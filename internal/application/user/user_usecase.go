@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"gitlab.com/demojira/template.git/internal/domain/user/entity"
-	"gitlab.com/demojira/template.git/internal/domain/user/repository"
+	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
+	"github.com/program-world-labs/DDDGo/internal/domain/user/repository"
 )
 
 // UserUseCaseImpl -.

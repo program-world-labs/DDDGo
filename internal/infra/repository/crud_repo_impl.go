@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.com/demojira/template.git/internal/infra/datasource"
+	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
 )
 
 // CRUDImpl -.

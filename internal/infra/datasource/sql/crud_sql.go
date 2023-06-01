@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	entity "gitlab.com/demojira/template.git/internal/domain/user/entity"
-	"gitlab.com/demojira/template.git/internal/infra/datasource"
+	entity "github.com/program-world-labs/DDDGo/internal/domain/user/entity"
+	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
 	"gorm.io/gorm"
 )
 

@@ -3,7 +3,7 @@ package usecase
 import (
 	"context"
 
-	"gitlab.com/demojira/template.git/internal/domain/user/entity"
+	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 )
 
 type UserUseCase interface {

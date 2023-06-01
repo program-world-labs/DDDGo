@@ -1,6 +1,6 @@
 linters-settings:
   gci:
-    local-prefixes: gitlab.com/demojira/template.git
+    local-prefixes: github.com/program-world-labs/DDDGo
   dupl:
     threshold: 100
   errorlint:

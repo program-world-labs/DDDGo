@@ -1,9 +1,9 @@
 package repository
 
 import (
-	"gitlab.com/demojira/template.git/internal/domain/user/entity"
-	"gitlab.com/demojira/template.git/internal/domain/user/repository"
-	"gitlab.com/demojira/template.git/internal/infra/datasource"
+	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
+	"github.com/program-world-labs/DDDGo/internal/domain/user/repository"
+	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
 )
 
 var _ repository.UserRepository = (*UserRepoImpl)(nil)

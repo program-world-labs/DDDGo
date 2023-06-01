@@ -3,7 +3,7 @@ package webapi
 import (
 	translator "github.com/Conight/go-googletrans"
 
-	entity "gitlab.com/demojira/template.git/internal/domain/user/entity"
+	entity "github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 )
 
 // UserWebAPI -.

@@ -3,8 +3,8 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 
-	usecase "gitlab.com/demojira/template.git/internal/application/user"
-	"gitlab.com/demojira/template.git/pkg/logger"
+	usecase "github.com/program-world-labs/DDDGo/internal/application/user"
+	"github.com/program-world-labs/DDDGo/pkg/logger"
 )
 
 type userRoutes struct {

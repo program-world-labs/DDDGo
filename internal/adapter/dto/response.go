@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	common_error "gitlab.com/demojira/template.git/internal/domain/errors"
+	common_error "github.com/program-world-labs/DDDGo/internal/domain/errors"
 )
 
 type Response struct {

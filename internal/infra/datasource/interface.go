@@ -3,7 +3,7 @@ package datasource
 import (
 	"context"
 
-	entity "gitlab.com/demojira/template.git/internal/domain/user/entity"
+	entity "github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 )
 
 type Entity interface {

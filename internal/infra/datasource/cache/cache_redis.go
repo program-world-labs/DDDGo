@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	entity "github.com/program-world-labs/DDDGo/internal/domain/user/entity"
+	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
 	"github.com/redis/go-redis/v9"
-	entity "gitlab.com/demojira/template.git/internal/domain/user/entity"
-	"gitlab.com/demojira/template.git/internal/infra/datasource"
 )
 
 var _ datasource.CacheDataSource[*entity.User] = (*RedisDataSourceImpl[*entity.User])(nil)

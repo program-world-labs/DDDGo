@@ -9,14 +9,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"gitlab.com/demojira/template.git/config"
-	v1 "gitlab.com/demojira/template.git/internal/adapter/http/v1"
-	usecase "gitlab.com/demojira/template.git/internal/application/user"
-	repo "gitlab.com/demojira/template.git/internal/infra/datasource/sql"
-	"gitlab.com/demojira/template.git/internal/infra/repository"
-	"gitlab.com/demojira/template.git/pkg/httpserver"
-	"gitlab.com/demojira/template.git/pkg/logger"
-	sqlgorm "gitlab.com/demojira/template.git/pkg/sql_gorm"
+	"github.com/program-world-labs/DDDGo/config"
+	v1 "github.com/program-world-labs/DDDGo/internal/adapter/http/v1"
+	usecase "github.com/program-world-labs/DDDGo/internal/application/user"
+	repo "github.com/program-world-labs/DDDGo/internal/infra/datasource/sql"
+	"github.com/program-world-labs/DDDGo/internal/infra/repository"
+	"github.com/program-world-labs/DDDGo/pkg/httpserver"
+	"github.com/program-world-labs/DDDGo/pkg/logger"
+	sqlgorm "github.com/program-world-labs/DDDGo/pkg/sql_gorm"
 )
 
 // Run creates objects via constructors.

@@ -11,9 +11,9 @@ import (
 
 	// Swagger docs.
 
-	_ "gitlab.com/demojira/template.git/docs"
-	usecase "gitlab.com/demojira/template.git/internal/application/user"
-	"gitlab.com/demojira/template.git/pkg/logger"
+	_ "github.com/program-world-labs/DDDGo/docs"
+	usecase "github.com/program-world-labs/DDDGo/internal/application/user"
+	"github.com/program-world-labs/DDDGo/pkg/logger"
 )
 
 // NewRouter -.

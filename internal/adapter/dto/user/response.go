@@ -1,6 +1,6 @@
 package user
 
-import "gitlab.com/demojira/template.git/internal/domain/user/entity"
+import "github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 
 type UserResponse struct {
 	ID        string `json:"id"`

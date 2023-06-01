@@ -3,7 +3,7 @@ package domain
 import (
 	"context"
 
-	"gitlab.com/demojira/template.git/internal/infra/datasource"
+	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
 )
 
 type CRUDRepository[T datasource.Entity] interface {

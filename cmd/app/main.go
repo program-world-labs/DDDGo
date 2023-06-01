@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"gitlab.com/demojira/template.git/config"
-	"gitlab.com/demojira/template.git/internal/app"
+	"github.com/program-world-labs/DDDGo/config"
+	"github.com/program-world-labs/DDDGo/internal/app"
 )
 
 func main() {
