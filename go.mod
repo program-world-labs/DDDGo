@@ -6,7 +6,7 @@ require (
 	github.com/Conight/go-googletrans v0.2.3
 	github.com/Eun/go-hit v0.5.23
 	github.com/gin-gonic/gin v1.9.1
-	github.com/golang-migrate/migrate/v4 v4.15.1
+	github.com/golang-migrate/migrate/v4 v4.16.0
 	github.com/google/uuid v1.3.0
 	github.com/prometheus/client_golang v1.15.1
 	github.com/redis/go-redis/v9 v9.0.4
