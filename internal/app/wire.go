@@ -45,8 +45,8 @@ func provideUserRepo(sqlDatasource *repo.UserDatasourceImpl, redisCacheDatasourc
 	return repository.NewUserRepoImpl(sqlDatasource, redisCacheDatasource, bigCacheDatasource)
 }
 
-func provideUserUseCase(userRepo *repository.UserRepoImpl) usecase.IUserUseCase {
-	return usecase.NewUserUseCaseImpl(userRepo)
+func provideUserService(userRepo *repository.UserRepoImpl) usecase.IUserService {
+	return usecase.NewUserServiceImpl(userRepo)
 }
 
 func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Server {
@@ -62,7 +62,7 @@ var appSet = wire.NewSet(
 	cache.NewRedisCacheDataSourceImpl,
 	cache.NewBigCacheDataSourceImp,
 	provideUserRepo,
-	provideUserUseCase,
+	provideUserService,
 	v1.NewRouter,
 	provideHTTPServer,
 )

@@ -48,8 +48,8 @@ func InitializeHTTPServer(cfg *config.Config) (*httpserver.Server, error) {
 	}
 	bigCacheDataSourceImpl := cache.NewBigCacheDataSourceImp(bigCache)
 	userRepoImpl := provideUserRepo(userDatasourceImpl, redisCacheDataSourceImpl, bigCacheDataSourceImpl)
-	iUserUseCase := provideUserUseCase(userRepoImpl)
-	engine := v1.NewRouter(loggerInterface, iUserUseCase)
+	iUserService := provideUserService(userRepoImpl)
+	engine := v1.NewRouter(loggerInterface, iUserService)
 	server := provideHTTPServer(engine, cfg)
 	return server, nil
 }
@@ -79,8 +79,8 @@ func provideUserRepo(sqlDatasource *sql.UserDatasourceImpl, redisCacheDatasource
 	return repository.NewUserRepoImpl(sqlDatasource, redisCacheDatasource, bigCacheDatasource)
 }
 
-func provideUserUseCase(userRepo *repository.UserRepoImpl) usecase.IUserUseCase {
-	return usecase.NewUserUseCaseImpl(userRepo)
+func provideUserService(userRepo *repository.UserRepoImpl) user.IUserService {
+	return user.NewUserServiceImpl(userRepo)
 }
 
 func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Server {
@@ -92,5 +92,5 @@ var appSet = wire.NewSet(
 	providePostgres,
 	provideRedisCache,
 	provideLocalCache, sql.NewUserDatasourceImpl, cache.NewRedisCacheDataSourceImpl, cache.NewBigCacheDataSourceImp, provideUserRepo,
-	provideUserUseCase, v1.NewRouter, provideHTTPServer,
+	provideUserService, v1.NewRouter, provideHTTPServer,
 )

@@ -8,11 +8,11 @@ import (
 )
 
 type userRoutes struct {
-	u usecase.IUserUseCase
+	u usecase.IUserService
 	l logger.Interface
 }
 
-func newUserRoutes(handler *gin.RouterGroup, u usecase.IUserUseCase, l logger.Interface) {
+func newUserRoutes(handler *gin.RouterGroup, u usecase.IUserService, l logger.Interface) {
 	r := &userRoutes{u, l}
 
 	h := handler.Group("/user")

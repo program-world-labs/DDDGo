@@ -1,4 +1,4 @@
-package usecase
+package user
 
 import (
 	"context"
@@ -8,18 +8,18 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/domain/user/repository"
 )
 
-// UserUseCaseImpl -.
-type UserUseCaseImpl struct {
+// UserServiceImpl -.
+type UserServiceImpl struct {
 	UserRepo repository.UserRepository
 }
 
-// NewUserUseCaseImpl -.
-func NewUserUseCaseImpl(userRepo repository.UserRepository) *UserUseCaseImpl {
-	return &UserUseCaseImpl{UserRepo: userRepo}
+// NewUserServiceImpl -.
+func NewUserServiceImpl(userRepo repository.UserRepository) *UserServiceImpl {
+	return &UserServiceImpl{UserRepo: userRepo}
 }
 
 // Register -.
-func (u *UserUseCaseImpl) Register(ctx context.Context, user *entity.User) (*entity.User, error) {
+func (u *UserServiceImpl) RegisterUseCase(ctx context.Context, user *entity.User) (*entity.User, error) {
 	// Check if user already exists
 	existingUser, err := u.UserRepo.GetByID(ctx, user)
 	if err != nil {
@@ -39,7 +39,7 @@ func (u *UserUseCaseImpl) Register(ctx context.Context, user *entity.User) (*ent
 }
 
 // GetByID -.
-func (u *UserUseCaseImpl) GetByID(ctx context.Context, id string) (*entity.User, error) {
+func (u *UserServiceImpl) GetByIDUseCase(ctx context.Context, id string) (*entity.User, error) {
 	user, err := entity.NewUser(id)
 	if err != nil {
 		return nil, err
