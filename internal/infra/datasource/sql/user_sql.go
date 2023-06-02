@@ -1,9 +1,10 @@
 package sql
 
 import (
+	"gorm.io/gorm"
+
 	entity "github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
-	"gorm.io/gorm"
 )
 
 var _ datasource.IDataSource[*entity.User] = (*UserDatasourceImpl)(nil)
