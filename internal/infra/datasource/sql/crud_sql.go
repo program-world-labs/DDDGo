@@ -1,4 +1,4 @@
-package repo
+package sql
 
 import (
 	"context"
@@ -9,15 +9,15 @@ import (
 	"gorm.io/gorm"
 )
 
-var _ datasource.DataSource[*entity.User] = (*CRUDDatasourceImpl[*entity.User])(nil)
+var _ datasource.IDataSource[*entity.User] = (*CRUDDatasourceImpl[*entity.User])(nil)
 
 // CRUDDatasourceImpl -.
-type CRUDDatasourceImpl[T datasource.Entity] struct {
+type CRUDDatasourceImpl[T datasource.IEntity] struct {
 	DB *gorm.DB
 }
 
 // NewCRUDDatasourceImpl -.
-func NewCRUDDatasourceImpl[T datasource.Entity](db *gorm.DB) *CRUDDatasourceImpl[T] {
+func NewCRUDDatasourceImpl[T datasource.IEntity](db *gorm.DB) *CRUDDatasourceImpl[T] {
 	return &CRUDDatasourceImpl[T]{DB: db}
 }
 

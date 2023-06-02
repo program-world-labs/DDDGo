@@ -6,6 +6,9 @@ http:
   port: '8080'
   backend_port: '8088'
 
+redis:
+  dsn: 'redis://localhost:6379/0'
+
 swagger:
   backend_host: 'localhost:8088'
   frontend_host: 'localhost:8080'
@@ -16,7 +19,7 @@ logger:
 
 postgres:
   pool_max: 2
-  url: ""
+  url: "postgres://user:pass@localhost:5432/postgres?sslmode=disable"
 
 gcp:
   project: ''

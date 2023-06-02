@@ -13,34 +13,14 @@ services:
     ports:
       - 5432:5432
 
-  rabbitmq:
-    container_name: rabbitmq
-    image: rabbitmq:3.8.12-management
+  redis:
+    container_name: redis
+    image: redis
+    volumes:
+      - redis-data:/data
     ports:
-      - 5672:5672
-      - 15672:15672
-
-  app:
-    build: .
-    container_name: app
-    image: app
-    environment:
-      PG_URL: 'postgres://user:pass@postgres:5432/postgres'
-      RMQ_URL: 'amqp://guest:guest@rabbitmq:5672/'
-    ports:
-      - 8080:8080
-    depends_on:
-      - postgres
-      - rabbitmq
-
-  integration:
-    build:
-      context: .
-      dockerfile: integration-test/Dockerfile
-    container_name: integration
-    image: integration
-    depends_on:
-      - app
+      - 6379:6379
 
 volumes:
   pg-data:
+  redis-data:

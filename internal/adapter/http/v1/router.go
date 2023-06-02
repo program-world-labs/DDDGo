@@ -23,7 +23,8 @@ import (
 // @version     1.0
 // @host        localhost:8080
 // @BasePath    /v1
-func NewRouter(handler *gin.Engine, l logger.Interface, t usecase.UserUseCase) {
+func NewRouter(l logger.Interface, t usecase.IUserUseCase) *gin.Engine {
+	handler := gin.New()
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
@@ -43,4 +44,5 @@ func NewRouter(handler *gin.Engine, l logger.Interface, t usecase.UserUseCase) {
 	{
 		newUserRoutes(h, t, l)
 	}
+	return handler
 }

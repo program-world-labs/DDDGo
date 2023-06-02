@@ -6,28 +6,28 @@ import (
 	"fmt"
 
 	"github.com/allegro/bigcache/v3"
-	entity "github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
 )
 
-var _ datasource.CacheDataSource[*entity.User] = (*RedisDataSourceImpl[*entity.User])(nil)
+var _ datasource.ICacheDataSource = (*BigCacheDataSourceImpl)(nil)
 
 // BigCacheDataSourceImpl -.
-type BigCacheDataSourceImpl[T datasource.Entity] struct {
+type BigCacheDataSourceImpl struct {
 	Cache *bigcache.BigCache
 }
 
 // NewBigCacheDataSourceImpl -.
-func NewBigCacheDataSourceImpl[T datasource.Entity](cache *bigcache.BigCache) (*BigCacheDataSourceImpl[T], error) {
-	return &BigCacheDataSourceImpl[T]{Cache: cache}, nil
+func NewBigCacheDataSourceImp(cache *bigcache.BigCache) *BigCacheDataSourceImpl {
+	return &BigCacheDataSourceImpl{Cache: cache}
 }
 
-func (r *BigCacheDataSourceImpl[T]) cacheKey(model T) string {
+func (r *BigCacheDataSourceImpl) cacheKey(model datasource.IEntityMethod) string {
+
 	return fmt.Sprintf("%s-%s", model.TableName(), model.GetID())
 }
 
 // Get -.
-func (r *BigCacheDataSourceImpl[T]) Get(ctx context.Context, model T) (T, error) {
+func (r *BigCacheDataSourceImpl) Get(ctx context.Context, model datasource.IEntityMethod) (datasource.IEntityMethod, error) {
 	data, err := r.Cache.Get(r.cacheKey(model))
 	if err != nil {
 		return nil, fmt.Errorf("BigCacheDataSourceImpl - Get - r.Cache.Get: %w", err)
@@ -42,7 +42,7 @@ func (r *BigCacheDataSourceImpl[T]) Get(ctx context.Context, model T) (T, error)
 }
 
 // Set -.
-func (r *BigCacheDataSourceImpl[T]) Set(ctx context.Context, model T) (T, error) {
+func (r *BigCacheDataSourceImpl) Set(ctx context.Context, model datasource.IEntityMethod) (datasource.IEntityMethod, error) {
 	data, err := json.Marshal(model)
 	if err != nil {
 		return nil, fmt.Errorf("BigCacheDataSourceImpl - Set - json.Marshal: %w", err)
@@ -57,7 +57,7 @@ func (r *BigCacheDataSourceImpl[T]) Set(ctx context.Context, model T) (T, error)
 }
 
 // Delete -.
-func (r *BigCacheDataSourceImpl[T]) Delete(ctx context.Context, model T) error {
+func (r *BigCacheDataSourceImpl) Delete(ctx context.Context, model datasource.IEntityMethod) error {
 	err := r.Cache.Delete(r.cacheKey(model))
 	if err != nil {
 		return fmt.Errorf("BigCacheDataSourceImpl - Delete - r.Cache.Delete: %w", err)

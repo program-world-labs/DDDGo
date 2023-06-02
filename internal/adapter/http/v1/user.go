@@ -8,11 +8,11 @@ import (
 )
 
 type userRoutes struct {
-	u usecase.UserUseCase
+	u usecase.IUserUseCase
 	l logger.Interface
 }
 
-func newUserRoutes(handler *gin.RouterGroup, u usecase.UserUseCase, l logger.Interface) {
+func newUserRoutes(handler *gin.RouterGroup, u usecase.IUserUseCase, l logger.Interface) {
 	r := &userRoutes{u, l}
 
 	h := handler.Group("/user")
@@ -41,12 +41,6 @@ func (r *userRoutes) getInfo(c *gin.Context) {
 	// }
 
 	// c.JSON(http.StatusOK, historyResponse{translations})
-}
-
-type doTranslateRequest struct {
-	Source      string `json:"source"       binding:"required"  example:"auto"`
-	Destination string `json:"destination"  binding:"required"  example:"en"`
-	Original    string `json:"original"     binding:"required"  example:"текст для перевода"`
 }
 
 // @Summary     Register User

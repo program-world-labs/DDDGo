@@ -14,7 +14,8 @@ type (
 		App     `mapstructure:"app"`
 		Swagger `mapstructure:"swagger"`
 		GCP     `mapstructure:"gcp"`
-		PG      `mapstructure:"pg"`
+		PG      `mapstructure:"postgres"`
+		Redis   `mapstructure:"redis"`
 		HTTP    `mapstructure:"http"`
 		Log     `mapstructure:"logger"`
 		Enviroment
@@ -44,6 +45,11 @@ type (
 	PG struct {
 		PoolMax int    `mapstructure:"pool_max"`
 		URL     string `mapstructure:"url"`
+	}
+
+	// Redis -.
+	Redis struct {
+		DSN string `mapstructure:"dsn"`
 	}
 
 	// HTTP -.

@@ -5,62 +5,61 @@ import (
 	"encoding/json"
 	"fmt"
 
-	entity "github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
 	"github.com/redis/go-redis/v9"
 )
 
-var _ datasource.CacheDataSource[*entity.User] = (*RedisDataSourceImpl[*entity.User])(nil)
+var _ datasource.ICacheDataSource = (*RedisCacheDataSourceImpl)(nil)
 
-// RedisDataSourceImpl -.
-type RedisDataSourceImpl[T datasource.Entity] struct {
+// RedisCacheDataSourceImpl -.
+type RedisCacheDataSourceImpl struct {
 	Client *redis.Client
 }
 
-// NewRedisDataSourceImpl -.
-func NewRedisDataSourceImpl[T datasource.Entity](client *redis.Client) *RedisDataSourceImpl[T] {
-	return &RedisDataSourceImpl[T]{Client: client}
+// NewRedisCacheDataSourceImpl -.
+func NewRedisCacheDataSourceImpl(client *redis.Client) *RedisCacheDataSourceImpl {
+	return &RedisCacheDataSourceImpl{Client: client}
 }
 
-func (r *RedisDataSourceImpl[T]) redisKey(model T) string {
+func (r *RedisCacheDataSourceImpl) redisKey(model datasource.IEntityMethod) string {
 	return fmt.Sprintf("%s-%s", model.TableName(), model.GetID())
 }
 
 // GetByID -.
-func (r *RedisDataSourceImpl[T]) Get(ctx context.Context, model T) (T, error) {
+func (r *RedisCacheDataSourceImpl) Get(ctx context.Context, model datasource.IEntityMethod) (datasource.IEntityMethod, error) {
 	data, err := r.Client.Get(ctx, r.redisKey(model)).Bytes()
 	if err != nil {
-		return nil, fmt.Errorf("RedisDataSourceImpl - GetByID - r.Client.Get: %w", err)
+		return nil, fmt.Errorf("RedisCacheDataSourceImpl - GetByID - r.Client.Get: %w", err)
 	}
 
 	err = json.Unmarshal(data, &model)
 	if err != nil {
-		return nil, fmt.Errorf("RedisDataSourceImpl - GetByID - json.Unmarshal: %w", err)
+		return nil, fmt.Errorf("RedisCacheDataSourceImpl - GetByID - json.Unmarshal: %w", err)
 	}
 
 	return model, nil
 }
 
 // Set -.
-func (r *RedisDataSourceImpl[T]) Set(ctx context.Context, model T) (T, error) {
+func (r *RedisCacheDataSourceImpl) Set(ctx context.Context, model datasource.IEntityMethod) (datasource.IEntityMethod, error) {
 	data, err := json.Marshal(model)
 	if err != nil {
-		return nil, fmt.Errorf("RedisDataSourceImpl - Create - json.Marshal: %w", err)
+		return nil, fmt.Errorf("RedisCacheDataSourceImpl - Create - json.Marshal: %w", err)
 	}
 
 	err = r.Client.Set(ctx, r.redisKey(model), data, 0).Err()
 	if err != nil {
-		return nil, fmt.Errorf("RedisDataSourceImpl - Create - r.Client.Set: %w", err)
+		return nil, fmt.Errorf("RedisCacheDataSourceImpl - Create - r.Client.Set: %w", err)
 	}
 
 	return model, nil
 }
 
 // Delete -.
-func (r *RedisDataSourceImpl[T]) Delete(ctx context.Context, model T) error {
+func (r *RedisCacheDataSourceImpl) Delete(ctx context.Context, model datasource.IEntityMethod) error {
 	err := r.Client.Del(ctx, r.redisKey(model)).Err()
 	if err != nil {
-		return fmt.Errorf("RedisDataSourceImpl - Delete - r.Client.Del: %w", err)
+		return fmt.Errorf("RedisCacheDataSourceImpl - Delete - r.Client.Del: %w", err)
 	}
 
 	return nil

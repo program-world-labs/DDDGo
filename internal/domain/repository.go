@@ -6,14 +6,14 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
 )
 
-type CRUDRepository[T datasource.Entity] interface {
+type ICRUDRepository[T datasource.IEntity] interface {
 	GetByID(ctx context.Context, e T) (T, error)
 	Create(ctx context.Context, e T) (T, error)
 	Update(ctx context.Context, e T) (T, error)
 	Delete(ctx context.Context, e T) error
 }
 
-type CacheUpdateRepository[T datasource.Entity] interface {
+type ICacheUpdateRepository[T datasource.IEntity] interface {
 	Save(ctx context.Context, e T) error
 	Delete(ctx context.Context, e T) error
 }
