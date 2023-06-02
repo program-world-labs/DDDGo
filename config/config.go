@@ -91,7 +91,9 @@ func NewConfig() (*Config, error) {
 	default:
 		viper.SetConfigName("dev")
 	}
-
+	// 取得PG環境變數
+	cfg.PG.URL = viper.GetString("pg_url")
+	cfg.Redis.DSN = viper.GetString("redis_url")
 	viper.SetConfigType("yml")
 	viper.AddConfigPath("../../config")
 	viper.AddConfigPath("./config")

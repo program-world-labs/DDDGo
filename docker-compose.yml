@@ -20,7 +20,27 @@ services:
       - redis-data:/data
     ports:
       - 6379:6379
+  app:
+      build: .
+      container_name: app
+      image: app
+      environment:
+        APP_PG_URL: 'postgres://user:pass@postgres:5432/postgres'
+        APP_REDIS_URL: 'redis://redis:6379/0'
+      ports:
+        - 8080:8080
+      depends_on:
+        - postgres
+        - redis
 
+  integration:
+    build:
+      context: .
+      dockerfile: integration-test/Dockerfile
+    container_name: integration
+    image: integration
+    depends_on:
+      - app
 volumes:
   pg-data:
   redis-data:
