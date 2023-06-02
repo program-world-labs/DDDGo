@@ -8,19 +8,19 @@ import (
 )
 
 type CacheUpdateImpl struct {
-	Redis datasource.ICacheDataSource
-	Cache datasource.ICacheDataSource
+	RemoteCache datasource.ICacheDataSource
+	Cache       datasource.ICacheDataSource
 }
 
 // NewCacheUpdateImpl -.
-func NewCacheUpdateImpl(redis datasource.ICacheDataSource, cache datasource.ICacheDataSource) *CacheUpdateImpl {
-	return &CacheUpdateImpl{Redis: redis, Cache: cache}
+func NewCacheUpdateImpl(remoteCache datasource.ICacheDataSource, cache datasource.ICacheDataSource) *CacheUpdateImpl {
+	return &CacheUpdateImpl{RemoteCache: remoteCache, Cache: cache}
 }
 
 // Save -.
 func (r *CacheUpdateImpl) Save(ctx context.Context, e datasource.IEntityMethod) error {
 	// 將資料寫入Redis
-	_, err := r.Redis.Set(ctx, e)
+	_, err := r.RemoteCache.Set(ctx, e)
 	if err != nil {
 		return fmt.Errorf("CacheUpdateImpl - Save - r.Redis.Save: %w", err)
 	}
@@ -36,7 +36,7 @@ func (r *CacheUpdateImpl) Save(ctx context.Context, e datasource.IEntityMethod) 
 // Delete -.
 func (r *CacheUpdateImpl) Delete(ctx context.Context, e datasource.IEntityMethod) error {
 	// 將資料從Redis刪除
-	err := r.Redis.Delete(ctx, e)
+	err := r.RemoteCache.Delete(ctx, e)
 	if err != nil {
 		return fmt.Errorf("CacheUpdateImpl - Delete - r.Redis.Delete: %w", err)
 	}

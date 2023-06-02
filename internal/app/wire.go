@@ -1,7 +1,9 @@
 //go:build wireinject
 // +build wireinject
 
-package app
+module DDDGoWire
+
+directory .
 
 import (
 	"github.com/allegro/bigcache/v3"

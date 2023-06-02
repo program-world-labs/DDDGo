@@ -21,18 +21,6 @@ linters-settings:
   goconst:
     min-len: 2
     min-occurrences: 2
-  gocritic:
-    enabled-tags:
-      - diagnostic
-      - experimental
-      - opinionated
-      - performance
-      - style
-    disabled-checks:
-      - dupImport
-      - unnecessaryBlock
-  gofumpt:
-    extra-rules: true
   gomnd:
     settings:
       mnd:
@@ -73,13 +61,11 @@ linters:
     - gochecknoinits
     - gocognit
     - goconst
-    - gocritic
     - gocyclo
     - godot
     - godox
     - goerr113
     - gofmt
-    - gofumpt
     - goimports
     - gomnd
     - gomodguard

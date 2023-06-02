@@ -28,6 +28,7 @@ func (r *CRUDImpl[T]) GetByID(ctx context.Context, e T) (T, error) {
 		if !ok {
 			return nil, fmt.Errorf("CRUDImpl - GetByID - r.Cache.Get: %w", err)
 		}
+
 		return d, nil
 	}
 
@@ -38,6 +39,7 @@ func (r *CRUDImpl[T]) GetByID(ctx context.Context, e T) (T, error) {
 		if !ok {
 			return nil, fmt.Errorf("CRUDImpl - GetByID - r.Redis.Get: %w", err)
 		}
+
 		return d, nil
 	}
 
@@ -56,6 +58,7 @@ func (r *CRUDImpl[T]) Create(ctx context.Context, e T) (T, error) {
 	if err != nil {
 		return nil, fmt.Errorf("CRUDImpl - Create - r.DB.Create: %w", err)
 	}
+
 	return e, nil
 }
 
@@ -65,6 +68,7 @@ func (r *CRUDImpl[T]) Update(ctx context.Context, e T) (T, error) {
 	if err != nil {
 		return nil, fmt.Errorf("CRUDImpl - Update - r.DB.Update: %w", err)
 	}
+
 	return e, nil
 }
 
