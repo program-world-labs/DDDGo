@@ -8,14 +8,14 @@ import (
 )
 
 // CRUDImpl -.
-type CRUDImpl[T datasource.Entity] struct {
-	DB    datasource.DataSource[T]
-	Redis datasource.CacheDataSource[T]
-	Cache datasource.CacheDataSource[T]
+type CRUDImpl[T datasource.IEntity] struct {
+	DB    datasource.IDataSource[T]
+	Redis datasource.ICacheDataSource
+	Cache datasource.ICacheDataSource
 }
 
 // NewCRUDImpl -.
-func NewCRUDImpl[T datasource.Entity](db datasource.DataSource[T], redis datasource.CacheDataSource[T], cache datasource.CacheDataSource[T]) *CRUDImpl[T] {
+func NewCRUDImpl[T datasource.IEntity](db datasource.IDataSource[T], redis datasource.ICacheDataSource, cache datasource.ICacheDataSource) *CRUDImpl[T] {
 	return &CRUDImpl[T]{DB: db, Redis: redis, Cache: cache}
 }
 
@@ -24,13 +24,23 @@ func (r *CRUDImpl[T]) GetByID(ctx context.Context, e T) (T, error) {
 	// 先從Local Cache取得資料
 	data, err := r.Cache.Get(ctx, e)
 	if err == nil {
-		return data, nil
+		d, ok := data.(T)
+		if !ok {
+			return nil, fmt.Errorf("CRUDImpl - GetByID - r.Cache.Get: %w", err)
+		}
+
+		return d, nil
 	}
 
 	// 若Local Cache沒有資料，則從Redis取得資料
 	data, err = r.Redis.Get(ctx, e)
 	if err == nil {
-		return data, nil
+		d, ok := data.(T)
+		if !ok {
+			return nil, fmt.Errorf("CRUDImpl - GetByID - r.Redis.Get: %w", err)
+		}
+
+		return d, nil
 	}
 
 	// 若Redis沒有資料，則從DB取得資料
@@ -39,7 +49,7 @@ func (r *CRUDImpl[T]) GetByID(ctx context.Context, e T) (T, error) {
 		return nil, fmt.Errorf("CRUDImpl - GetByID - r.DB.GetByID: %w", err)
 	}
 
-	return data, nil
+	return data.(T), nil
 }
 
 // Create -.
@@ -48,6 +58,7 @@ func (r *CRUDImpl[T]) Create(ctx context.Context, e T) (T, error) {
 	if err != nil {
 		return nil, fmt.Errorf("CRUDImpl - Create - r.DB.Create: %w", err)
 	}
+
 	return e, nil
 }
 
@@ -57,6 +68,7 @@ func (r *CRUDImpl[T]) Update(ctx context.Context, e T) (T, error) {
 	if err != nil {
 		return nil, fmt.Errorf("CRUDImpl - Update - r.DB.Update: %w", err)
 	}
+
 	return e, nil
 }
 

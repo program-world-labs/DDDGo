@@ -6,5 +6,5 @@ import (
 )
 
 type UserRepository interface {
-	domain.CRUDRepository[*entity.User]
+	domain.ICRUDRepository[*entity.User]
 }

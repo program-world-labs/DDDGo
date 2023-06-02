@@ -8,11 +8,11 @@ import (
 )
 
 type userRoutes struct {
-	u usecase.UserUseCase
+	u usecase.IUserService
 	l logger.Interface
 }
 
-func newUserRoutes(handler *gin.RouterGroup, u usecase.UserUseCase, l logger.Interface) {
+func newUserRoutes(handler *gin.RouterGroup, u usecase.IUserService, l logger.Interface) {
 	r := &userRoutes{u, l}
 
 	h := handler.Group("/user")
@@ -30,23 +30,9 @@ func newUserRoutes(handler *gin.RouterGroup, u usecase.UserUseCase, l logger.Int
 // @Produce     json
 // @Success     200 {object} historyResponse
 // @Failure     500 {object} response
-// @Router      /user/getInfo [get]
-func (r *userRoutes) getInfo(c *gin.Context) {
-	// translations, err := r.u.GetByID(c.Request.Context())
-	// if err != nil {
-	// 	r.l.Error(err, "http - v1 - history")
-	// 	errorResponse(c, http.StatusInternalServerError, "database problems")
+// @Router      /user/getInfo [get].
+func (r *userRoutes) getInfo(_ *gin.Context) {
 
-	// 	return
-	// }
-
-	// c.JSON(http.StatusOK, historyResponse{translations})
-}
-
-type doTranslateRequest struct {
-	Source      string `json:"source"       binding:"required"  example:"auto"`
-	Destination string `json:"destination"  binding:"required"  example:"en"`
-	Original    string `json:"original"     binding:"required"  example:"текст для перевода"`
 }
 
 // @Summary     Register User
@@ -59,8 +45,8 @@ type doTranslateRequest struct {
 // @Success     200 {object} entity.Translation
 // @Failure     400 {object} response
 // @Failure     500 {object} response
-// @Router      /user/register [post]
-func (r *userRoutes) register(c *gin.Context) {
+// @Router      /user/register [post].
+func (r *userRoutes) register(_ *gin.Context) {
 	// var request doTranslateRequest
 	// if err := c.ShouldBindJSON(&request); err != nil {
 	// 	r.l.Error(err, "http - v1 - doTranslate")

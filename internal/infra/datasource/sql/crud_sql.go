@@ -1,28 +1,29 @@
-package repo
+package sql
 
 import (
 	"context"
 	"fmt"
 
+	"gorm.io/gorm"
+
 	entity "github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
-	"gorm.io/gorm"
 )
 
-var _ datasource.DataSource[*entity.User] = (*CRUDDatasourceImpl[*entity.User])(nil)
+var _ datasource.IDataSource[*entity.User] = (*CRUDDatasourceImpl[*entity.User])(nil)
 
 // CRUDDatasourceImpl -.
-type CRUDDatasourceImpl[T datasource.Entity] struct {
+type CRUDDatasourceImpl[T datasource.IEntity] struct {
 	DB *gorm.DB
 }
 
 // NewCRUDDatasourceImpl -.
-func NewCRUDDatasourceImpl[T datasource.Entity](db *gorm.DB) *CRUDDatasourceImpl[T] {
+func NewCRUDDatasourceImpl[T datasource.IEntity](db *gorm.DB) *CRUDDatasourceImpl[T] {
 	return &CRUDDatasourceImpl[T]{DB: db}
 }
 
 // GetByID -.
-func (r *CRUDDatasourceImpl[T]) GetByID(ctx context.Context, model T) (T, error) {
+func (r *CRUDDatasourceImpl[T]) GetByID(_ context.Context, model T) (T, error) {
 	err := r.DB.First(model, model.GetID()).Error
 	if err != nil {
 		return nil, fmt.Errorf("CRUDDatasourceImpl - GetByID - r.DB.First: %w", err)
@@ -32,7 +33,7 @@ func (r *CRUDDatasourceImpl[T]) GetByID(ctx context.Context, model T) (T, error)
 }
 
 // Create -.
-func (r *CRUDDatasourceImpl[T]) Create(ctx context.Context, model T) (T, error) {
+func (r *CRUDDatasourceImpl[T]) Create(_ context.Context, model T) (T, error) {
 	err := r.DB.Create(model).Error
 	if err != nil {
 		return nil, fmt.Errorf("CRUDDatasourceImpl - Create - r.DB.Create: %w", err)
@@ -42,7 +43,7 @@ func (r *CRUDDatasourceImpl[T]) Create(ctx context.Context, model T) (T, error) 
 }
 
 // Update -.
-func (r *CRUDDatasourceImpl[T]) Update(ctx context.Context, model T) (T, error) {
+func (r *CRUDDatasourceImpl[T]) Update(_ context.Context, model T) (T, error) {
 	err := r.DB.Save(model).Error
 	if err != nil {
 		return nil, fmt.Errorf("CRUDDatasourceImpl - Update - r.DB.Save: %w", err)
@@ -52,7 +53,7 @@ func (r *CRUDDatasourceImpl[T]) Update(ctx context.Context, model T) (T, error) 
 }
 
 // Delete -.
-func (r *CRUDDatasourceImpl[T]) Delete(ctx context.Context, model T) error {
+func (r *CRUDDatasourceImpl[T]) Delete(_ context.Context, model T) error {
 	err := r.DB.Delete(model, model.GetID()).Error
 	if err != nil {
 		return fmt.Errorf("CRUDDatasourceImpl - Delete - r.DB.Delete: %w", err)

@@ -16,7 +16,6 @@ logger:
 
 postgres:
   pool_max: 2
-  url: ""
 
 gcp:
   project: ''

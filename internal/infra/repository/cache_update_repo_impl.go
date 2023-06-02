@@ -7,20 +7,20 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
 )
 
-type CacheUpdateImpl[T datasource.Entity] struct {
-	Redis datasource.CacheDataSource[T]
-	Cache datasource.CacheDataSource[T]
+type CacheUpdateImpl struct {
+	RemoteCache datasource.ICacheDataSource
+	Cache       datasource.ICacheDataSource
 }
 
 // NewCacheUpdateImpl -.
-func NewCacheUpdateImpl[T datasource.Entity](redis datasource.CacheDataSource[T], cache datasource.CacheDataSource[T]) *CacheUpdateImpl[T] {
-	return &CacheUpdateImpl[T]{Redis: redis, Cache: cache}
+func NewCacheUpdateImpl(remoteCache datasource.ICacheDataSource, cache datasource.ICacheDataSource) *CacheUpdateImpl {
+	return &CacheUpdateImpl{RemoteCache: remoteCache, Cache: cache}
 }
 
 // Save -.
-func (r *CacheUpdateImpl[T]) Save(ctx context.Context, e T) error {
+func (r *CacheUpdateImpl) Save(ctx context.Context, e datasource.IEntityMethod) error {
 	// 將資料寫入Redis
-	_, err := r.Redis.Set(ctx, e)
+	_, err := r.RemoteCache.Set(ctx, e)
 	if err != nil {
 		return fmt.Errorf("CacheUpdateImpl - Save - r.Redis.Save: %w", err)
 	}
@@ -34,9 +34,9 @@ func (r *CacheUpdateImpl[T]) Save(ctx context.Context, e T) error {
 }
 
 // Delete -.
-func (r *CacheUpdateImpl[T]) Delete(ctx context.Context, e T) error {
+func (r *CacheUpdateImpl) Delete(ctx context.Context, e datasource.IEntityMethod) error {
 	// 將資料從Redis刪除
-	err := r.Redis.Delete(ctx, e)
+	err := r.RemoteCache.Delete(ctx, e)
 	if err != nil {
 		return fmt.Errorf("CacheUpdateImpl - Delete - r.Redis.Delete: %w", err)
 	}

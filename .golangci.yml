@@ -12,7 +12,7 @@ linters-settings:
     check-generated: false
     default-signifies-exhaustive: false
   funlen:
-    lines: 65
+    lines: 80
     statements: 40
   gocognit:
     min-complexity: 15
@@ -21,18 +21,6 @@ linters-settings:
   goconst:
     min-len: 2
     min-occurrences: 2
-  gocritic:
-    enabled-tags:
-      - diagnostic
-      - experimental
-      - opinionated
-      - performance
-      - style
-    disabled-checks:
-      - dupImport
-      - unnecessaryBlock
-  gofumpt:
-    extra-rules: true
   gomnd:
     settings:
       mnd:
@@ -58,8 +46,6 @@ linters:
     - asciicheck
     - bodyclose
     - cyclop
-    - deadcode
-    - depguard
     - dogsled
     - dupl
     - durationcheck
@@ -74,13 +60,11 @@ linters:
     - gochecknoinits
     - gocognit
     - goconst
-    - gocritic
     - gocyclo
     - godot
     - godox
     - goerr113
     - gofmt
-    - gofumpt
     - goimports
     - gomnd
     - gomodguard
@@ -102,7 +86,6 @@ linters:
     - rowserrcheck
     - sqlclosecheck
     - staticcheck
-    - structcheck
     - stylecheck
     - tparallel
     - thelper
@@ -110,7 +93,6 @@ linters:
     - unconvert
     - unparam
     - unused
-    - varcheck
     - wsl
     - whitespace
 

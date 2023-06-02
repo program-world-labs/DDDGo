@@ -25,14 +25,5 @@ func New() *UserWebAPI {
 
 // Translate -.
 func (t *UserWebAPI) Translate(User entity.User) (entity.User, error) {
-	// trans := translator.New(t.conf)
-
-	// result, err := trans.Translate(User.Original, User.Source, User.Destination)
-	// if err != nil {
-	// 	return entity.User{}, fmt.Errorf("UserWebAPI - Translate - trans.Translate: %w", err)
-	// }
-
-	// User.User = result.Text
-
 	return User, nil
 }
