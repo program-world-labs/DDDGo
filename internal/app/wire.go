@@ -14,7 +14,7 @@ import (
 	repo "github.com/program-world-labs/DDDGo/internal/infra/datasource/sql"
 	"github.com/program-world-labs/DDDGo/internal/infra/repository"
 	"github.com/program-world-labs/DDDGo/pkg/cache/local"
-	redis_cache "github.com/program-world-labs/DDDGo/pkg/cache/redis"
+	redisCache "github.com/program-world-labs/DDDGo/pkg/cache/redis"
 	"github.com/program-world-labs/DDDGo/pkg/httpserver"
 	"github.com/program-world-labs/DDDGo/pkg/logger"
 	sqlgorm "github.com/program-world-labs/DDDGo/pkg/sql_gorm"
@@ -32,7 +32,7 @@ func providePostgres(cfg *config.Config) (*gorm.DB, error) {
 }
 
 func provideRedisCache(cfg *config.Config) (*redis.Client, error) {
-	cache, err := redis_cache.New(cfg.Redis.DSN)
+	cache, err := redisCache.New(cfg.Redis.DSN)
 	return cache.Client, err
 }
 
@@ -45,8 +45,8 @@ func provideUserRepo(sqlDatasource *repo.UserDatasourceImpl, redisCacheDatasourc
 	return repository.NewUserRepoImpl(sqlDatasource, redisCacheDatasource, bigCacheDatasource)
 }
 
-func provideUserService(userRepo *repository.UserRepoImpl) usecase.IUserService {
-	return usecase.NewUserServiceImpl(userRepo)
+func provideService(userRepo *repository.UserRepoImpl) usecase.IUserService {
+	return usecase.NewServiceImpl(userRepo)
 }
 
 func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Server {
@@ -62,7 +62,7 @@ var appSet = wire.NewSet(
 	cache.NewRedisCacheDataSourceImpl,
 	cache.NewBigCacheDataSourceImp,
 	provideUserRepo,
-	provideUserService,
+	provideService,
 	v1.NewRouter,
 	provideHTTPServer,
 )

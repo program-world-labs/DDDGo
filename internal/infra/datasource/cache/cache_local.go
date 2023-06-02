@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/allegro/bigcache/v3"
+
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
 )
 
@@ -22,12 +23,11 @@ func NewBigCacheDataSourceImp(cache *bigcache.BigCache) *BigCacheDataSourceImpl 
 }
 
 func (r *BigCacheDataSourceImpl) cacheKey(model datasource.IEntityMethod) string {
-
 	return fmt.Sprintf("%s-%s", model.TableName(), model.GetID())
 }
 
 // Get -.
-func (r *BigCacheDataSourceImpl) Get(ctx context.Context, model datasource.IEntityMethod) (datasource.IEntityMethod, error) {
+func (r *BigCacheDataSourceImpl) Get(_ context.Context, model datasource.IEntityMethod) (datasource.IEntityMethod, error) {
 	data, err := r.Cache.Get(r.cacheKey(model))
 	if err != nil {
 		return nil, fmt.Errorf("BigCacheDataSourceImpl - Get - r.Cache.Get: %w", err)
@@ -42,7 +42,7 @@ func (r *BigCacheDataSourceImpl) Get(ctx context.Context, model datasource.IEnti
 }
 
 // Set -.
-func (r *BigCacheDataSourceImpl) Set(ctx context.Context, model datasource.IEntityMethod) (datasource.IEntityMethod, error) {
+func (r *BigCacheDataSourceImpl) Set(_ context.Context, model datasource.IEntityMethod) (datasource.IEntityMethod, error) {
 	data, err := json.Marshal(model)
 	if err != nil {
 		return nil, fmt.Errorf("BigCacheDataSourceImpl - Set - json.Marshal: %w", err)
@@ -57,7 +57,7 @@ func (r *BigCacheDataSourceImpl) Set(ctx context.Context, model datasource.IEnti
 }
 
 // Delete -.
-func (r *BigCacheDataSourceImpl) Delete(ctx context.Context, model datasource.IEntityMethod) error {
+func (r *BigCacheDataSourceImpl) Delete(_ context.Context, model datasource.IEntityMethod) error {
 	err := r.Cache.Delete(r.cacheKey(model))
 	if err != nil {
 		return fmt.Errorf("BigCacheDataSourceImpl - Delete - r.Cache.Delete: %w", err)

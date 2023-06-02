@@ -1,4 +1,4 @@
-package redis_cache
+package redis
 
 import (
 	"context"
@@ -65,6 +65,7 @@ func (r *Redis) Close() {
 		err := r.Client.Close()
 		if err != nil {
 			log.Printf("failed to close redis client: %v", err)
+
 			return
 		}
 	}

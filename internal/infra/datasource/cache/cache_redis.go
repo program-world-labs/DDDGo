@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
 	"github.com/redis/go-redis/v9"
+
+	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
 )
 
 var _ datasource.ICacheDataSource = (*RedisCacheDataSourceImpl)(nil)

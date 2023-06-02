@@ -17,7 +17,7 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource/sql"
 	"github.com/program-world-labs/DDDGo/internal/infra/repository"
 	"github.com/program-world-labs/DDDGo/pkg/cache/local"
-	"github.com/program-world-labs/DDDGo/pkg/cache/redis"
+	redis2 "github.com/program-world-labs/DDDGo/pkg/cache/redis"
 	"github.com/program-world-labs/DDDGo/pkg/httpserver"
 	"github.com/program-world-labs/DDDGo/pkg/logger"
 	"github.com/program-world-labs/DDDGo/pkg/sql_gorm"
@@ -48,7 +48,7 @@ func InitializeHTTPServer(cfg *config.Config) (*httpserver.Server, error) {
 	}
 	bigCacheDataSourceImpl := cache.NewBigCacheDataSourceImp(bigCache)
 	userRepoImpl := provideUserRepo(userDatasourceImpl, redisCacheDataSourceImpl, bigCacheDataSourceImpl)
-	iUserService := provideUserService(userRepoImpl)
+	iUserService := provideService(userRepoImpl)
 	engine := v1.NewRouter(loggerInterface, iUserService)
 	server := provideHTTPServer(engine, cfg)
 	return server, nil
@@ -66,7 +66,7 @@ func providePostgres(cfg *config.Config) (*gorm.DB, error) {
 }
 
 func provideRedisCache(cfg *config.Config) (*redis.Client, error) {
-	cache2, err := redis_cache.New(cfg.Redis.DSN)
+	cache2, err := redis2.New(cfg.Redis.DSN)
 	return cache2.Client, err
 }
 
@@ -79,8 +79,8 @@ func provideUserRepo(sqlDatasource *sql.UserDatasourceImpl, redisCacheDatasource
 	return repository.NewUserRepoImpl(sqlDatasource, redisCacheDatasource, bigCacheDatasource)
 }
 
-func provideUserService(userRepo *repository.UserRepoImpl) user.IUserService {
-	return user.NewUserServiceImpl(userRepo)
+func provideService(userRepo *repository.UserRepoImpl) user.IUserService {
+	return user.NewServiceImpl(userRepo)
 }
 
 func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Server {
@@ -92,5 +92,5 @@ var appSet = wire.NewSet(
 	providePostgres,
 	provideRedisCache,
 	provideLocalCache, sql.NewUserDatasourceImpl, cache.NewRedisCacheDataSourceImpl, cache.NewBigCacheDataSourceImp, provideUserRepo,
-	provideUserService, v1.NewRouter, provideHTTPServer,
+	provideService, v1.NewRouter, provideHTTPServer,
 )

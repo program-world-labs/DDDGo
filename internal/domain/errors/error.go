@@ -1,4 +1,4 @@
-package common_error
+package errors
 
 import (
 	"encoding/json"
@@ -10,42 +10,42 @@ type ErrorCode int
 
 const (
 	// Controller Errors
-	// 參數錯誤
+	// 參數錯誤.
 	ErrorCodeInvalidParameter ErrorCode = 1000 + iota
-	// 參數驗證錯誤
+	// 參數驗證錯誤.
 	ErrorCodeParamValidationFailed
-	// 認證錯誤 - Authorization header is missing
+	// 認證錯誤 - Authorization header is missing.
 	ErrorCodeAuthHeaderMissing
-	// Claim UID is missing
+	// Claim UID is missing.
 	ErrorCodeClaimUIDMissing
-	// Claim HospitalID is missing
+	// Claim HospitalID is missing.
 	ErrorCodeClaimHospitalIDMissing
-	// SearchQuery is missing
+	// SearchQuery is missing.
 	ErrorCodeSearchQueryMissing
-	// 參數遺失
+	// 參數遺失.
 	ErrorCodeParamMissing
-	// 參數格式錯誤
+	// 參數格式錯誤.
 	ErrorCodeParamFormatInvalid
-	// 資源不存在
+	// 資源不存在.
 	ErrorCodeResourceNotFound
-	// 權限不足
+	// 權限不足.
 	ErrorCodePermissionDenied
-	// Authorization header is invalid
+	// Authorization header is invalid.
 	ErrorCodeAuthHeaderInvalid
-	// Role type is invalid
+	// Role type is invalid.
 	ErrorCodeRoleTypeInvalid
-	// 運算錯誤
+	// 運算錯誤.
 	ErrorCodeDivisionByZero
-	// 資料欄位轉換錯誤
+	// 資料欄位轉換錯誤.
 	ErrorCodeDataFieldConvertError
 
-	// Entity Errors
+	// Entity Errors.
 	ErrorCodeEntityParamInvalid ErrorCode = 2000 + iota
 	ErrorCodeEntityValidationFailed
 	ErrorCodeEntityFieldHasExist
 	ErrorCodeEntityFieldNotFound
 
-	// UseCase Errors
+	// UseCase Errors.
 	ErrorCodeUseCaseParamInvalid ErrorCode = 3000 + iota
 	ErrorCodeUseCaseValidationFailed
 	ErrorCodeUseCaseDataNotFound
@@ -56,7 +56,7 @@ const (
 	ErrorCodeUseCaseProcessFailed
 	ErrorCodeUseCaseTagIsBinding
 
-	// Database Errors
+	// Database Errors.
 	ErrorCodeDataSourceDeleteFailed ErrorCode = 4000 + iota
 	ErrorCodeDataSourceCreateFailed
 	ErrorCodeDataSourceUpdateFailed
@@ -66,13 +66,13 @@ const (
 	ErrorCodeDataSourceDownloadFailed
 	ErrorCodeDataSourceDataNotFound
 
-	// Repository Errors
+	// Repository Errors.
 	ErrorCodeRepositoryCreateFailed ErrorCode = 5000 + iota
 	ErrorCodeRepositoryUpdateFailed
 	ErrorCodeRepositoryDeleteFailed
 	ErrorCodeRepositoryQueryFailed
 
-	// Pub/Sub Errors
+	// Pub/Sub Errors.
 	ErrorCodePubSubPublishFailed ErrorCode = 6000 + iota
 	ErrorCodePubSubSubscribeFailed
 	ErrorCodePubSubReceivedFailed
@@ -83,7 +83,7 @@ const (
 	ErrorCodePubSubShutdownFailed
 
 	// Internal Errors
-	// 內部錯誤
+	// 內部錯誤.
 	ErrorCodeInternalServerError ErrorCode = 5000 + iota
 )
 
@@ -93,6 +93,7 @@ type ErrorInfo struct {
 	Err     interface{} `json:"-"`
 }
 
+//nolint:gochecknoglobals // TODO. 暫時先這樣，後續再改.
 var errorInfoMap = map[ErrorCode]ErrorInfo{
 	// Controller Errors
 	ErrorCodeInvalidParameter:       {Code: ErrorCodeInvalidParameter, Message: "Invalid parameter"},
@@ -155,7 +156,7 @@ var errorInfoMap = map[ErrorCode]ErrorInfo{
 	ErrorCodeInternalServerError: {Code: ErrorCodeInternalServerError, Message: "Internal server error"},
 }
 
-// ErrorInfo implements the error interface
+// ErrorInfo implements the error interface.
 func (e ErrorInfo) Error() string {
 	return e.Message
 }
@@ -170,25 +171,25 @@ func (e *ErrorInfo) MarshalJSON() ([]byte, error) {
 	})
 }
 
-// New returns a new error with an error code and error message
+// New returns a new error with an error code and error message.
 func New(code ErrorCode) ErrorInfo {
-
 	return ErrorInfo{Code: code, Message: errorInfoMap[code].Message}
 }
 
-// Wrap returns a new error with an error code and error message, wrapping an existing error
-func Wrap(code ErrorCode, err error) error {
+// Wrap returns a new error with an error code and error message, wrapping an existing error.
+func Wrap(code ErrorCode, err error) *ErrorInfo {
 	return &ErrorInfo{Code: code, Message: GetErrorMessage(code), Err: errors.WithStack(err)}
 }
 
-// Cause returns the underlying cause of an error, if available
+// Cause returns the underlying cause of an error, if available.
 func Cause(err error) error {
 	return errors.Cause(err)
 }
 
-// IsErrorCode returns true if the given error has the given error code
+// IsErrorCode returns true if the given error has the given error code.
 func IsErrorCode(err error, code ErrorCode) bool {
-	if e, ok := err.(*ErrorInfo); ok {
+	var e *ErrorInfo
+	if errors.As(err, &e) {
 		return e.Code == code
 	}
 

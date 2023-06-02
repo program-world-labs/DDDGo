@@ -2,7 +2,7 @@ package user
 
 import "github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 
-type UserResponse struct {
+type Response struct {
 	ID        string `json:"id"`
 	Username  string `json:"username"`
 	EMail     string `json:"email"`
@@ -11,8 +11,8 @@ type UserResponse struct {
 	LastName  string `json:"last_name"`
 }
 
-func NewUserResponse(model entity.User) UserResponse {
-	return UserResponse{
+func NewResponse(model entity.User) Response {
+	return Response{
 		ID:       model.ID.String(),
 		Username: model.Username,
 		EMail:    model.EMail,

@@ -1,4 +1,4 @@
-package redis_cache
+package redis
 
 import "time"
 

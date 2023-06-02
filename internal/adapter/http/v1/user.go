@@ -30,17 +30,9 @@ func newUserRoutes(handler *gin.RouterGroup, u usecase.IUserService, l logger.In
 // @Produce     json
 // @Success     200 {object} historyResponse
 // @Failure     500 {object} response
-// @Router      /user/getInfo [get]
-func (r *userRoutes) getInfo(c *gin.Context) {
-	// translations, err := r.u.GetByID(c.Request.Context())
-	// if err != nil {
-	// 	r.l.Error(err, "http - v1 - history")
-	// 	errorResponse(c, http.StatusInternalServerError, "database problems")
+// @Router      /user/getInfo [get].
+func (r *userRoutes) getInfo(_ *gin.Context) {
 
-	// 	return
-	// }
-
-	// c.JSON(http.StatusOK, historyResponse{translations})
 }
 
 // @Summary     Register User
@@ -53,8 +45,8 @@ func (r *userRoutes) getInfo(c *gin.Context) {
 // @Success     200 {object} entity.Translation
 // @Failure     400 {object} response
 // @Failure     500 {object} response
-// @Router      /user/register [post]
-func (r *userRoutes) register(c *gin.Context) {
+// @Router      /user/register [post].
+func (r *userRoutes) register(_ *gin.Context) {
 	// var request doTranslateRequest
 	// if err := c.ShouldBindJSON(&request); err != nil {
 	// 	r.l.Error(err, "http - v1 - doTranslate")

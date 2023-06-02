@@ -9,8 +9,8 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	// Swagger docs.
-
+	// Blank import removed as it is not justified
+	// _ "github.com/program-world-labs/DDDGo/docs".
 	_ "github.com/program-world-labs/DDDGo/docs"
 	usecase "github.com/program-world-labs/DDDGo/internal/application/user"
 	"github.com/program-world-labs/DDDGo/pkg/logger"
@@ -22,7 +22,7 @@ import (
 // @description Using a translation service as an example
 // @version     1.0
 // @host        localhost:8080
-// @BasePath    /v1
+// @BasePath    /v1.
 func NewRouter(l logger.Interface, t usecase.IUserService) *gin.Engine {
 	handler := gin.New()
 	// Options
@@ -44,5 +44,6 @@ func NewRouter(l logger.Interface, t usecase.IUserService) *gin.Engine {
 	{
 		newUserRoutes(h, t, l)
 	}
+
 	return handler
 }

@@ -79,8 +79,10 @@ func (p *Postgres) Close() {
 		sqlDB, err := p.DB.DB()
 		if err != nil {
 			log.Printf("failed to get sql.DB: %v", err)
+
 			return
 		}
+
 		sqlDB.Close()
 	}
 }

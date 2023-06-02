@@ -18,6 +18,7 @@ func NewUser(uid string) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &User{
 		ID: uuidString,
 	}, nil
@@ -29,8 +30,15 @@ func (u *User) GetID() string {
 }
 
 // SetID -.
-func (u *User) SetID(id string) {
-	u.ID, _ = uuid.Parse(id)
+func (u *User) SetID(id string) error {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return err
+	}
+
+	u.ID = parsedID
+
+	return nil
 }
 
 // TableName -.

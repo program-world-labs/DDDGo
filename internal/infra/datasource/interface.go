@@ -8,7 +8,7 @@ import (
 
 type IEntityMethod interface {
 	GetID() string
-	SetID(string)
+	SetID(string) error
 	TableName() string
 }
 type IEntity interface {

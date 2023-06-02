@@ -15,7 +15,6 @@ type BigCache struct {
 
 // New -.
 func New() (*BigCache, error) {
-
 	config := bigcache.Config{
 		// number of shards (must be a power of 2)
 		Shards: 1024,
@@ -58,6 +57,7 @@ func New() (*BigCache, error) {
 	if initErr != nil {
 		log.Fatal(initErr)
 	}
+
 	return &BigCache{Client: cache}, initErr
 }
 
