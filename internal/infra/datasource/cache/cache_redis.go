@@ -7,6 +7,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
+	"github.com/program-world-labs/DDDGo/internal/domain"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
 )
 
@@ -22,12 +23,12 @@ func NewRedisCacheDataSourceImpl(client *redis.Client) *RedisCacheDataSourceImpl
 	return &RedisCacheDataSourceImpl{Client: client}
 }
 
-func (r *RedisCacheDataSourceImpl) redisKey(model datasource.IEntityMethod) string {
+func (r *RedisCacheDataSourceImpl) redisKey(model domain.IEntity) string {
 	return fmt.Sprintf("%s-%s", model.TableName(), model.GetID())
 }
 
 // GetByID -.
-func (r *RedisCacheDataSourceImpl) Get(ctx context.Context, model datasource.IEntityMethod) (datasource.IEntityMethod, error) {
+func (r *RedisCacheDataSourceImpl) Get(ctx context.Context, model domain.IEntity) (domain.IEntity, error) {
 	data, err := r.Client.Get(ctx, r.redisKey(model)).Bytes()
 	if err != nil {
 		return nil, fmt.Errorf("RedisCacheDataSourceImpl - GetByID - r.Client.Get: %w", err)
@@ -42,7 +43,7 @@ func (r *RedisCacheDataSourceImpl) Get(ctx context.Context, model datasource.IEn
 }
 
 // Set -.
-func (r *RedisCacheDataSourceImpl) Set(ctx context.Context, model datasource.IEntityMethod) (datasource.IEntityMethod, error) {
+func (r *RedisCacheDataSourceImpl) Set(ctx context.Context, model domain.IEntity) (domain.IEntity, error) {
 	data, err := json.Marshal(model)
 	if err != nil {
 		return nil, fmt.Errorf("RedisCacheDataSourceImpl - Create - json.Marshal: %w", err)
@@ -57,7 +58,7 @@ func (r *RedisCacheDataSourceImpl) Set(ctx context.Context, model datasource.IEn
 }
 
 // Delete -.
-func (r *RedisCacheDataSourceImpl) Delete(ctx context.Context, model datasource.IEntityMethod) error {
+func (r *RedisCacheDataSourceImpl) Delete(ctx context.Context, model domain.IEntity) error {
 	err := r.Client.Del(ctx, r.redisKey(model)).Err()
 	if err != nil {
 		return fmt.Errorf("RedisCacheDataSourceImpl - Delete - r.Client.Del: %w", err)
