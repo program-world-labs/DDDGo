@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/program-world-labs/DDDGo/internal/domain"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
 )
 
@@ -18,7 +19,7 @@ func NewCacheUpdateImpl(remoteCache datasource.ICacheDataSource, cache datasourc
 }
 
 // Save -.
-func (r *CacheUpdateImpl) Save(ctx context.Context, e datasource.IEntityMethod) error {
+func (r *CacheUpdateImpl) Save(ctx context.Context, e domain.IEntity) error {
 	// 將資料寫入Redis
 	_, err := r.RemoteCache.Set(ctx, e)
 	if err != nil {
@@ -34,7 +35,7 @@ func (r *CacheUpdateImpl) Save(ctx context.Context, e datasource.IEntityMethod) 
 }
 
 // Delete -.
-func (r *CacheUpdateImpl) Delete(ctx context.Context, e datasource.IEntityMethod) error {
+func (r *CacheUpdateImpl) Delete(ctx context.Context, e domain.IEntity) error {
 	// 將資料從Redis刪除
 	err := r.RemoteCache.Delete(ctx, e)
 	if err != nil {

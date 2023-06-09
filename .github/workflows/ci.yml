@@ -54,8 +54,6 @@ jobs:
       - uses: actions/setup-go@v4
         with:
           go-version: ">=1.18.0"
-      - name: Current Go version
-        run: go version
       - name: Install dependencies
         run: go mod download
 
@@ -65,9 +63,21 @@ jobs:
           -race \
           -covermode atomic \
           -coverprofile=coverage.txt \
-          ./internal/..."
-      - name: Upload coverage report
-        run: bash <(curl -s https://codecov.io/bash)
+          ./tests/..."
+      - name: Generate coverage report
+        run: |
+          go get github.com/boumenot/gocover-cobertura
+          go run github.com/boumenot/gocover-cobertura < coverage.txt > coverage.xml
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          env_vars: GO_VERSION
+          fail_ci_if_error: true
+          files: coverage.xml
+          flags: unittest
+          name: codecov-ddd
+          verbose: true
 
       - name: Integration tests
         run: "docker-compose up \

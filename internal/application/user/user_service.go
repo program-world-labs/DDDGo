@@ -9,6 +9,8 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/domain/user/repository"
 )
 
+var _ IUserService = (*ServiceImpl)(nil)
+
 // ServiceImpl -.
 type ServiceImpl struct {
 	UserRepo repository.UserRepository
@@ -21,7 +23,7 @@ func NewServiceImpl(userRepo repository.UserRepository) *ServiceImpl {
 
 var ErrUserAlreadyExists = errors.New("user already exists")
 
-func (u *ServiceImpl) RegisterUseCase(ctx context.Context, user *entity.User) (*entity.User, error) {
+func (u *ServiceImpl) RegisterUseCase(ctx context.Context, user *entity.User) (*Output, error) {
 	// Check if user already exists
 	existingUser, err := u.UserRepo.GetByID(ctx, user)
 	if err != nil {
@@ -38,12 +40,18 @@ func (u *ServiceImpl) RegisterUseCase(ctx context.Context, user *entity.User) (*
 		return nil, err
 	}
 
-	return createdUser, nil
+	// Cast to entity.User
+	createdUserEntity, ok := createdUser.(*entity.User)
+	if !ok {
+		return nil, fmt.Errorf("ServiceImpl - RegisterUseCase - u.UserRepo.Create: %w", err)
+	}
+
+	return NewOutput(createdUserEntity), nil
 }
 
 var ErrUserNotFound = errors.New("user not found")
 
-func (u *ServiceImpl) GetByIDUseCase(ctx context.Context, id string) (*entity.User, error) {
+func (u *ServiceImpl) GetByIDUseCase(ctx context.Context, id string) (*Output, error) {
 	user, err := entity.NewUser(id)
 	if err != nil {
 		return nil, err
@@ -58,5 +66,11 @@ func (u *ServiceImpl) GetByIDUseCase(ctx context.Context, id string) (*entity.Us
 		return nil, fmt.Errorf("%w", ErrUserNotFound)
 	}
 
-	return foundUser, nil
+	// cast to entity.User
+	foundUserEntity, ok := foundUser.(*entity.User)
+	if !ok {
+		return nil, fmt.Errorf("ServiceImpl - GetByIDUseCase - u.UserRepo.GetByID: %w", err)
+	}
+
+	return NewOutput(foundUserEntity), nil
 }

@@ -12,7 +12,8 @@
             "program": "${workspaceFolder}/cmd/app",
             "env": {
                 "APP_PG_URL": "postgres://user:pass@localhost:5432/postgres",
-                "APP_REDIS_URL": "redis://localhost:6379/0"
+                "APP_REDIS_URL": "redis://localhost:6379/0",
+                "APP_PROJECT_ROOT": "${workspaceFolder}"
             }
         }
     ]

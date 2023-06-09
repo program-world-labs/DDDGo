@@ -13,7 +13,7 @@ type Response struct {
 
 func NewResponse(model entity.User) Response {
 	return Response{
-		ID:       model.ID.String(),
+		ID:       model.ID,
 		Username: model.Username,
 		EMail:    model.EMail,
 		Avatar:   model.Avatar,
