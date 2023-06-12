@@ -65,9 +65,32 @@ jobs:
           -race \
           -covermode atomic \
           -coverprofile=coverage.txt \
-          ./internal/..."
-      - name: Upload coverage report
-        run: bash <(curl -s https://codecov.io/bash)
+          ./tests/..."
+      - name: Zip files
+        run: zip -r report.zip tests/report
+      - name: Upload report to Jira Zephyr
+        uses: program-world-labs/jira-zephyr-action@v1
+        with:
+          project_key: ${{ secrets.JIRA_ZEPHYR_PROJECT_KEY }}
+          format: "cucumber"
+          auth: ${{ secrets.JIRA_ZEPHYR_TOKEN }}
+          file_path: "tests/report.zip"
+          auto_create_test_cases: "false"
+          test_cycle: '{"name": "Test Regression", "description": "Regression test cycle 1 to ensure no breaking changes", "jiraProjectVersion": 10000}'
+      - name: Generate coverage report
+        run: |
+          go get github.com/boumenot/gocover-cobertura
+          go run github.com/boumenot/gocover-cobertura < coverage.txt > coverage.xml
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          env_vars: GO_VERSION
+          fail_ci_if_error: true
+          files: coverage.xml
+          flags: unittest
+          name: codecov-ddd
+          verbose: true
 
       - name: Integration tests
         run: "docker-compose up \
