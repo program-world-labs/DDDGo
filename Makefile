@@ -50,7 +50,7 @@ linter-dotenv: ### check by dotenv linter
 .PHONY: linter-dotenv
 
 test: ### run test
-	go test -v -cover -race ./internal/...
+	source .env && go test -v -cover -race ./tests/...
 .PHONY: test
 
 integration-test: ### run integration-test
@@ -58,7 +58,7 @@ integration-test: ### run integration-test
 .PHONY: integration-test
 
 mock: ### run mockgen
-	mockgen -source ./internal/usecase/interfaces.go -package usecase_test > ./internal/usecase/mocks_test.go
+	mockgen -source=internal/domain/user/repository/user_repository.go -destination=tests/user/UserRepository_mock.go -package=user_test
 .PHONY: mock
 
 migrate-create:  ### create new migration

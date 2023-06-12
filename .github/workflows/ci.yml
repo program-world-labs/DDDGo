@@ -54,8 +54,6 @@ jobs:
       - uses: actions/setup-go@v4
         with:
           go-version: ">=1.18.0"
-      - name: Current Go version
-        run: go version
       - name: Install dependencies
         run: go mod download
 
