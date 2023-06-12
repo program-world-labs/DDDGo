@@ -65,7 +65,7 @@ jobs:
           -coverprofile=coverage.txt \
           ./tests/..."
       - name: Zip files
-        run: zip -r report.zip tests/report
+        run: zip -r tests/report.zip tests/report
       - name: Upload report to Jira Zephyr
         uses: program-world-labs/jira-zephyr-action@v1
         with:
