@@ -7,7 +7,7 @@ require (
 	github.com/Eun/go-hit v0.5.23
 	github.com/cucumber/godog v0.12.6
 	github.com/gin-gonic/gin v1.9.1
-	github.com/golang-migrate/migrate/v4 v4.16.0
+	github.com/golang-migrate/migrate/v4 v4.16.2
 	github.com/golang/mock v1.6.0
 	github.com/google/wire v0.5.0
 	github.com/prometheus/client_golang v1.15.1
