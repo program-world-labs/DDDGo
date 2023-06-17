@@ -8,6 +8,8 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
 )
 
+var _ domain.ICRUDRepository = (*CRUDImpl)(nil)
+
 // CRUDImpl -.
 type CRUDImpl struct {
 	DB    datasource.IDataSource

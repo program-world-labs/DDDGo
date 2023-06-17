@@ -1,102 +1,192 @@
 package logger
 
 import (
-	"fmt"
+	"io"
 	"os"
-	"strings"
+	"time"
 
 	"github.com/rs/zerolog"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // Interface -.
 type Interface interface {
-	Debug(message interface{}, args ...interface{})
-	Info(message string, args ...interface{})
-	Warn(message string, args ...interface{})
-	Error(message interface{}, args ...interface{})
-	Fatal(message interface{}, args ...interface{})
-}
+	Trace() *Event
+	Debug() *Event
+	Info() *Event
+	Warn() *Event
+	Error() *Event
+	Fatal() *Event
+	Panic() *Event
+	Err(error) *Event
+	Log() *Event
+	Span(trace.Span) *Event
+	ErrorSpan(trace.Span) *Event
+	Print(...interface{})
+	Printf(string, ...interface{})
+	Write(p []byte) (n int, err error)
+	Output(io.Writer) Logger
 
-// Logger -.
-type Logger struct {
-	logger *zerolog.Logger
 }
 
 var _ Interface = (*Logger)(nil)
 
-// New -.
-func New(level string) *Logger {
-	var l zerolog.Level
+type Logger struct {
+	*zerolog.Logger
+	projectID string
+}
 
-	switch strings.ToLower(level) {
-	case "error":
-		l = zerolog.ErrorLevel
-	case "warn":
-		l = zerolog.WarnLevel
-	case "info":
-		l = zerolog.InfoLevel
-	case "debug":
-		l = zerolog.DebugLevel
-	default:
-		l = zerolog.InfoLevel
+type Event struct {
+	*zerolog.Event
+}
+
+// See: https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity
+func logLevelSeverity(l zerolog.Level) string {
+	return map[zerolog.Level]string{
+		zerolog.DebugLevel: "DEBUG",
+		zerolog.InfoLevel:  "INFO",
+		zerolog.WarnLevel:  "WARNING",
+		zerolog.ErrorLevel: "ERROR",
+		zerolog.PanicLevel: "CRITICAL",
+		zerolog.FatalLevel: "CRITICAL",
+	}[l]
+}
+
+// NewProductionLogger returns a configured logger for production.
+// It outputs info level and above logs with sampling.
+const severityFieldName = "severity"
+const timeFieldName = "time"
+
+func NewProductionLogger(projectID string) *Logger {
+	logLevel := zerolog.InfoLevel
+	zerolog.SetGlobalLevel(logLevel)
+
+	zerolog.LevelFieldName = severityFieldName
+	zerolog.LevelFieldMarshalFunc = func(l zerolog.Level) string {
+		return logLevelSeverity(l)
 	}
+	zerolog.TimestampFieldName = timeFieldName
+	zerolog.TimeFieldFormat = time.RFC3339Nano
 
-	zerolog.SetGlobalLevel(l)
+	// default sampler
+	sampler := &zerolog.BasicSampler{N: 1}
 
-	skipFrameCount := 3
-	logger := zerolog.New(os.Stdout).With().Timestamp().CallerWithSkipFrameCount(zerolog.CallerSkipFrameCount + skipFrameCount).Logger()
+	logger := zerolog.New(os.Stderr).Sample(sampler).With().Timestamp().Logger()
 
-	return &Logger{
-		logger: &logger,
+	return &Logger{&logger, projectID}
+}
+
+// NewDevelopmentLogger returns a configured logger for development.
+// It outputs debug level and above logs, and sampling is disabled.
+func NewDevelopmentLogger(projectID string) *Logger {
+	logLevel := zerolog.DebugLevel
+	zerolog.SetGlobalLevel(logLevel)
+
+	zerolog.LevelFieldName = severityFieldName
+	zerolog.LevelFieldMarshalFunc = func(l zerolog.Level) string {
+		return logLevelSeverity(l)
+	}
+	zerolog.TimestampFieldName = timeFieldName
+	zerolog.TimeFieldFormat = time.RFC3339Nano
+
+	logger := zerolog.New(os.Stderr).With().Timestamp().Logger()
+
+	return &Logger{&logger, projectID}
+}
+
+// To use method chain we need followings
+
+func (l *Logger) Trace() *Event {
+	e := l.Logger.Trace()
+
+	return &Event{e}
+}
+
+func (l *Logger) Debug() *Event {
+	e := l.Logger.Debug()
+
+	return &Event{e}
+}
+
+func (l *Logger) Info() *Event {
+	e := l.Logger.Info()
+
+	return &Event{e}
+}
+
+func (l *Logger) Warn() *Event {
+	e := l.Logger.Warn()
+
+	return &Event{e}
+}
+
+func (l *Logger) Error() *Event {
+	e := l.Logger.Error()
+
+	return &Event{e}
+}
+
+func (l *Logger) Err(err error) *Event {
+	e := l.Logger.Err(err)
+
+	return &Event{e}
+}
+
+func (l *Logger) Fatal() *Event {
+	e := l.Logger.Fatal()
+
+	return &Event{e}
+}
+
+func (l *Logger) Panic() *Event {
+	e := l.Logger.Panic()
+
+	return &Event{e}
+}
+
+func (l *Logger) WithLevel(level zerolog.Level) *Event {
+	e := l.Logger.WithLevel(level)
+
+	return &Event{e}
+}
+
+func (l *Logger) Log() *Event {
+	e := l.Logger.Log()
+
+	return &Event{e}
+}
+
+func (l *Logger) Print(v ...interface{}) {
+	l.Logger.Print(v...)
+}
+
+func (l *Logger) Printf(format string, v ...interface{}) {
+	l.Logger.Printf(format, v...)
+}
+
+func (l Logger) Write(p []byte) (n int, err error) {
+	n, err = l.Logger.Write(p)
+
+	return n, err
+}
+
+func (l Logger) Output(w io.Writer) Logger {
+	logger := l.Logger.Output(w)
+
+	return Logger{
+		&logger,
+		l.projectID,
 	}
 }
 
-// Debug -.
-func (l *Logger) Debug(message interface{}, args ...interface{}) {
-	l.msg("debug", message, args...)
+func (l *Logger) Span(span trace.Span) *Event {
+	e := l.Logger.Info().Str("trace", "projects/"+l.projectID+"/traces/"+span.SpanContext().TraceID().String()).Str("span", span.SpanContext().SpanID().String())
+
+	return &Event{e}
 }
 
-// Info -.
-func (l *Logger) Info(message string, args ...interface{}) {
-	l.log(message, args...)
-}
+func (l *Logger) ErrorSpan(span trace.Span) *Event {
+	e := l.Logger.Error().Str("trace", "projects/"+l.projectID+"/traces/"+span.SpanContext().TraceID().String()).Str("span", span.SpanContext().SpanID().String())
 
-// Warn -.
-func (l *Logger) Warn(message string, args ...interface{}) {
-	l.log(message, args...)
-}
-
-// Error -.
-func (l *Logger) Error(message interface{}, args ...interface{}) {
-	if l.logger.GetLevel() == zerolog.DebugLevel {
-		l.Debug(message, args...)
-	}
-
-	l.msg("error", message, args...)
-}
-
-// Fatal -.
-func (l *Logger) Fatal(message interface{}, args ...interface{}) {
-	l.msg("fatal", message, args...)
-
-	os.Exit(1)
-}
-
-func (l *Logger) log(message string, args ...interface{}) {
-	if len(args) == 0 {
-		l.logger.Info().Msg(message)
-	} else {
-		l.logger.Info().Msgf(message, args...)
-	}
-}
-
-func (l *Logger) msg(level string, message interface{}, args ...interface{}) {
-	switch msg := message.(type) {
-	case error:
-		l.log(msg.Error(), args...)
-	case string:
-		l.log(msg, args...)
-	default:
-		l.log(fmt.Sprintf("%s message %v has unknown type %v", level, message, msg), args...)
-	}
+	return &Event{e}
 }

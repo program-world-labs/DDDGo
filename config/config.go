@@ -35,9 +35,14 @@ type (
 	// GCP -.
 	GCP struct {
 		Project     string `mapstructure:"project"`
+		Monitor    	bool   `mapstructure:"monitor"`
 		Emulator    bool   `mapstructure:"emulator"`
 		Credentials string `mapstructure:"credentials"`
 		Firestore   string `mapstructure:"firestore"`
+		Storage struct {
+			Bucket string `mapstructure:"bucket"`
+			URL    string `mapstructure:"url"`
+		} `mapstructure:"storage"`
 		Auth        string `mapstructure:"auth"`
 	}
 
@@ -93,7 +98,7 @@ func NewConfig() (*Config, error) {
 	if !ok {
 		configName = "dev"
 	}
-
+	
 	viper.SetConfigName(configName)
 
 	// 取得PG環境變數
@@ -108,35 +113,33 @@ func NewConfig() (*Config, error) {
 		return nil, fmt.Errorf("config error: %w", err)
 	}
 
-	os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", viper.GetString("gcp.credentials"))
+	err = viper.Unmarshal(cfg)
+	if err != nil {
+		return nil, fmt.Errorf("config error: %w", err)
+	}
 
-	if !viper.GetBool("gcp.emulator") {
-		os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", viper.GetString("gcp.credentials"))
+	// 設定GCP環境變數
+	if cfg.GCP.Credentials != "" {
+		os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", cfg.GCP.Credentials)
+	}
 
+	if !cfg.GCP.Emulator {
 		return cfg, nil
 	}
 
 	// 設定Firestore環境變數
-	if f := viper.GetString("gcp.firestore"); f != "" {
-		os.Setenv("FIRESTORE_EMULATOR_HOST", f)
-	}
-	// 設定Pubsub環境變數
-	if p := viper.GetString("gcp.pubsub.url"); p != "" {
-		os.Setenv("PUBSUB_EMULATOR_HOST", p)
-	}
-	// 設定Storage環境變數
-	if s := viper.GetString("gcp.storage.url"); s != "" {
-		os.Setenv("FIREBASE_STORAGE_EMULATOR_HOST", s)
-		os.Setenv("STORAGE_EMULATOR_HOST", s)
-	}
-	// 設定Auth環境變數
-	if a := viper.GetString("gcp.auth"); a != "" {
-		os.Setenv("FIREBASE_AUTH_EMULATOR_HOST", a)
+	if cfg.GCP.Firestore != "" {
+		os.Setenv("FIRESTORE_EMULATOR_HOST", cfg.GCP.Firestore)
 	}
 
-	err = viper.Unmarshal(cfg)
-	if err != nil {
-		return nil, fmt.Errorf("config error: %w", err)
+	// 設定Storage環境變數
+	if cfg.GCP.Storage.URL != "" {
+		os.Setenv("FIREBASE_STORAGE_EMULATOR_HOST", cfg.GCP.Storage.URL)
+		os.Setenv("STORAGE_EMULATOR_HOST", cfg.GCP.Storage.URL)
+	}
+	// 設定Auth環境變數
+	if cfg.GCP.Auth != "" {
+		os.Setenv("FIREBASE_AUTH_EMULATOR_HOST", cfg.GCP.Auth)
 	}
 
 	return cfg, nil

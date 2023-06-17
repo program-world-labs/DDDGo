@@ -74,7 +74,7 @@ jobs:
           auth: ${{ secrets.JIRA_ZEPHYR_TOKEN }}
           file_path: "tests/report.zip"
           auto_create_test_cases: "false"
-          test_cycle: '{"name": "Test Regression", "description": "Regression test cycle 1 to ensure no breaking changes", "jiraProjectVersion": 10000}'
+          test_cycle: '{"name": "Auto Test Regression", "description": "Regression test cycle 1 to ensure no breaking changes", "jiraProjectVersion": 10000}'
       - name: Generate coverage report
         run: |
           go get github.com/boumenot/gocover-cobertura

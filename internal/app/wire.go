@@ -17,13 +17,15 @@ import (
 	redisCache "github.com/program-world-labs/DDDGo/pkg/cache/redis"
 	"github.com/program-world-labs/DDDGo/pkg/httpserver"
 	"github.com/program-world-labs/DDDGo/pkg/logger"
+	"github.com/program-world-labs/DDDGo/pkg/operations"
 	sqlgorm "github.com/program-world-labs/DDDGo/pkg/sql_gorm"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
-func provideLogger(cfg *config.Config) (logger.Interface, error) {
-	return logger.New(cfg.Log.Level), nil
+func provideTracer(cfg *config.Config) (operations.ITracer, error) {
+	operations.GoogleCloudOperationInit(cfg.GCP.Project, cfg.GCP.Monitor)
+	return operations.NewTracer(cfg.App.Name), nil
 }
 
 func providePostgres(cfg *config.Config) (*gorm.DB, error) {
@@ -45,8 +47,8 @@ func provideUserRepo(sqlDatasource *repo.UserDatasourceImpl, redisCacheDatasourc
 	return repository.NewUserRepoImpl(sqlDatasource, redisCacheDatasource, bigCacheDatasource)
 }
 
-func provideService(userRepo *repository.UserRepoImpl) usecase.IUserService {
-	return usecase.NewServiceImpl(userRepo)
+func provideService(userRepo *repository.UserRepoImpl, l logger.Interface, t operations.ITracer) usecase.IUserService {
+	return usecase.NewServiceImpl(userRepo, l, t)
 }
 
 func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Server {
@@ -54,7 +56,7 @@ func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Serv
 }
 
 var appSet = wire.NewSet(
-	provideLogger,
+	provideTracer,
 	providePostgres,
 	provideRedisCache,
 	provideLocalCache,
@@ -67,7 +69,7 @@ var appSet = wire.NewSet(
 	provideHTTPServer,
 )
 
-func InitializeHTTPServer(cfg *config.Config) (*httpserver.Server, error) {
+func InitializeHTTPServer(cfg *config.Config, l logger.Interface) (*httpserver.Server,  error) {
 	wire.Build(appSet)
 	return &httpserver.Server{}, nil
 }

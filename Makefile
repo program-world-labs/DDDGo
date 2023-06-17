@@ -13,7 +13,7 @@ help: ## Display this help screen
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 compose-up: ### Run docker-compose
-	docker-compose up --build -d postgres rabbitmq && docker-compose logs -f
+	docker-compose  -f docker-compose.dev.yml up -d
 .PHONY: compose-up
 
 compose-up-integration-test: ### Run docker-compose with integration test
@@ -58,8 +58,16 @@ integration-test: ### run integration-test
 .PHONY: integration-test
 
 mock: ### run mockgen
-	mockgen -source=internal/domain/user/repository/user_repository.go -destination=tests/user/UserRepository_mock.go -package=user_test
+	mockgen -source=internal/domain/user/repository/user_repository.go -destination=tests/mock/UserRepository_mock.go -package=mock
+	mockgen -source=internal/application/user/user_interface.go -destination=tests/mock/UserService_mock.go -package=mock
+	mockgen -source=internal/infra/datasource/interface.go -destination=tests/mock/DataSource_mock.go -package=mock
+	mockgen -source=pkg/logger/logger.go -destination=tests/mock/Logger_mock.go -package=mock
+	mockgen -source=pkg/operations/tracer.go -destination=tests/mock/Tracer_mock.go -package=mock
 .PHONY: mock
+
+wire: ### run mockgen
+	wire
+.PHONY: wire
 
 migrate-create:  ### create new migration
 	migrate create -ext sql -dir migrations 'migrate_name'

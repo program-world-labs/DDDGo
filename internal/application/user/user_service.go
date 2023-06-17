@@ -7,6 +7,8 @@ import (
 
 	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 	"github.com/program-world-labs/DDDGo/internal/domain/user/repository"
+	"github.com/program-world-labs/DDDGo/pkg/logger"
+	"github.com/program-world-labs/DDDGo/pkg/operations"
 )
 
 var _ IUserService = (*ServiceImpl)(nil)
@@ -14,18 +16,20 @@ var _ IUserService = (*ServiceImpl)(nil)
 // ServiceImpl -.
 type ServiceImpl struct {
 	UserRepo repository.UserRepository
+	log 	logger.Interface
+	trace 	operations.ITracer
 }
 
 // NewServiceImpl -.
-func NewServiceImpl(userRepo repository.UserRepository) *ServiceImpl {
-	return &ServiceImpl{UserRepo: userRepo}
+func NewServiceImpl(userRepo repository.UserRepository, l logger.Interface, t operations.ITracer) *ServiceImpl {
+	return &ServiceImpl{UserRepo: userRepo, log: l, trace: t}
 }
 
 var ErrUserAlreadyExists = errors.New("user already exists")
 
-func (u *ServiceImpl) RegisterUseCase(ctx context.Context, user *entity.User) (*Output, error) {
+func (u *ServiceImpl) RegisterUseCase(ctx context.Context, userInfo *entity.User) (*Output, error) {
 	// Check if user already exists
-	existingUser, err := u.UserRepo.GetByID(ctx, user)
+	existingUser, err := u.UserRepo.GetByID(ctx, userInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +39,7 @@ func (u *ServiceImpl) RegisterUseCase(ctx context.Context, user *entity.User) (*
 	}
 
 	// Create user
-	createdUser, err := u.UserRepo.Create(ctx, user)
+	createdUser, err := u.UserRepo.Create(ctx, userInfo)
 	if err != nil {
 		return nil, err
 	}

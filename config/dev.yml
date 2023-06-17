@@ -1,25 +1,26 @@
 app:
-  name: 'ai-service'
-  version: '0.0.1'
+  name: "ai-service"
+  version: "0.0.1"
 
 http:
-  port: '8080'
-  backend_port: '8088'
+  port: "8080"
+  backend_port: "8088"
 
 swagger:
-  backend_host: 'localhost:8088'
-  frontend_host: 'localhost:8080'
+  backend_host: "localhost:8088"
+  frontend_host: "localhost:8080"
 
 logger:
-  log_level: 'debug'
-  log_id: 'ai-dev'
+  log_level: "debug"
+  log_id: "ai-dev"
 
 postgres:
   pool_max: 2
 
 gcp:
-  project: ''
+  project: ""
   credentials: ""
-  emulator: true
-  firestore: 'localhost:8090'
-  auth: 'localhost:9099'
+  emulator: false
+  monitor: false
+  firestore: "localhost:8090"
+  auth: "localhost:9099"
