@@ -20,6 +20,7 @@ postgres:
 gcp:
   project: ""
   credentials: ""
+  emulator: false
   monitor: true
   firestore: "localhost:8090"
   auth: "localhost:9099"

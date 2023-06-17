@@ -35,7 +35,8 @@ type (
 	// GCP -.
 	GCP struct {
 		Project     string `mapstructure:"project"`
-		Monitor    bool   `mapstructure:"monitor"`
+		Monitor    	bool   `mapstructure:"monitor"`
+		Emulator    bool   `mapstructure:"emulator"`
 		Credentials string `mapstructure:"credentials"`
 		Firestore   string `mapstructure:"firestore"`
 		Auth        string `mapstructure:"auth"`
@@ -93,7 +94,7 @@ func NewConfig() (*Config, error) {
 	if !ok {
 		configName = "dev"
 	}
-
+	
 	viper.SetConfigName(configName)
 
 	// 取得PG環境變數
@@ -108,11 +109,14 @@ func NewConfig() (*Config, error) {
 		return nil, fmt.Errorf("config error: %w", err)
 	}
 
+	err = viper.Unmarshal(cfg)
+	if err != nil {
+		return nil, fmt.Errorf("config error: %w", err)
+	}
+
 	os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", viper.GetString("gcp.credentials"))
 
-	if !viper.GetBool("gcp.emulator") {
-		os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", viper.GetString("gcp.credentials"))
-
+	if !cfg.GCP.Emulator {
 		return cfg, nil
 	}
 
@@ -132,11 +136,6 @@ func NewConfig() (*Config, error) {
 	// 設定Auth環境變數
 	if a := viper.GetString("gcp.auth"); a != "" {
 		os.Setenv("FIREBASE_AUTH_EMULATOR_HOST", a)
-	}
-
-	err = viper.Unmarshal(cfg)
-	if err != nil {
-		return nil, fmt.Errorf("config error: %w", err)
 	}
 
 	return cfg, nil
