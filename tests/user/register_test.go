@@ -15,12 +15,13 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/application/user"
 	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 	"github.com/program-world-labs/DDDGo/tests"
+	"github.com/program-world-labs/DDDGo/tests/mock"
 )
 
 // godogsCtxKey is the key used to store the available godogs in the context.Context.
 type userServiceTest struct {
 	t                *testing.T // 新增這一行
-	userRepoMock     *MockUserRepository
+	userRepoMock     *mock.MockUserRepository
 	userService      *user.ServiceImpl
 	e                *entity.User
 	o                *user.Output
@@ -115,8 +116,10 @@ func TestUserUsecase(t *testing.T) {
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
 
-	repo := NewMockUserRepository(gomock.NewController(t))
-	service := user.NewServiceImpl(repo)
+	repo := mock.NewMockUserRepository(gomock.NewController(t))
+	logger := mock.NewMockInterface(gomock.NewController(t))
+	tracer := mock.NewMockITracer(gomock.NewController(t))
+	service := user.NewServiceImpl(repo, logger, tracer)
 	u, err := entity.NewUser("test")
 
 	if err != nil {
