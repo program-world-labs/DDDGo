@@ -21,6 +21,6 @@ gcp:
   project: ""
   credentials: ""
   emulator: false
-  monitor: true
+  monitor: false
   firestore: "localhost:8090"
   auth: "localhost:9099"
