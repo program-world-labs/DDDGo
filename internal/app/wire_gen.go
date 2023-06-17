@@ -20,6 +20,7 @@ import (
 	redis2 "github.com/program-world-labs/DDDGo/pkg/cache/redis"
 	"github.com/program-world-labs/DDDGo/pkg/httpserver"
 	"github.com/program-world-labs/DDDGo/pkg/logger"
+	"github.com/program-world-labs/DDDGo/pkg/operations"
 	"github.com/program-world-labs/DDDGo/pkg/sql_gorm"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
@@ -27,11 +28,7 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeHTTPServer(cfg *config.Config) (*httpserver.Server, error) {
-	loggerInterface, err := provideLogger(cfg)
-	if err != nil {
-		return nil, err
-	}
+func InitializeHTTPServer(cfg *config.Config, l logger.Interface) (*httpserver.Server, error) {
 	db, err := providePostgres(cfg)
 	if err != nil {
 		return nil, err
@@ -48,16 +45,21 @@ func InitializeHTTPServer(cfg *config.Config) (*httpserver.Server, error) {
 	}
 	bigCacheDataSourceImpl := cache.NewBigCacheDataSourceImp(bigCache)
 	userRepoImpl := provideUserRepo(userDatasourceImpl, redisCacheDataSourceImpl, bigCacheDataSourceImpl)
-	iUserService := provideService(userRepoImpl)
-	engine := v1.NewRouter(loggerInterface, iUserService)
+	iTracer, err := provideTracer(cfg)
+	if err != nil {
+		return nil, err
+	}
+	iUserService := provideService(userRepoImpl, l, iTracer)
+	engine := v1.NewRouter(l, iUserService)
 	server := provideHTTPServer(engine, cfg)
 	return server, nil
 }
 
 // wire.go:
 
-func provideLogger(cfg *config.Config) (logger.Interface, error) {
-	return logger.New(cfg.Log.Level), nil
+func provideTracer(cfg *config.Config) (operations.ITracer, error) {
+	operations.GoogleCloudOperationInit(cfg.GCP.Project, cfg.GCP.Monitor)
+	return operations.NewTracer(cfg.App.Name), nil
 }
 
 func providePostgres(cfg *config.Config) (*gorm.DB, error) {
@@ -79,8 +81,8 @@ func provideUserRepo(sqlDatasource *sql.UserDatasourceImpl, redisCacheDatasource
 	return repository.NewUserRepoImpl(sqlDatasource, redisCacheDatasource, bigCacheDatasource)
 }
 
-func provideService(userRepo *repository.UserRepoImpl) user.IUserService {
-	return user.NewServiceImpl(userRepo)
+func provideService(userRepo *repository.UserRepoImpl, l logger.Interface, t operations.ITracer) user.IUserService {
+	return user.NewServiceImpl(userRepo, l, t)
 }
 
 func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Server {
@@ -88,7 +90,7 @@ func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Serv
 }
 
 var appSet = wire.NewSet(
-	provideLogger,
+	provideTracer,
 	providePostgres,
 	provideRedisCache,
 	provideLocalCache, sql.NewUserDatasourceImpl, cache.NewRedisCacheDataSourceImpl, cache.NewBigCacheDataSourceImp, provideUserRepo,

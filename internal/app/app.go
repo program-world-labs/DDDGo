@@ -2,22 +2,31 @@
 package app
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/program-world-labs/DDDGo/config"
 	"github.com/program-world-labs/DDDGo/pkg/logger"
+	"github.com/program-world-labs/DDDGo/pkg/operations"
 )
 
 // Run creates objects via constructors.
 func Run(cfg *config.Config) {
-	l := logger.New(cfg.Log.Level)
+	// Tracer
+	operations.GoogleCloudOperationInit(cfg.GCP.Project, cfg.GCP.Monitor)
 
-	httpServer, err := InitializeHTTPServer(cfg)
+	var l logger.Interface
+	// Logger
+	if cfg.Env.EnvName != "dev" {
+		l = logger.NewProductionLogger(cfg.GCP.Project)
+	} else {
+		l = logger.NewDevelopmentLogger(cfg.GCP.Project)
+	}
+
+	httpServer, err := InitializeHTTPServer(cfg, l)
 	if err != nil {
-		l.Error("failed to initialize HTTP server: %v", err)
+		l.Err(err).Str("app", "Run").Msg("InitializeHTTPServer error")
 	}
 
 	// Waiting signal
@@ -26,14 +35,14 @@ func Run(cfg *config.Config) {
 
 	select {
 	case s := <-interrupt:
-		l.Info("app - Run - signal: " + s.String())
+		l.Info().Str("app", "Run").Msgf("Got signal %s, exiting now", s.String())
 	case err = <-httpServer.Notify():
-		l.Error(fmt.Errorf("app - Run - httpServer.Notify: %w", err))
+		l.Err(err).Str("app", "Run").Msg("httpServer.Notify error")
 	}
 
 	// Shutdown
 	err = httpServer.Shutdown()
 	if err != nil {
-		l.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
+		l.Err(err).Str("app", "Run").Msg("httpServer.Shutdown error")
 	}
 }
