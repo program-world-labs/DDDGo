@@ -137,8 +137,7 @@ func TestUserUsecase(t *testing.T) {
 		shouldMockCreate: false,
 	}
 
-	projectRoot := os.Getenv("PROJECT_ROOT")
-	reportPath := filepath.Join(projectRoot, "tests", "report", "TestUserUsecase.json")
+	reportPath := filepath.Join("..", "report", "TestUserUsecase.json")
 	// Create the directory if it does not exist
 	err = os.MkdirAll(filepath.Dir(reportPath), os.ModePerm)
 	if err != nil {
