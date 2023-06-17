@@ -35,7 +35,7 @@ type (
 	// GCP -.
 	GCP struct {
 		Project     string `mapstructure:"project"`
-		Emulator    bool   `mapstructure:"emulator"`
+		Monitor    bool   `mapstructure:"monitor"`
 		Credentials string `mapstructure:"credentials"`
 		Firestore   string `mapstructure:"firestore"`
 		Auth        string `mapstructure:"auth"`
