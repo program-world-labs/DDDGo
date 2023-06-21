@@ -28,7 +28,7 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server, error) {
+func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server, error) {
 	db, err := providePostgres(cfg)
 	if err != nil {
 		return nil, err

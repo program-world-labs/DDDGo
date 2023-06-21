@@ -24,8 +24,8 @@ func Run(cfg *config.Config) {
 	} else {
 		l = pwlogger.NewDevelopmentLogger(cfg.GCP.Project)
 	}
-	l.Info().Str("app", "Run").Msg("Logger initialized")
-	httpServer, err := InitializeHTTPServer(cfg, l)
+
+	httpServer, err := NewHTTPServer(cfg, l)
 	if err != nil {
 		l.Err(err).Str("app", "Run").Msg("InitializeHTTPServer error")
 	}
