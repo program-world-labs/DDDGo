@@ -7,6 +7,8 @@ import (
 	"github.com/allegro/bigcache/v3"
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
+	"github.com/program-world-labs/pwlogger"
+
 	"github.com/program-world-labs/DDDGo/config"
 	v1 "github.com/program-world-labs/DDDGo/internal/adapter/http/v1"
 	usecase "github.com/program-world-labs/DDDGo/internal/application/user"
@@ -16,7 +18,6 @@ import (
 	"github.com/program-world-labs/DDDGo/pkg/cache/local"
 	redisCache "github.com/program-world-labs/DDDGo/pkg/cache/redis"
 	"github.com/program-world-labs/DDDGo/pkg/httpserver"
-	"github.com/program-world-labs/DDDGo/pkg/logger"
 	"github.com/program-world-labs/DDDGo/pkg/operations"
 	sqlgorm "github.com/program-world-labs/DDDGo/pkg/sql_gorm"
 	"github.com/redis/go-redis/v9"
@@ -47,7 +48,7 @@ func provideUserRepo(sqlDatasource *repo.UserDatasourceImpl, redisCacheDatasourc
 	return repository.NewUserRepoImpl(sqlDatasource, redisCacheDatasource, bigCacheDatasource)
 }
 
-func provideService(userRepo *repository.UserRepoImpl, l logger.Interface, t operations.ITracer) usecase.IUserService {
+func provideService(userRepo *repository.UserRepoImpl, l pwlogger.Interface, t operations.ITracer) usecase.IUserService {
 	return usecase.NewServiceImpl(userRepo, l, t)
 }
 
@@ -69,7 +70,7 @@ var appSet = wire.NewSet(
 	provideHTTPServer,
 )
 
-func InitializeHTTPServer(cfg *config.Config, l logger.Interface) (*httpserver.Server, error) {
+func InitializeHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server, error) {
 	wire.Build(appSet)
 	return &httpserver.Server{}, nil
 }

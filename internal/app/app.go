@@ -6,8 +6,9 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/program-world-labs/pwlogger"
+
 	"github.com/program-world-labs/DDDGo/config"
-	"github.com/program-world-labs/DDDGo/pkg/logger"
 	"github.com/program-world-labs/DDDGo/pkg/operations"
 )
 
@@ -16,14 +17,14 @@ func Run(cfg *config.Config) {
 	// Tracer
 	operations.GoogleCloudOperationInit(cfg.GCP.Project, cfg.GCP.Monitor)
 
-	var l logger.Interface
+	var l pwlogger.Interface
 	// Logger
 	if cfg.Env.EnvName != "dev" {
-		l = logger.NewProductionLogger(cfg.GCP.Project)
+		l = pwlogger.NewProductionLogger(cfg.GCP.Project)
 	} else {
-		l = logger.NewDevelopmentLogger(cfg.GCP.Project)
+		l = pwlogger.NewDevelopmentLogger(cfg.GCP.Project)
 	}
-
+	l.Info().Str("app", "Run").Msg("Logger initialized")
 	httpServer, err := InitializeHTTPServer(cfg, l)
 	if err != nil {
 		l.Err(err).Str("app", "Run").Msg("InitializeHTTPServer error")

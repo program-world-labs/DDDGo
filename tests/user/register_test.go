@@ -10,6 +10,7 @@ import (
 
 	"github.com/cucumber/godog"
 	gomock "github.com/golang/mock/gomock"
+	"github.com/program-world-labs/pwlogger"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/program-world-labs/DDDGo/internal/application/user"
@@ -117,7 +118,7 @@ func TestUserUsecase(t *testing.T) {
 	defer mockCtl.Finish()
 
 	repo := mock.NewMockUserRepository(gomock.NewController(t))
-	logger := mock.NewMockInterface(gomock.NewController(t))
+	logger := pwlogger.NewDevelopmentLogger("")
 	tracer := mock.NewMockITracer(gomock.NewController(t))
 	service := user.NewServiceImpl(repo, logger, tracer)
 	u, err := entity.NewUser("test")

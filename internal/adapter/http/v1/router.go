@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/program-world-labs/pwlogger"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -13,7 +14,6 @@ import (
 	// _ "github.com/program-world-labs/DDDGo/docs".
 	_ "github.com/program-world-labs/DDDGo/docs"
 	usecase "github.com/program-world-labs/DDDGo/internal/application/user"
-	"github.com/program-world-labs/DDDGo/pkg/logger"
 )
 
 // NewRouter -.
@@ -23,7 +23,7 @@ import (
 // @version     1.0
 // @host        localhost:8080
 // @BasePath    /v1.
-func NewRouter(l logger.Interface, t usecase.IUserService) *gin.Engine {
+func NewRouter(l pwlogger.Interface, t usecase.IUserService) *gin.Engine {
 	handler := gin.New()
 	// Options
 	handler.Use(gin.Logger())
