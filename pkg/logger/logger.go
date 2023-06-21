@@ -26,7 +26,6 @@ type Interface interface {
 	Printf(string, ...interface{})
 	Write(p []byte) (n int, err error)
 	Output(io.Writer) Logger
-
 }
 
 var _ Interface = (*Logger)(nil)

@@ -16,8 +16,8 @@ var _ IUserService = (*ServiceImpl)(nil)
 // ServiceImpl -.
 type ServiceImpl struct {
 	UserRepo repository.UserRepository
-	log 	logger.Interface
-	trace 	operations.ITracer
+	log      logger.Interface
+	trace    operations.ITracer
 }
 
 // NewServiceImpl -.

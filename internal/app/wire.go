@@ -69,7 +69,7 @@ var appSet = wire.NewSet(
 	provideHTTPServer,
 )
 
-func InitializeHTTPServer(cfg *config.Config, l logger.Interface) (*httpserver.Server,  error) {
+func InitializeHTTPServer(cfg *config.Config, l logger.Interface) (*httpserver.Server, error) {
 	wire.Build(appSet)
 	return &httpserver.Server{}, nil
 }
