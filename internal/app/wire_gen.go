@@ -19,16 +19,16 @@ import (
 	"github.com/program-world-labs/DDDGo/pkg/cache/local"
 	redis2 "github.com/program-world-labs/DDDGo/pkg/cache/redis"
 	"github.com/program-world-labs/DDDGo/pkg/httpserver"
-	"github.com/program-world-labs/DDDGo/pkg/logger"
 	"github.com/program-world-labs/DDDGo/pkg/operations"
 	"github.com/program-world-labs/DDDGo/pkg/sql_gorm"
+	"github.com/program-world-labs/pwlogger"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
 // Injectors from wire.go:
 
-func InitializeHTTPServer(cfg *config.Config, l logger.Interface) (*httpserver.Server, error) {
+func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server, error) {
 	db, err := providePostgres(cfg)
 	if err != nil {
 		return nil, err
@@ -81,7 +81,7 @@ func provideUserRepo(sqlDatasource *sql.UserDatasourceImpl, redisCacheDatasource
 	return repository.NewUserRepoImpl(sqlDatasource, redisCacheDatasource, bigCacheDatasource)
 }
 
-func provideService(userRepo *repository.UserRepoImpl, l logger.Interface, t operations.ITracer) user.IUserService {
+func provideService(userRepo *repository.UserRepoImpl, l pwlogger.Interface, t operations.ITracer) user.IUserService {
 	return user.NewServiceImpl(userRepo, l, t)
 }
 

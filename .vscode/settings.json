@@ -1,0 +1,20 @@
+{
+  // format all files on save if a formatter is available
+  "editor.formatOnSave": true,
+  // I use "goimports" instead of "gofmt"
+  // because it does the same thing but also formats imports
+  "go.formatTool": "default",
+  // go-specific settings
+  "[go]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    }
+  },
+  "[go.mod]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    }
+  }
+}

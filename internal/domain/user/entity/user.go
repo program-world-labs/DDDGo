@@ -1,7 +1,8 @@
-// BEGIN: 3c5f9d7d3d9a
 package entity
 
 import (
+	"time"
+
 	"github.com/program-world-labs/DDDGo/internal/domain"
 )
 
@@ -9,12 +10,17 @@ var _ domain.IEntity = (*User)(nil)
 
 // User -.
 type User struct {
-	ID          string `gorm:"primary_key;"`
-	Username    string `json:"username"`
-	Password    string `json:"password"`
-	EMail       string `json:"email"`
-	DisplayName string `json:"display_name"`
-	Avatar      string `json:"avatar"`
+	ID          string     `json:"id"`
+	Username    string     `json:"username"`
+	Password    string     `json:"password"`
+	EMail       string     `json:"email"`
+	DisplayName string     `json:"display_name"`
+	Avatar      string     `json:"avatar"`
+	Roles       []Role     `json:"roles" gorm:"many2many:user_roles;"`
+	Department  Department `json:"departmentId" gorm:"foreignKey:DepartmentID"`
+	CreatedAt   time.Time  `json:"createdAt"`
+	UpdatedAt   time.Time  `json:"updatedAt"`
+	DeletedAt   time.Time  `json:"deletedAt"`
 }
 
 func NewUser(uid string) (*User, error) {

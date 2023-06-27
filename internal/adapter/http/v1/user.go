@@ -2,17 +2,17 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/program-world-labs/pwlogger"
 
 	usecase "github.com/program-world-labs/DDDGo/internal/application/user"
-	"github.com/program-world-labs/DDDGo/pkg/logger"
 )
 
 type userRoutes struct {
 	u usecase.IUserService
-	l logger.Interface
+	l pwlogger.Interface
 }
 
-func newUserRoutes(handler *gin.RouterGroup, u usecase.IUserService, l logger.Interface) {
+func newUserRoutes(handler *gin.RouterGroup, u usecase.IUserService, l pwlogger.Interface) {
 	r := &userRoutes{u, l}
 
 	h := handler.Group("/user")

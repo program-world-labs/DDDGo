@@ -19,7 +19,7 @@ type Tracer struct {
 
 func NewTracer(applicationName string) *Tracer {
 	tracer := otel.Tracer(applicationName)
-	
+
 	return &Tracer{
 		tracer: tracer,
 	}

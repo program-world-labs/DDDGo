@@ -5,9 +5,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/program-world-labs/pwlogger"
+
 	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 	"github.com/program-world-labs/DDDGo/internal/domain/user/repository"
-	"github.com/program-world-labs/DDDGo/pkg/logger"
 	"github.com/program-world-labs/DDDGo/pkg/operations"
 )
 
@@ -16,12 +17,12 @@ var _ IUserService = (*ServiceImpl)(nil)
 // ServiceImpl -.
 type ServiceImpl struct {
 	UserRepo repository.UserRepository
-	log 	logger.Interface
-	trace 	operations.ITracer
+	log      pwlogger.Interface
+	trace    operations.ITracer
 }
 
 // NewServiceImpl -.
-func NewServiceImpl(userRepo repository.UserRepository, l logger.Interface, t operations.ITracer) *ServiceImpl {
+func NewServiceImpl(userRepo repository.UserRepository, l pwlogger.Interface, t operations.ITracer) *ServiceImpl {
 	return &ServiceImpl{UserRepo: userRepo, log: l, trace: t}
 }
 

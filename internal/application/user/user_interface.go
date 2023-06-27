@@ -6,7 +6,6 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 )
 
-
 type IUserService interface {
 	// Command
 	RegisterUseCase(ctx context.Context, userInfo *entity.User) (*Output, error)

@@ -35,15 +35,15 @@ type (
 	// GCP -.
 	GCP struct {
 		Project     string `mapstructure:"project"`
-		Monitor    	bool   `mapstructure:"monitor"`
+		Monitor     bool   `mapstructure:"monitor"`
 		Emulator    bool   `mapstructure:"emulator"`
 		Credentials string `mapstructure:"credentials"`
 		Firestore   string `mapstructure:"firestore"`
-		Storage struct {
+		Storage     struct {
 			Bucket string `mapstructure:"bucket"`
 			URL    string `mapstructure:"url"`
 		} `mapstructure:"storage"`
-		Auth        string `mapstructure:"auth"`
+		Auth string `mapstructure:"auth"`
 	}
 
 	// PG -.
@@ -98,7 +98,7 @@ func NewConfig() (*Config, error) {
 	if !ok {
 		configName = "dev"
 	}
-	
+
 	viper.SetConfigName(configName)
 
 	// 取得PG環境變數
