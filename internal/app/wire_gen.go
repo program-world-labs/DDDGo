@@ -12,14 +12,14 @@ import (
 	"github.com/google/wire"
 	"github.com/program-world-labs/DDDGo/config"
 	"github.com/program-world-labs/DDDGo/internal/adapter/http/v1"
-	"github.com/program-world-labs/DDDGo/internal/application/user"
-	"github.com/program-world-labs/DDDGo/internal/infra/datasource/cache"
-	"github.com/program-world-labs/DDDGo/internal/infra/datasource/sql"
-	"github.com/program-world-labs/DDDGo/internal/infra/repository"
+	role2 "github.com/program-world-labs/DDDGo/internal/application/role"
+	user2 "github.com/program-world-labs/DDDGo/internal/application/user"
+	"github.com/program-world-labs/DDDGo/internal/infra/base/datasource/cache"
+	"github.com/program-world-labs/DDDGo/internal/infra/role"
+	"github.com/program-world-labs/DDDGo/internal/infra/user"
 	"github.com/program-world-labs/DDDGo/pkg/cache/local"
 	redis2 "github.com/program-world-labs/DDDGo/pkg/cache/redis"
 	"github.com/program-world-labs/DDDGo/pkg/httpserver"
-	"github.com/program-world-labs/DDDGo/pkg/operations"
 	"github.com/program-world-labs/DDDGo/pkg/sql_gorm"
 	"github.com/program-world-labs/pwlogger"
 	"github.com/redis/go-redis/v9"
@@ -33,7 +33,7 @@ func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server
 	if err != nil {
 		return nil, err
 	}
-	userDatasourceImpl := sql.NewUserDatasourceImpl(db)
+	datasourceImpl := user.NewDatasourceImpl(db)
 	client, err := provideRedisCache(cfg)
 	if err != nil {
 		return nil, err
@@ -44,45 +44,58 @@ func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server
 		return nil, err
 	}
 	bigCacheDataSourceImpl := cache.NewBigCacheDataSourceImp(bigCache)
-	userRepoImpl := provideUserRepo(userDatasourceImpl, redisCacheDataSourceImpl, bigCacheDataSourceImpl)
-	iTracer, err := provideTracer(cfg)
-	if err != nil {
-		return nil, err
-	}
-	iUserService := provideService(userRepoImpl, l, iTracer)
-	engine := v1.NewRouter(l, iUserService)
+	repoImpl := provideUserRepo(datasourceImpl, redisCacheDataSourceImpl, bigCacheDataSourceImpl)
+	iService := provideUserService(repoImpl, l)
+	roleDatasourceImpl := role.NewDatasourceImpl(db)
+	roleRepoImpl := provideRoleRepo(roleDatasourceImpl, redisCacheDataSourceImpl, bigCacheDataSourceImpl)
+	roleIService := provideRoleService(roleRepoImpl, l)
+	services := provideServices(iService, roleIService)
+	engine := v1.NewRouter(l, services)
 	server := provideHTTPServer(engine, cfg)
 	return server, nil
 }
 
 // wire.go:
 
-func provideTracer(cfg *config.Config) (operations.ITracer, error) {
-	operations.GoogleCloudOperationInit(cfg.GCP.Project, cfg.GCP.Monitor)
-	return operations.NewTracer(cfg.App.Name), nil
-}
-
 func providePostgres(cfg *config.Config) (*gorm.DB, error) {
 	client, err := sqlgorm.New(cfg.PG.URL, sqlgorm.MaxPoolSize(cfg.PG.PoolMax))
+
 	return client.DB, err
 }
 
 func provideRedisCache(cfg *config.Config) (*redis.Client, error) {
-	cache2, err := redis2.New(cfg.Redis.DSN)
-	return cache2.Client, err
+	c, err := redis2.New(cfg.Redis.DSN)
+
+	return c.Client, err
 }
 
 func provideLocalCache() (*bigcache.BigCache, error) {
-	cache2, err := local.New()
-	return cache2.Client, err
+	c, err := local.New()
+
+	return c.Client, err
 }
 
-func provideUserRepo(sqlDatasource *sql.UserDatasourceImpl, redisCacheDatasource *cache.RedisCacheDataSourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl) *repository.UserRepoImpl {
-	return repository.NewUserRepoImpl(sqlDatasource, redisCacheDatasource, bigCacheDatasource)
+func provideUserRepo(sqlDatasource *user.DatasourceImpl, redisCacheDatasource *cache.RedisCacheDataSourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl) *user.RepoImpl {
+	return user.NewRepoImpl(sqlDatasource, redisCacheDatasource, bigCacheDatasource)
 }
 
-func provideService(userRepo *repository.UserRepoImpl, l pwlogger.Interface, t operations.ITracer) user.IUserService {
-	return user.NewServiceImpl(userRepo, l, t)
+func provideRoleRepo(sqlDatasource *role.DatasourceImpl, redisCacheDatasource *cache.RedisCacheDataSourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl) *role.RepoImpl {
+	return role.NewRepoImpl(sqlDatasource, redisCacheDatasource, bigCacheDatasource)
+}
+
+func provideServices(user3 user2.IService, role3 role2.IService) v1.Services {
+	return v1.Services{
+		User: user3,
+		Role: role3,
+	}
+}
+
+func provideUserService(userRepo *user.RepoImpl, l pwlogger.Interface) user2.IService {
+	return user2.NewServiceImpl(userRepo, l)
+}
+
+func provideRoleService(roleRepo *role.RepoImpl, l pwlogger.Interface) role2.IService {
+	return role2.NewServiceImpl(roleRepo, l)
 }
 
 func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Server {
@@ -90,9 +103,11 @@ func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Serv
 }
 
 var appSet = wire.NewSet(
-	provideTracer,
 	providePostgres,
 	provideRedisCache,
-	provideLocalCache, sql.NewUserDatasourceImpl, cache.NewRedisCacheDataSourceImpl, cache.NewBigCacheDataSourceImp, provideUserRepo,
-	provideService, v1.NewRouter, provideHTTPServer,
+	provideLocalCache, user.NewDatasourceImpl, role.NewDatasourceImpl, cache.NewRedisCacheDataSourceImpl, cache.NewBigCacheDataSourceImp, provideUserRepo,
+	provideRoleRepo,
+	provideUserService,
+	provideRoleService,
+	provideServices, v1.NewRouter, provideHTTPServer,
 )

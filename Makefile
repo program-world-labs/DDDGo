@@ -59,9 +59,8 @@ integration-test: ### run integration-test
 
 mock: ### run mockgen
 	mockgen -source=internal/domain/user/repository/user_repository.go -destination=tests/mock/UserRepository_mock.go -package=mock
-	mockgen -source=internal/application/user/user_interface.go -destination=tests/mock/UserService_mock.go -package=mock
-	mockgen -source=internal/infra/datasource/interface.go -destination=tests/mock/DataSource_mock.go -package=mock
-	mockgen -source=pkg/operations/tracer.go -destination=tests/mock/Tracer_mock.go -package=mock
+	mockgen -source=internal/application/user/interface.go -destination=tests/mock/UserService_mock.go -package=mock
+	mockgen -source=internal/infra/base/datasource/interface.go -destination=tests/mock/DataSource_mock.go -package=mock
 .PHONY: mock
 
 wire: ### run mockgen

@@ -8,48 +8,61 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 	"github.com/program-world-labs/pwlogger"
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 
 	"github.com/program-world-labs/DDDGo/config"
 	v1 "github.com/program-world-labs/DDDGo/internal/adapter/http/v1"
-	usecase "github.com/program-world-labs/DDDGo/internal/application/user"
-	"github.com/program-world-labs/DDDGo/internal/infra/datasource/cache"
-	repo "github.com/program-world-labs/DDDGo/internal/infra/datasource/sql"
-	"github.com/program-world-labs/DDDGo/internal/infra/repository"
+	application_role "github.com/program-world-labs/DDDGo/internal/application/role"
+	application_user "github.com/program-world-labs/DDDGo/internal/application/user"
+	"github.com/program-world-labs/DDDGo/internal/infra/base/datasource/cache"
+	"github.com/program-world-labs/DDDGo/internal/infra/role"
+	"github.com/program-world-labs/DDDGo/internal/infra/user"
 	"github.com/program-world-labs/DDDGo/pkg/cache/local"
 	redisCache "github.com/program-world-labs/DDDGo/pkg/cache/redis"
 	"github.com/program-world-labs/DDDGo/pkg/httpserver"
-	"github.com/program-world-labs/DDDGo/pkg/operations"
 	sqlgorm "github.com/program-world-labs/DDDGo/pkg/sql_gorm"
-	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 )
-
-func provideTracer(cfg *config.Config) (operations.ITracer, error) {
-	operations.GoogleCloudOperationInit(cfg.GCP.Project, cfg.GCP.Monitor)
-	return operations.NewTracer(cfg.App.Name), nil
-}
 
 func providePostgres(cfg *config.Config) (*gorm.DB, error) {
 	client, err := sqlgorm.New(cfg.PG.URL, sqlgorm.MaxPoolSize(cfg.PG.PoolMax))
+
 	return client.DB, err
 }
 
 func provideRedisCache(cfg *config.Config) (*redis.Client, error) {
-	cache, err := redisCache.New(cfg.Redis.DSN)
-	return cache.Client, err
+	c, err := redisCache.New(cfg.Redis.DSN)
+
+	return c.Client, err
 }
 
 func provideLocalCache() (*bigcache.BigCache, error) {
-	cache, err := local.New()
-	return cache.Client, err
+	c, err := local.New()
+
+	return c.Client, err
 }
 
-func provideUserRepo(sqlDatasource *repo.UserDatasourceImpl, redisCacheDatasource *cache.RedisCacheDataSourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl) *repository.UserRepoImpl {
-	return repository.NewUserRepoImpl(sqlDatasource, redisCacheDatasource, bigCacheDatasource)
+func provideUserRepo(sqlDatasource *user.DatasourceImpl, redisCacheDatasource *cache.RedisCacheDataSourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl) *user.RepoImpl {
+	return user.NewRepoImpl(sqlDatasource, redisCacheDatasource, bigCacheDatasource)
 }
 
-func provideService(userRepo *repository.UserRepoImpl, l pwlogger.Interface, t operations.ITracer) usecase.IUserService {
-	return usecase.NewServiceImpl(userRepo, l, t)
+func provideRoleRepo(sqlDatasource *role.DatasourceImpl, redisCacheDatasource *cache.RedisCacheDataSourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl) *role.RepoImpl {
+	return role.NewRepoImpl(sqlDatasource, redisCacheDatasource, bigCacheDatasource)
+}
+
+func provideServices(user application_user.IService, role application_role.IService) v1.Services {
+	return v1.Services{
+		User: user,
+		Role: role,
+	}
+}
+
+func provideUserService(userRepo *user.RepoImpl, l pwlogger.Interface) application_user.IService {
+	return application_user.NewServiceImpl(userRepo, l)
+}
+
+func provideRoleService(roleRepo *role.RepoImpl, l pwlogger.Interface) application_role.IService {
+	return application_role.NewServiceImpl(roleRepo, l)
 }
 
 func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Server {
@@ -57,20 +70,24 @@ func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Serv
 }
 
 var appSet = wire.NewSet(
-	provideTracer,
 	providePostgres,
 	provideRedisCache,
 	provideLocalCache,
-	repo.NewUserDatasourceImpl,
+	user.NewDatasourceImpl,
+	role.NewDatasourceImpl,
 	cache.NewRedisCacheDataSourceImpl,
 	cache.NewBigCacheDataSourceImp,
 	provideUserRepo,
-	provideService,
+	provideRoleRepo,
+	provideUserService,
+	provideRoleService,
+	provideServices,
 	v1.NewRouter,
 	provideHTTPServer,
 )
 
 func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server, error) {
 	wire.Build(appSet)
+
 	return &httpserver.Server{}, nil
 }

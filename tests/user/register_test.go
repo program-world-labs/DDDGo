@@ -13,7 +13,7 @@ import (
 	"github.com/program-world-labs/pwlogger"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/program-world-labs/DDDGo/internal/application/user"
+	application_user "github.com/program-world-labs/DDDGo/internal/application/user"
 	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 	"github.com/program-world-labs/DDDGo/tests"
 	"github.com/program-world-labs/DDDGo/tests/mock"
@@ -23,9 +23,9 @@ import (
 type userServiceTest struct {
 	t                *testing.T // 新增這一行
 	userRepoMock     *mock.MockUserRepository
-	userService      *user.ServiceImpl
+	userService      *application_user.ServiceImpl
 	e                *entity.User
-	o                *user.Output
+	o                *application_user.Output
 	shouldMockCreate bool
 }
 
@@ -119,15 +119,14 @@ func TestUserUsecase(t *testing.T) {
 
 	repo := mock.NewMockUserRepository(gomock.NewController(t))
 	logger := pwlogger.NewDevelopmentLogger("")
-	tracer := mock.NewMockITracer(gomock.NewController(t))
-	service := user.NewServiceImpl(repo, logger, tracer)
+	service := application_user.NewServiceImpl(repo, logger)
 	u, err := entity.NewUser("test")
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	o := user.NewOutput(u)
+	o := application_user.NewOutput(u)
 
 	userServiceTest := &userServiceTest{
 		t:                t,
@@ -150,7 +149,7 @@ func TestUserUsecase(t *testing.T) {
 		ScenarioInitializer: userServiceTest.InitializeScenario,
 		Options: &godog.Options{
 			Format:   "cucumber:" + reportPath,
-			Paths:    []string{"features/usecase.feature"},
+			Paths:    []string{"features/user.feature"},
 			TestingT: t,
 		},
 	}
