@@ -9,9 +9,9 @@
     "host": "localhost:8080",
     "basePath": "/v1",
     "paths": {
-        "/translation/do-translate": {
+        "/role/create": {
             "post": {
-                "description": "Translate a text",
+                "description": "Create role",
                 "consumes": [
                     "application/json"
                 ],
@@ -19,18 +19,18 @@
                     "application/json"
                 ],
                 "tags": [
-                    "translation"
+                    "Role"
                 ],
-                "summary": "Translate",
-                "operationId": "do-translate",
+                "summary": "Create role",
+                "operationId": "CreateRole",
                 "parameters": [
                     {
-                        "description": "Set up translation",
-                        "name": "request",
+                        "description": "Role Create Request",
+                        "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.doTranslateRequest"
+                            "$ref": "#/definitions/role.CreatedRequest"
                         }
                     }
                 ],
@@ -38,49 +38,31 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/entity.Translation"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/adapter.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/role.Response"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/adapter.Response"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
-                        }
-                    }
-                }
-            }
-        },
-        "/translation/history": {
-            "get": {
-                "description": "Show all translation history",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "translation"
-                ],
-                "summary": "Show history",
-                "operationId": "history",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/v1.historyResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/adapter.Response"
                         }
                     }
                 }
@@ -88,66 +70,100 @@
         }
     },
     "definitions": {
-        "entity.Translation": {
+        "adapter.Response": {
             "type": "object",
             "properties": {
-                "destination": {
-                    "type": "string",
-                    "example": "en"
+                "code": {
+                    "type": "integer"
                 },
-                "original": {
-                    "type": "string",
-                    "example": "текст для перевода"
-                },
-                "source": {
-                    "type": "string",
-                    "example": "auto"
-                },
-                "translation": {
-                    "type": "string",
-                    "example": "text for translation"
+                "data": {},
+                "error": {
+                    "type": "string"
                 }
             }
         },
-        "v1.doTranslateRequest": {
+        "role.CreatedRequest": {
             "type": "object",
             "required": [
-                "destination",
-                "original",
-                "source"
+                "description",
+                "name",
+                "permissions"
             ],
             "properties": {
-                "destination": {
+                "description": {
                     "type": "string",
-                    "example": "en"
+                    "maxLength": 200,
+                    "example": "this is for admin role"
                 },
-                "original": {
+                "name": {
                     "type": "string",
-                    "example": "текст для перевода"
+                    "maxLength": 30,
+                    "example": "admin"
                 },
-                "source": {
-                    "type": "string",
-                    "example": "auto"
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "read:all",
+                        "write:all"
+                    ]
                 }
             }
         },
-        "v1.historyResponse": {
+        "role.Response": {
             "type": "object",
             "properties": {
-                "history": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "permissions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/entity.Translation"
+                        "type": "string"
+                    }
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/user.Response"
                     }
                 }
             }
         },
-        "v1.response": {
+        "user.Response": {
             "type": "object",
             "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "message"
+                "avatar": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         }
