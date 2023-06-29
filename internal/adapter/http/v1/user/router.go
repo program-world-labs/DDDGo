@@ -22,30 +22,10 @@ func NewUserRoutes(handler *gin.RouterGroup, u application_user.IService, l pwlo
 	}
 }
 
-// @Summary     Show user info
-// @Description Show user info
-// @ID          GetUser
-// @Tags  	    user
-// @Accept      json
-// @Produce     json
-// @Success     200 {object} historyResponse
-// @Failure     500 {object} response
-// @Router      /user/getInfo [get].
 func (r *userRoutes) getInfo(_ *gin.Context) {
 
 }
 
-// @Summary     Register User
-// @Description Register User
-// @ID          RegisterUser
-// @Tags  	    user
-// @Accept      json
-// @Produce     json
-// @Param       request body doTranslateRequest true "Set up translation"
-// @Success     200 {object} entity.Translation
-// @Failure     400 {object} response
-// @Failure     500 {object} response
-// @Router      /user/register [post].
 func (r *userRoutes) register(_ *gin.Context) {
 	// var request doTranslateRequest
 	// if err := c.ShouldBindJSON(&request); err != nil {
