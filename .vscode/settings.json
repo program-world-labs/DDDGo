@@ -16,5 +16,17 @@
     "editor.codeActionsOnSave": {
       "source.organizeImports": true
     }
-  }
+  },
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "Dev",
+      "database": "postgres",
+      "username": "user",
+      "password": "pass"
+    }
+  ]
 }

@@ -27,3 +27,7 @@ func (a *Amount) GetID() string {
 func (a *Amount) SetID(id string) {
 	a.ID = id
 }
+
+func (a *Amount) Self() interface{} {
+	return a
+}

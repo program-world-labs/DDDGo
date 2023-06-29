@@ -27,3 +27,7 @@ func (a *Group) GetID() string {
 func (a *Group) SetID(id string) {
 	a.ID = id
 }
+
+func (a *Group) Self() interface{} {
+	return a
+}

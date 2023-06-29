@@ -38,3 +38,8 @@ func (u *User) GetID() string {
 func (u *User) SetID(id string) {
 	u.ID = id
 }
+
+// Self -.
+func (u *User) Self() interface{} {
+	return u
+}

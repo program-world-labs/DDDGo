@@ -8,6 +8,7 @@ import (
 
 	"github.com/program-world-labs/DDDGo/internal/infra/base/datasource"
 	"github.com/program-world-labs/DDDGo/internal/infra/base/entity"
+	"github.com/program-world-labs/DDDGo/pkg/pwsql"
 )
 
 var _ datasource.IDataSource = (*CRUDDatasourceImpl)(nil)
@@ -18,8 +19,8 @@ type CRUDDatasourceImpl struct {
 }
 
 // NewCRUDDatasourceImpl -.
-func NewCRUDDatasourceImpl(db *gorm.DB) *CRUDDatasourceImpl {
-	return &CRUDDatasourceImpl{DB: db}
+func NewCRUDDatasourceImpl(db pwsql.ISQLGorm) *CRUDDatasourceImpl {
+	return &CRUDDatasourceImpl{DB: db.GetDB()}
 }
 
 // GetByID -.

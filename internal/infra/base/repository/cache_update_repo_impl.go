@@ -10,19 +10,19 @@ import (
 )
 
 type CacheUpdateImpl struct {
-	RemoteCache  datasource.ICacheDataSource
-	Cache        datasource.ICacheDataSource
-	entityEntity entity.IEntity
+	RemoteCache datasource.ICacheDataSource
+	Cache       datasource.ICacheDataSource
+	DTOEntity   entity.IEntity
 }
 
 // NewCacheUpdateImpl -.
 func NewCacheUpdateImpl(remoteCache datasource.ICacheDataSource, cache datasource.ICacheDataSource, data entity.IEntity) *CacheUpdateImpl {
-	return &CacheUpdateImpl{RemoteCache: remoteCache, Cache: cache, entityEntity: data}
+	return &CacheUpdateImpl{RemoteCache: remoteCache, Cache: cache, DTOEntity: data}
 }
 
 // Save -.
 func (r *CacheUpdateImpl) Save(ctx context.Context, e domain.IEntity) error {
-	info, err := r.entityEntity.Transform(e)
+	info, err := Transform(e, r.DTOEntity)
 	if err != nil {
 		return fmt.Errorf("CacheUpdateImpl - Save - r.entityEntity.Transform: %w", err)
 	}
@@ -42,7 +42,7 @@ func (r *CacheUpdateImpl) Save(ctx context.Context, e domain.IEntity) error {
 
 // Delete -.
 func (r *CacheUpdateImpl) Delete(ctx context.Context, e domain.IEntity) error {
-	info, err := r.entityEntity.Transform(e)
+	info, err := Transform(e, r.DTOEntity)
 	if err != nil {
 		return fmt.Errorf("CacheUpdateImpl - Delete - r.entityEntity.Transform: %w", err)
 	}

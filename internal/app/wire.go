@@ -9,25 +9,26 @@ import (
 	"github.com/google/wire"
 	"github.com/program-world-labs/pwlogger"
 	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 
 	"github.com/program-world-labs/DDDGo/config"
 	v1 "github.com/program-world-labs/DDDGo/internal/adapter/http/v1"
 	application_role "github.com/program-world-labs/DDDGo/internal/application/role"
 	application_user "github.com/program-world-labs/DDDGo/internal/application/user"
 	"github.com/program-world-labs/DDDGo/internal/infra/base/datasource/cache"
+	"github.com/program-world-labs/DDDGo/internal/infra/dto"
 	"github.com/program-world-labs/DDDGo/internal/infra/role"
 	"github.com/program-world-labs/DDDGo/internal/infra/user"
 	"github.com/program-world-labs/DDDGo/pkg/cache/local"
 	redisCache "github.com/program-world-labs/DDDGo/pkg/cache/redis"
 	"github.com/program-world-labs/DDDGo/pkg/httpserver"
-	sqlgorm "github.com/program-world-labs/DDDGo/pkg/sql_gorm"
+	"github.com/program-world-labs/DDDGo/pkg/pwsql"
 )
 
-func providePostgres(cfg *config.Config) (*gorm.DB, error) {
-	client, err := sqlgorm.New(cfg.PG.URL, sqlgorm.MaxPoolSize(cfg.PG.PoolMax))
+func providePostgres(cfg *config.Config) (pwsql.ISQLGorm, error) {
+	client, err := pwsql.New(cfg.PG.URL, pwsql.MaxPoolSize(cfg.PG.PoolMax))
+	client.GetDB().AutoMigrate(&dto.User{}, &dto.Role{})
 
-	return client.DB, err
+	return client, err
 }
 
 func provideRedisCache(cfg *config.Config) (*redis.Client, error) {

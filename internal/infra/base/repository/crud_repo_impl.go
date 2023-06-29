@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/jinzhu/copier"
 	"github.com/program-world-labs/DDDGo/internal/domain"
 	"github.com/program-world-labs/DDDGo/internal/infra/base/datasource"
 	"github.com/program-world-labs/DDDGo/internal/infra/base/entity"
@@ -26,7 +27,7 @@ func NewCRUDImpl(db datasource.IDataSource, redis datasource.ICacheDataSource, c
 
 // GetByID -.
 func (r *CRUDImpl) GetByID(ctx context.Context, e domain.IEntity) (domain.IEntity, error) {
-	info, err := r.DTOEntity.Transform(e)
+	info, err := Transform(e, r.DTOEntity)
 	if err != nil {
 		return nil, fmt.Errorf("CRUDImpl - GetByID - r.DTOEntity.Transform: %w", err)
 	}
@@ -54,12 +55,12 @@ func (r *CRUDImpl) GetByID(ctx context.Context, e domain.IEntity) (domain.IEntit
 
 // Create -.
 func (r *CRUDImpl) Create(ctx context.Context, e domain.IEntity) (domain.IEntity, error) {
-	info, err := r.DTOEntity.Transform(e)
+	err := copier.Copy(r.DTOEntity, e.Self())
 	if err != nil {
 		return nil, fmt.Errorf("CRUDImpl - Create - r.DTOEntity.Transform: %w", err)
 	}
 
-	_, err = r.DB.Create(ctx, info)
+	_, err = r.DB.Create(ctx, r.DTOEntity)
 	if err != nil {
 		return nil, fmt.Errorf("CRUDImpl - Create - r.DB.Create: %w", err)
 	}
@@ -69,7 +70,7 @@ func (r *CRUDImpl) Create(ctx context.Context, e domain.IEntity) (domain.IEntity
 
 // Update -.
 func (r *CRUDImpl) Update(ctx context.Context, e domain.IEntity) (domain.IEntity, error) {
-	info, err := r.DTOEntity.Transform(e)
+	info, err := Transform(e, r.DTOEntity)
 	if err != nil {
 		return nil, fmt.Errorf("CRUDImpl - Update - r.DTOEntity.Transform: %w", err)
 	}
@@ -84,7 +85,7 @@ func (r *CRUDImpl) Update(ctx context.Context, e domain.IEntity) (domain.IEntity
 
 // Delete -.
 func (r *CRUDImpl) Delete(ctx context.Context, e domain.IEntity) error {
-	info, err := r.DTOEntity.Transform(e)
+	info, err := Transform(e, r.DTOEntity)
 	if err != nil {
 		return fmt.Errorf("CRUDImpl - Delete - r.DTOEntity.Transform: %w", err)
 	}

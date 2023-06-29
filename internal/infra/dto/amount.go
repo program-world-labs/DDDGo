@@ -3,13 +3,15 @@ package dto
 import (
 	"time"
 
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+
 	"github.com/program-world-labs/DDDGo/internal/infra/base/entity"
 )
 
 var _ entity.IEntity = (*Amount)(nil)
 
 type Amount struct {
-	entity.Base
 	ID        string    `json:"id" gorm:"primary_key"`
 	Currency  string    `json:"currency"`
 	Icon      string    `json:"icon"`
@@ -22,7 +24,13 @@ type Amount struct {
 }
 
 func (a *Amount) TableName() string {
-	return "Amount"
+	return "Amounts"
+}
+
+func (a *Amount) BeforeCreate(_ *gorm.DB) (err error) {
+	a.ID = uuid.New().String()
+
+	return
 }
 
 func (a *Amount) GetID() string {
@@ -31,4 +39,8 @@ func (a *Amount) GetID() string {
 
 func (a *Amount) SetID(id string) {
 	a.ID = id
+}
+
+func (a *Amount) Self() interface{} {
+	return a
 }

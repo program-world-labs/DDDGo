@@ -1,4 +1,4 @@
-package sqlgorm
+package pwsql
 
 import (
 	"context"
@@ -9,6 +9,8 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
+
+var _ ISQLGorm = (*Postgres)(nil)
 
 const (
 	_defaultMaxPoolSize  = 1
@@ -22,7 +24,7 @@ type Postgres struct {
 	connAttempts int
 	connTimeout  time.Duration
 
-	DB *gorm.DB
+	db *gorm.DB
 }
 
 // New -.
@@ -68,21 +70,27 @@ func New(dsn string, opts ...Option) (*Postgres, error) {
 		return nil, fmt.Errorf("postgres - NewPostgres - connAttempts == 0: %w", err)
 	}
 
-	pg.DB = db
+	pg.db = db
 
 	return pg, nil
 }
 
+func (p *Postgres) GetDB() *gorm.DB {
+	return p.db
+}
+
 // Close -.
-func (p *Postgres) Close() {
-	if p.DB != nil {
-		sqlDB, err := p.DB.DB()
+func (p *Postgres) Close() error {
+	if p.db != nil {
+		sqlDB, err := p.db.DB()
 		if err != nil {
 			log.Printf("failed to get sql.DB: %v", err)
 
-			return
+			return err
 		}
 
 		sqlDB.Close()
 	}
+
+	return nil
 }

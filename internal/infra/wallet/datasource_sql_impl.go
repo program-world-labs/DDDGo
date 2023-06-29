@@ -1,10 +1,9 @@
 package wallet
 
 import (
-	"gorm.io/gorm"
-
 	"github.com/program-world-labs/DDDGo/internal/infra/base/datasource"
 	"github.com/program-world-labs/DDDGo/internal/infra/base/datasource/sql"
+	"github.com/program-world-labs/DDDGo/pkg/pwsql"
 )
 
 var _ datasource.IDataSource = (*DatasourceImpl)(nil)
@@ -15,6 +14,6 @@ type DatasourceImpl struct {
 }
 
 // NewDatasourceImpl -.
-func NewDatasourceImpl(db *gorm.DB) *DatasourceImpl {
+func NewDatasourceImpl(db pwsql.ISQLGorm) *DatasourceImpl {
 	return &DatasourceImpl{CRUDDatasourceImpl: *sql.NewCRUDDatasourceImpl(db)}
 }

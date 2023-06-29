@@ -15,25 +15,25 @@ import (
 	role2 "github.com/program-world-labs/DDDGo/internal/application/role"
 	user2 "github.com/program-world-labs/DDDGo/internal/application/user"
 	"github.com/program-world-labs/DDDGo/internal/infra/base/datasource/cache"
+	"github.com/program-world-labs/DDDGo/internal/infra/dto"
 	"github.com/program-world-labs/DDDGo/internal/infra/role"
 	"github.com/program-world-labs/DDDGo/internal/infra/user"
 	"github.com/program-world-labs/DDDGo/pkg/cache/local"
 	redis2 "github.com/program-world-labs/DDDGo/pkg/cache/redis"
 	"github.com/program-world-labs/DDDGo/pkg/httpserver"
-	"github.com/program-world-labs/DDDGo/pkg/sql_gorm"
+	"github.com/program-world-labs/DDDGo/pkg/pwsql"
 	"github.com/program-world-labs/pwlogger"
 	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 )
 
 // Injectors from wire.go:
 
 func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server, error) {
-	db, err := providePostgres(cfg)
+	isqlGorm, err := providePostgres(cfg)
 	if err != nil {
 		return nil, err
 	}
-	datasourceImpl := user.NewDatasourceImpl(db)
+	datasourceImpl := user.NewDatasourceImpl(isqlGorm)
 	client, err := provideRedisCache(cfg)
 	if err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server
 	bigCacheDataSourceImpl := cache.NewBigCacheDataSourceImp(bigCache)
 	repoImpl := provideUserRepo(datasourceImpl, redisCacheDataSourceImpl, bigCacheDataSourceImpl)
 	iService := provideUserService(repoImpl, l)
-	roleDatasourceImpl := role.NewDatasourceImpl(db)
+	roleDatasourceImpl := role.NewDatasourceImpl(isqlGorm)
 	roleRepoImpl := provideRoleRepo(roleDatasourceImpl, redisCacheDataSourceImpl, bigCacheDataSourceImpl)
 	roleIService := provideRoleService(roleRepoImpl, l)
 	services := provideServices(iService, roleIService)
@@ -57,10 +57,11 @@ func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server
 
 // wire.go:
 
-func providePostgres(cfg *config.Config) (*gorm.DB, error) {
-	client, err := sqlgorm.New(cfg.PG.URL, sqlgorm.MaxPoolSize(cfg.PG.PoolMax))
+func providePostgres(cfg *config.Config) (pwsql.ISQLGorm, error) {
+	client, err := pwsql.New(cfg.PG.URL, pwsql.MaxPoolSize(cfg.PG.PoolMax))
+	client.GetDB().AutoMigrate(&dto.User{}, &dto.Role{})
 
-	return client.DB, err
+	return client, err
 }
 
 func provideRedisCache(cfg *config.Config) (*redis.Client, error) {

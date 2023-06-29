@@ -1,4 +1,4 @@
-package sqlgorm
+package pwsql
 
 import "time"
 

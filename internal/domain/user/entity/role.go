@@ -26,3 +26,7 @@ func (a *Role) GetID() string {
 func (a *Role) SetID(id string) {
 	a.ID = id
 }
+
+func (a *Role) Self() interface{} {
+	return a
+}
