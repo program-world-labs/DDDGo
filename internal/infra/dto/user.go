@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
+	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 )
 
 var _ IRepoEntity = (*User)(nil)
@@ -39,14 +40,27 @@ func (a *User) Transform(i domain.IEntity) (IRepoEntity, error) {
 		return nil, NewUserTransformError(err)
 	}
 
-	a.UpdatedAt = time.Now()
-	a.CreatedAt = time.Now()
-
 	return a, nil
 }
 
+func (a *User) BackToDomain() (domain.IEntity, error) {
+	i := &entity.User{}
+	if err := copier.Copy(&i, a); err != nil {
+		return nil, NewUserBackToDomainError(err)
+	}
+
+	return i, nil
+}
+
+func (a *User) BeforeUpdate(_ *gorm.DB) (err error) {
+	a.UpdatedAt = time.Now()
+
+	return
+}
 func (a *User) BeforeCreate(_ *gorm.DB) (err error) {
 	a.ID = uuid.New().String()
+	a.UpdatedAt = time.Now()
+	a.CreatedAt = time.Now()
 
 	return
 }

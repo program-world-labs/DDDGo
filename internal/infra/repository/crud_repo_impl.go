@@ -33,7 +33,12 @@ func (r *CRUDImpl) GetByID(ctx context.Context, e domain.IEntity) (domain.IEntit
 	// 先從Local Cache取得資料
 	data, err := r.Cache.Get(ctx, info)
 	if err == nil {
-		return data, nil
+		d, derr := data.BackToDomain()
+		if derr != nil {
+			return nil, NewDatasourceError(err)
+		}
+
+		return d, nil
 	}
 
 	// 從Redis取得資料, 取不到資料會自動從db取得資料
@@ -48,7 +53,12 @@ func (r *CRUDImpl) GetByID(ctx context.Context, e domain.IEntity) (domain.IEntit
 		return nil, NewDatasourceError(err)
 	}
 
-	return data, nil
+	d, err := data.BackToDomain()
+	if err != nil {
+		return nil, NewDatasourceError(err)
+	}
+
+	return d, nil
 }
 
 // Create -.
@@ -63,7 +73,12 @@ func (r *CRUDImpl) Create(ctx context.Context, e domain.IEntity) (domain.IEntity
 		return nil, NewDatasourceError(err)
 	}
 
-	return e, nil
+	d, err := info.BackToDomain()
+	if err != nil {
+		return nil, NewDatasourceError(err)
+	}
+
+	return d, nil
 }
 
 // Update -.
@@ -88,7 +103,12 @@ func (r *CRUDImpl) Update(ctx context.Context, e domain.IEntity) (domain.IEntity
 		return nil, NewDatasourceError(err)
 	}
 
-	return e, nil
+	d, err := info.BackToDomain()
+	if err != nil {
+		return nil, NewDatasourceError(err)
+	}
+
+	return d, nil
 }
 
 // UpdateWithFields -.
@@ -113,7 +133,12 @@ func (r *CRUDImpl) UpdateWithFields(ctx context.Context, e domain.IEntity, keys 
 		return nil, NewDatasourceError(err)
 	}
 
-	return e, nil
+	d, err := info.BackToDomain()
+	if err != nil {
+		return nil, NewDatasourceError(err)
+	}
+
+	return d, nil
 }
 
 // Delete -.

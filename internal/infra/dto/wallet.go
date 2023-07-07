@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
+	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 )
 
 type Chain string
@@ -44,14 +45,27 @@ func (a *Wallet) Transform(i domain.IEntity) (IRepoEntity, error) {
 		return nil, NewWalletTransformError(err)
 	}
 
-	a.UpdatedAt = time.Now()
-	a.CreatedAt = time.Now()
-
 	return a, nil
 }
 
+func (a *Wallet) BackToDomain() (domain.IEntity, error) {
+	i := &entity.Wallet{}
+	if err := copier.Copy(&i, a); err != nil {
+		return nil, NewWalletBackToDomainError(err)
+	}
+
+	return i, nil
+}
+
+func (a *Wallet) BeforeUpdate(_ *gorm.DB) (err error) {
+	a.UpdatedAt = time.Now()
+
+	return
+}
 func (a *Wallet) BeforeCreate(_ *gorm.DB) (err error) {
 	a.ID = uuid.New().String()
+	a.UpdatedAt = time.Now()
+	a.CreatedAt = time.Now()
 
 	return
 }
