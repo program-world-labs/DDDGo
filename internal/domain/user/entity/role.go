@@ -19,14 +19,18 @@ type Role struct {
 	DeletedAt   time.Time `json:"deletedAt"`
 }
 
+func NewRole(name, description string, permissions []string) *Role {
+	return &Role{
+		Name:        name,
+		Description: description,
+		Permissions: permissions,
+	}
+}
+
 func (a *Role) GetID() string {
 	return a.ID
 }
 
 func (a *Role) SetID(id string) {
 	a.ID = id
-}
-
-func (a *Role) Self() interface{} {
-	return a
 }

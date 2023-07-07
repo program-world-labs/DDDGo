@@ -8,6 +8,7 @@ package app
 
 import (
 	"github.com/allegro/bigcache/v3"
+	"github.com/dtm-labs/rockscache"
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 	"github.com/program-world-labs/DDDGo/config"
@@ -38,16 +39,18 @@ func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server
 	if err != nil {
 		return nil, err
 	}
-	redisCacheDataSourceImpl := cache.NewRedisCacheDataSourceImpl(client)
+	rockscacheClient := provideRocksCache(client)
+	cacheDatasourceImpl := provideUserCacheDatasource(rockscacheClient, datasourceImpl)
 	bigCache, err := provideLocalCache()
 	if err != nil {
 		return nil, err
 	}
 	bigCacheDataSourceImpl := cache.NewBigCacheDataSourceImp(bigCache)
-	repoImpl := provideUserRepo(datasourceImpl, redisCacheDataSourceImpl, bigCacheDataSourceImpl)
+	repoImpl := provideUserRepo(datasourceImpl, cacheDatasourceImpl, bigCacheDataSourceImpl)
 	iService := provideUserService(repoImpl, l)
 	roleDatasourceImpl := role.NewDatasourceImpl(isqlGorm)
-	roleRepoImpl := provideRoleRepo(roleDatasourceImpl, redisCacheDataSourceImpl, bigCacheDataSourceImpl)
+	roleCacheDatasourceImpl := provideRoleCacheDatasource(rockscacheClient, roleDatasourceImpl)
+	roleRepoImpl := provideRoleRepo(roleDatasourceImpl, roleCacheDatasourceImpl, bigCacheDataSourceImpl)
 	roleIService := provideRoleService(roleRepoImpl, l)
 	services := provideServices(iService, roleIService)
 	engine := v1.NewRouter(l, services)
@@ -70,17 +73,31 @@ func provideRedisCache(cfg *config.Config) (*redis.Client, error) {
 	return c.Client, err
 }
 
+func provideRocksCache(r *redis.Client) *rockscache.Client {
+	rc := rockscache.NewClient(r, rockscache.NewDefaultOptions())
+
+	return rc
+}
+
 func provideLocalCache() (*bigcache.BigCache, error) {
 	c, err := local.New()
 
 	return c.Client, err
 }
 
-func provideUserRepo(sqlDatasource *user.DatasourceImpl, redisCacheDatasource *cache.RedisCacheDataSourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl) *user.RepoImpl {
+func provideUserCacheDatasource(client *rockscache.Client, sqlDatasource *user.DatasourceImpl) *user.CacheDatasourceImpl {
+	return user.NewCacheDatasourceImpl(client, sqlDatasource)
+}
+
+func provideRoleCacheDatasource(client *rockscache.Client, sqlDatasource *role.DatasourceImpl) *role.CacheDatasourceImpl {
+	return role.NewCacheDatasourceImpl(client, sqlDatasource)
+}
+
+func provideUserRepo(sqlDatasource *user.DatasourceImpl, redisCacheDatasource *user.CacheDatasourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl) *user.RepoImpl {
 	return user.NewRepoImpl(sqlDatasource, redisCacheDatasource, bigCacheDatasource)
 }
 
-func provideRoleRepo(sqlDatasource *role.DatasourceImpl, redisCacheDatasource *cache.RedisCacheDataSourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl) *role.RepoImpl {
+func provideRoleRepo(sqlDatasource *role.DatasourceImpl, redisCacheDatasource *role.CacheDatasourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl) *role.RepoImpl {
 	return role.NewRepoImpl(sqlDatasource, redisCacheDatasource, bigCacheDatasource)
 }
 
@@ -106,7 +123,9 @@ func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Serv
 var appSet = wire.NewSet(
 	providePostgres,
 	provideRedisCache,
-	provideLocalCache, user.NewDatasourceImpl, role.NewDatasourceImpl, cache.NewRedisCacheDataSourceImpl, cache.NewBigCacheDataSourceImp, provideUserRepo,
+	provideLocalCache,
+	provideRocksCache, user.NewDatasourceImpl, role.NewDatasourceImpl, provideUserCacheDatasource,
+	provideRoleCacheDatasource, cache.NewBigCacheDataSourceImp, provideUserRepo,
 	provideRoleRepo,
 	provideUserService,
 	provideRoleService,

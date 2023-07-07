@@ -2,11 +2,11 @@ package role
 
 import (
 	"context"
-	"fmt"
+
+	"github.com/program-world-labs/pwlogger"
 
 	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 	"github.com/program-world-labs/DDDGo/internal/domain/user/repository"
-	"github.com/program-world-labs/pwlogger"
 )
 
 var _ IService = (*ServiceImpl)(nil)
@@ -22,19 +22,26 @@ func NewServiceImpl(roleRepo repository.RoleRepository, l pwlogger.Interface) *S
 	return &ServiceImpl{RoleRepo: roleRepo, log: l}
 }
 
-// CreateRole -.
+// CreateRole creates a role.
 func (u *ServiceImpl) CreateRole(ctx context.Context, roleInfo *CreatedInput) (*Output, error) {
-	e := roleInfo.ToEntity()
-	// Create role
-	createdRole, err := u.RoleRepo.Create(ctx, e)
+	// Validate input.
+	err := roleInfo.Validate()
 	if err != nil {
-		return nil, err
+		return nil, NewValidateInputError(err)
 	}
 
-	// Cast to entity.Role
+	// Create role.
+	e := roleInfo.ToEntity()
+	createdRole, err := u.RoleRepo.Create(ctx, e)
+
+	if err != nil {
+		return nil, NewRepositoryError(err)
+	}
+
+	// Cast to entity.Role.
 	createdRoleEntity, ok := createdRole.(*entity.Role)
 	if !ok {
-		return nil, fmt.Errorf("ServiceImpl - CreateRole - u.RoleRepo.Create: %w", err)
+		return nil, NewCastError(ErrCastToEntityFailed)
 	}
 
 	return NewOutput(createdRoleEntity), nil

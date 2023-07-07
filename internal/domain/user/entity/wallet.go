@@ -37,7 +37,3 @@ func (a *Wallet) GetID() string {
 func (a *Wallet) SetID(id string) {
 	a.ID = id
 }
-
-func (a *Wallet) Self() interface{} {
-	return a
-}

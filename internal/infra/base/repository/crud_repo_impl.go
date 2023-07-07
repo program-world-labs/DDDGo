@@ -2,9 +2,7 @@ package repository
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/jinzhu/copier"
 	"github.com/program-world-labs/DDDGo/internal/domain"
 	"github.com/program-world-labs/DDDGo/internal/infra/base/datasource"
 	"github.com/program-world-labs/DDDGo/internal/infra/base/entity"
@@ -27,9 +25,9 @@ func NewCRUDImpl(db datasource.IDataSource, redis datasource.ICacheDataSource, c
 
 // GetByID -.
 func (r *CRUDImpl) GetByID(ctx context.Context, e domain.IEntity) (domain.IEntity, error) {
-	info, err := Transform(e, r.DTOEntity)
+	info, err := r.DTOEntity.Transform(e)
 	if err != nil {
-		return nil, fmt.Errorf("CRUDImpl - GetByID - r.DTOEntity.Transform: %w", err)
+		return nil, NewDatasourceError(err)
 	}
 
 	// 先從Local Cache取得資料
@@ -38,16 +36,16 @@ func (r *CRUDImpl) GetByID(ctx context.Context, e domain.IEntity) (domain.IEntit
 		return data, nil
 	}
 
-	// 若Local Cache沒有資料，則從Redis取得資料
+	// 從Redis取得資料, 取不到資料會自動從db取得資料
 	data, err = r.Redis.Get(ctx, info)
-	if err == nil {
-		return data, nil
+	if err != nil {
+		return nil, NewDatasourceError(err)
 	}
 
-	// 若Redis沒有資料，則從DB取得資料
-	data, err = r.DB.GetByID(ctx, info)
+	// 將資料存入Local Cache
+	_, err = r.Cache.Set(ctx, data)
 	if err != nil {
-		return nil, fmt.Errorf("CRUDImpl - GetByID - r.DB.GetByID: %w", err)
+		return nil, NewDatasourceError(err)
 	}
 
 	return data, nil
@@ -55,14 +53,14 @@ func (r *CRUDImpl) GetByID(ctx context.Context, e domain.IEntity) (domain.IEntit
 
 // Create -.
 func (r *CRUDImpl) Create(ctx context.Context, e domain.IEntity) (domain.IEntity, error) {
-	err := copier.Copy(r.DTOEntity, e.Self())
+	info, err := r.DTOEntity.Transform(e)
 	if err != nil {
-		return nil, fmt.Errorf("CRUDImpl - Create - r.DTOEntity.Transform: %w", err)
+		return nil, NewDatasourceError(err)
 	}
 
-	_, err = r.DB.Create(ctx, r.DTOEntity)
+	_, err = r.DB.Create(ctx, info)
 	if err != nil {
-		return nil, fmt.Errorf("CRUDImpl - Create - r.DB.Create: %w", err)
+		return nil, NewDatasourceError(err)
 	}
 
 	return e, nil
@@ -70,14 +68,49 @@ func (r *CRUDImpl) Create(ctx context.Context, e domain.IEntity) (domain.IEntity
 
 // Update -.
 func (r *CRUDImpl) Update(ctx context.Context, e domain.IEntity) (domain.IEntity, error) {
-	info, err := Transform(e, r.DTOEntity)
+	info, err := r.DTOEntity.Transform(e)
 	if err != nil {
-		return nil, fmt.Errorf("CRUDImpl - Update - r.DTOEntity.Transform: %w", err)
+		return nil, NewDatasourceError(err)
 	}
 
 	_, err = r.DB.Update(ctx, info)
 	if err != nil {
-		return nil, fmt.Errorf("CRUDImpl - Update - r.DB.Update: %w", err)
+		return nil, NewDatasourceError(err)
+	}
+
+	err = r.Cache.Delete(ctx, info)
+	if err != nil {
+		return nil, NewDatasourceError(err)
+	}
+
+	err = r.Redis.Delete(ctx, info)
+	if err != nil {
+		return nil, NewDatasourceError(err)
+	}
+
+	return e, nil
+}
+
+// UpdateWithFields -.
+func (r *CRUDImpl) UpdateWithFields(ctx context.Context, e domain.IEntity, keys []string) (domain.IEntity, error) {
+	info, err := r.DTOEntity.Transform(e)
+	if err != nil {
+		return nil, NewDatasourceError(err)
+	}
+
+	_, err = r.DB.UpdateWithFields(ctx, info, keys)
+	if err != nil {
+		return nil, NewDatasourceError(err)
+	}
+
+	err = r.Cache.Delete(ctx, info)
+	if err != nil {
+		return nil, NewDatasourceError(err)
+	}
+
+	err = r.Redis.Delete(ctx, info)
+	if err != nil {
+		return nil, NewDatasourceError(err)
 	}
 
 	return e, nil
@@ -85,14 +118,14 @@ func (r *CRUDImpl) Update(ctx context.Context, e domain.IEntity) (domain.IEntity
 
 // Delete -.
 func (r *CRUDImpl) Delete(ctx context.Context, e domain.IEntity) error {
-	info, err := Transform(e, r.DTOEntity)
+	info, err := r.DTOEntity.Transform(e)
 	if err != nil {
-		return fmt.Errorf("CRUDImpl - Delete - r.DTOEntity.Transform: %w", err)
+		return NewDatasourceError(err)
 	}
 
 	err = r.DB.Delete(ctx, info)
 	if err != nil {
-		return fmt.Errorf("CRUDImpl - Delete - r.DB.Delete: %w", err)
+		return NewDatasourceError(err)
 	}
 
 	return nil

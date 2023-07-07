@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/allegro/bigcache/v3"
 
@@ -28,30 +29,30 @@ func (r *BigCacheDataSourceImpl) cacheKey(model entity.IEntity) string {
 }
 
 // Get -.
-func (r *BigCacheDataSourceImpl) Get(_ context.Context, model entity.IEntity) (entity.IEntity, error) {
+func (r *BigCacheDataSourceImpl) Get(_ context.Context, model entity.IEntity, _ ...time.Duration) (entity.IEntity, error) {
 	data, err := r.Cache.Get(r.cacheKey(model))
 	if err != nil {
-		return nil, fmt.Errorf("BigCacheDataSourceImpl - Get - r.Cache.Get: %w", err)
+		return nil, NewGetError(err)
 	}
 
 	err = json.Unmarshal(data, &model)
 	if err != nil {
-		return nil, fmt.Errorf("BigCacheDataSourceImpl - Get - json.Unmarshal: %w", err)
+		return nil, NewGetError(err)
 	}
 
 	return model, nil
 }
 
 // Set -.
-func (r *BigCacheDataSourceImpl) Set(_ context.Context, model entity.IEntity) (entity.IEntity, error) {
+func (r *BigCacheDataSourceImpl) Set(_ context.Context, model entity.IEntity, _ ...time.Duration) (entity.IEntity, error) {
 	data, err := json.Marshal(model)
 	if err != nil {
-		return nil, fmt.Errorf("BigCacheDataSourceImpl - Set - json.Marshal: %w", err)
+		return nil, NewSetError(err)
 	}
 
 	err = r.Cache.Set(r.cacheKey(model), data)
 	if err != nil {
-		return nil, fmt.Errorf("BigCacheDataSourceImpl - Set - r.Cache.Set: %w", err)
+		return nil, NewSetError(err)
 	}
 
 	return model, nil
@@ -61,7 +62,7 @@ func (r *BigCacheDataSourceImpl) Set(_ context.Context, model entity.IEntity) (e
 func (r *BigCacheDataSourceImpl) Delete(_ context.Context, model entity.IEntity) error {
 	err := r.Cache.Delete(r.cacheKey(model))
 	if err != nil {
-		return fmt.Errorf("BigCacheDataSourceImpl - Delete - r.Cache.Delete: %w", err)
+		return NewDeleteError(err)
 	}
 
 	return nil

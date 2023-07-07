@@ -2,7 +2,6 @@ package sql
 
 import (
 	"context"
-	"fmt"
 
 	"gorm.io/gorm"
 
@@ -27,7 +26,7 @@ func NewCRUDDatasourceImpl(db pwsql.ISQLGorm) *CRUDDatasourceImpl {
 func (r *CRUDDatasourceImpl) GetByID(_ context.Context, model entity.IEntity) (entity.IEntity, error) {
 	err := r.DB.First(model, model.GetID()).Error
 	if err != nil {
-		return nil, fmt.Errorf("CRUDDatasourceImpl - GetByID - r.DB.First: %w", err)
+		return nil, NewGetError(err)
 	}
 
 	return model, nil
@@ -37,7 +36,7 @@ func (r *CRUDDatasourceImpl) GetByID(_ context.Context, model entity.IEntity) (e
 func (r *CRUDDatasourceImpl) Create(_ context.Context, model entity.IEntity) (entity.IEntity, error) {
 	err := r.DB.Create(model).Error
 	if err != nil {
-		return nil, fmt.Errorf("CRUDDatasourceImpl - Create - r.DB.Create: %w", err)
+		return nil, NewCreateError(err)
 	}
 
 	return model, nil
@@ -47,7 +46,7 @@ func (r *CRUDDatasourceImpl) Create(_ context.Context, model entity.IEntity) (en
 func (r *CRUDDatasourceImpl) Update(_ context.Context, model entity.IEntity) (entity.IEntity, error) {
 	err := r.DB.Save(model).Error
 	if err != nil {
-		return nil, fmt.Errorf("CRUDDatasourceImpl - Update - r.DB.Save: %w", err)
+		return nil, NewUpdateError(err)
 	}
 
 	return model, nil
@@ -57,7 +56,7 @@ func (r *CRUDDatasourceImpl) Update(_ context.Context, model entity.IEntity) (en
 func (r *CRUDDatasourceImpl) UpdateWithFields(_ context.Context, model entity.IEntity, fields []string) (entity.IEntity, error) {
 	err := r.DB.Model(model).Select(fields).Updates(model).Error
 	if err != nil {
-		return nil, fmt.Errorf("CRUDDatasourceImpl - UpdateWithFields - r.DB.Model: %w", err)
+		return nil, NewUpdateWithFieldsError(err)
 	}
 
 	return model, nil
@@ -67,7 +66,7 @@ func (r *CRUDDatasourceImpl) UpdateWithFields(_ context.Context, model entity.IE
 func (r *CRUDDatasourceImpl) Delete(_ context.Context, model entity.IEntity) error {
 	err := r.DB.Delete(model, model.GetID()).Error
 	if err != nil {
-		return fmt.Errorf("CRUDDatasourceImpl - Delete - r.DB.Delete: %w", err)
+		return NewDeleteError(err)
 	}
 
 	return nil

@@ -1,4 +1,4 @@
-package adapter
+package http
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	domain_errors "github.com/program-world-labs/DDDGo/internal/domain/errors"
+	domain_errors "github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 )
 
 type Response struct {
@@ -17,7 +17,7 @@ type Response struct {
 
 func HandleErrorResponse(c *gin.Context, err error) {
 	// Check if the error is of type domain_errors.ErrorInfo
-	var errorInfo domain_errors.ErrorInfo
+	var errorInfo *domain_errors.ErrorInfo
 	if errors.As(err, &errorInfo) {
 		c.JSON(http.StatusOK, errorInfo)
 
@@ -25,12 +25,9 @@ func HandleErrorResponse(c *gin.Context, err error) {
 	}
 
 	// If the error is not of type domain_errors.ErrorInfo, create a new ErrorInfo struct
-	errorInfo = domain_errors.ErrorInfo{
-		Code:    domain_errors.ErrorCodeInternalServerError,
-		Message: domain_errors.GetErrorMessage(domain_errors.ErrorCodeInternalServerError),
-	}
+	info := NewAdapterError(err)
 
-	c.JSON(http.StatusOK, errorInfo)
+	c.JSON(http.StatusOK, info)
 }
 
 func SuccessResponse(c *gin.Context, data interface{}) {

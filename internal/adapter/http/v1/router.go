@@ -31,6 +31,7 @@ type Services struct {
 // @version     1.0
 // @host        localhost:8080
 // @BasePath    /v1
+// Swagger base path.
 func NewRouter(l pwlogger.Interface, s Services) *gin.Engine {
 	handler := gin.New()
 	// Options

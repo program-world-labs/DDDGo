@@ -2,10 +2,10 @@ package cache
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"time"
 
-	"github.com/redis/go-redis/v9"
+	"github.com/dtm-labs/rockscache"
 
 	"github.com/program-world-labs/DDDGo/internal/infra/base/datasource"
 	"github.com/program-world-labs/DDDGo/internal/infra/base/entity"
@@ -15,12 +15,13 @@ var _ datasource.ICacheDataSource = (*RedisCacheDataSourceImpl)(nil)
 
 // RedisCacheDataSourceImpl -.
 type RedisCacheDataSourceImpl struct {
-	Client *redis.Client
+	Client        *rockscache.Client
+	SQLDataSource datasource.IDataSource
 }
 
 // NewRedisCacheDataSourceImpl -.
-func NewRedisCacheDataSourceImpl(client *redis.Client) *RedisCacheDataSourceImpl {
-	return &RedisCacheDataSourceImpl{Client: client}
+func NewRedisCacheDataSourceImpl(client *rockscache.Client, sqlDatasource datasource.IDataSource) *RedisCacheDataSourceImpl {
+	return &RedisCacheDataSourceImpl{Client: client, SQLDataSource: sqlDatasource}
 }
 
 func (r *RedisCacheDataSourceImpl) redisKey(model entity.IEntity) string {
@@ -28,40 +29,52 @@ func (r *RedisCacheDataSourceImpl) redisKey(model entity.IEntity) string {
 }
 
 // GetByID -.
-func (r *RedisCacheDataSourceImpl) Get(ctx context.Context, model entity.IEntity) (entity.IEntity, error) {
-	data, err := r.Client.Get(ctx, r.redisKey(model)).Bytes()
-	if err != nil {
-		return nil, fmt.Errorf("RedisCacheDataSourceImpl - GetByID - r.Client.Get: %w", err)
+func (r *RedisCacheDataSourceImpl) Get(ctx context.Context, model entity.IEntity, ttl ...time.Duration) (entity.IEntity, error) {
+	var t time.Duration
+	if len(ttl) > 0 {
+		t = ttl[0]
 	}
 
-	err = json.Unmarshal(data, &model)
+	v, err := r.Client.Fetch2(ctx, r.redisKey(model), t, func() (string, error) {
+		data, err := r.SQLDataSource.GetByID(ctx, model)
+		if err != nil {
+			return "", err
+		}
+
+		return data.ToJSON()
+	})
 	if err != nil {
-		return nil, fmt.Errorf("RedisCacheDataSourceImpl - GetByID - json.Unmarshal: %w", err)
+		return nil, NewGetError(err)
+	}
+
+	err = model.DecodeJSON(v)
+	if err != nil {
+		return nil, NewGetError(err)
 	}
 
 	return model, nil
 }
 
 // Set -.
-func (r *RedisCacheDataSourceImpl) Set(ctx context.Context, model entity.IEntity) (entity.IEntity, error) {
-	data, err := json.Marshal(model)
-	if err != nil {
-		return nil, fmt.Errorf("RedisCacheDataSourceImpl - Create - json.Marshal: %w", err)
-	}
+func (r *RedisCacheDataSourceImpl) Set(_ context.Context, model entity.IEntity, _ ...time.Duration) (entity.IEntity, error) {
+	// data, err := json.Marshal(model)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("RedisCacheDataSourceImpl - Create - json.Marshal: %w", err)
+	// }
 
-	err = r.Client.Set(ctx, r.redisKey(model), data, 0).Err()
-	if err != nil {
-		return nil, fmt.Errorf("RedisCacheDataSourceImpl - Create - r.Client.Set: %w", err)
-	}
+	// err = r.Client.Set(ctx, r.redisKey(model), data, 0).Err()
+	// if err != nil {
+	// 	return nil, fmt.Errorf("RedisCacheDataSourceImpl - Create - r.Client.Set: %w", err)
+	// }
 
 	return model, nil
 }
 
 // Delete -.
 func (r *RedisCacheDataSourceImpl) Delete(ctx context.Context, model entity.IEntity) error {
-	err := r.Client.Del(ctx, r.redisKey(model)).Err()
+	err := r.Client.TagAsDeleted2(ctx, r.redisKey(model))
 	if err != nil {
-		return fmt.Errorf("RedisCacheDataSourceImpl - Delete - r.Client.Del: %w", err)
+		return NewDeleteError(err)
 	}
 
 	return nil

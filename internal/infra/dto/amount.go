@@ -1,11 +1,14 @@
 package dto
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 
+	"github.com/program-world-labs/DDDGo/internal/domain"
 	"github.com/program-world-labs/DDDGo/internal/infra/base/entity"
 )
 
@@ -27,6 +30,14 @@ func (a *Amount) TableName() string {
 	return "Amounts"
 }
 
+func (a *Amount) Transform(i domain.IEntity) (entity.IEntity, error) {
+	if err := copier.Copy(a, i); err != nil {
+		return nil, NewAmountTransformError(err)
+	}
+
+	return a, nil
+}
+
 func (a *Amount) BeforeCreate(_ *gorm.DB) (err error) {
 	a.ID = uuid.New().String()
 
@@ -41,6 +52,20 @@ func (a *Amount) SetID(id string) {
 	a.ID = id
 }
 
-func (a *Amount) Self() interface{} {
-	return a
+func (a *Amount) ToJSON() (string, error) {
+	jsonData, err := json.Marshal(a)
+	if err != nil {
+		return "", NewAmountToJSONError(err)
+	}
+
+	return string(jsonData), nil
+}
+
+func (a *Amount) DecodeJSON(data string) error {
+	err := json.Unmarshal([]byte(data), &a)
+	if err != nil {
+		return NewAmountDecodeJSONError(err)
+	}
+
+	return nil
 }

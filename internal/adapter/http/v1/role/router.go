@@ -1,15 +1,15 @@
 package role
 
 import (
+	"strings"
+
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 	"github.com/jinzhu/copier"
 	"github.com/program-world-labs/pwlogger"
 	"go.opentelemetry.io/otel"
 
-	"github.com/program-world-labs/DDDGo/internal/adapter"
+	"github.com/program-world-labs/DDDGo/internal/adapter/http"
 	application_role "github.com/program-world-labs/DDDGo/internal/application/role"
-	common_error "github.com/program-world-labs/DDDGo/internal/domain/errors"
 )
 
 type roleRoutes struct {
@@ -33,10 +33,10 @@ func NewRoleRoutes(handler *gin.RouterGroup, u application_role.IService, l pwlo
 // @Accept      json
 // @Produce     json
 // @Param		body	body		CreatedRequest	true	"Role Create Request"
-// @Success		200		{object}	adapter.Response{data=Response}
-// @Failure		400		{object}	adapter.Response
-// @Failure		500		{object}	adapter.Response
-// @Router			/role/create [post]
+// @Success		200		{object}	http.Response{data=Response}
+// @Failure		400		{object}	http.Response
+// @Failure		500		{object}	http.Response
+// @Router			/role/create [post].
 func (r *roleRoutes) create(c *gin.Context) {
 	// 開始追蹤
 	var tracer = otel.Tracer("")
@@ -51,50 +51,33 @@ func (r *roleRoutes) create(c *gin.Context) {
 	// 參數驗證
 	var req CreatedRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		r.l.Error().Err(err).Msg("http - v1 - backend - CreateUser")
-		adapter.HandleErrorResponse(c, common_error.New(common_error.ErrorCodeParamMissing))
-
-		return
-	}
-	// // 檢查檔案格式
-	validate := validator.New()
-	err := validate.RegisterValidation("custom_permission", CustomPermission)
-
-	if err != nil {
-		r.l.Error().Err(err).Msg("http - v1 - backend - CreateUser")
-		adapter.HandleErrorResponse(c, common_error.New(common_error.ErrorCodeParamFormatInvalid))
-
-		return
-	}
-
-	err = validate.Struct(req)
-
-	if err != nil {
-		r.l.Error().Err(err).Msg("http - v1 - backend - CreateUser")
-		adapter.HandleErrorResponse(c, common_error.New(common_error.ErrorCodeParamFormatInvalid))
+		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindJSON")
+		http.HandleErrorResponse(c, NewBindJSONError(err))
 
 		return
 	}
 
 	// // 執行UseCase
 	var input application_role.CreatedInput
-	err = copier.Copy(&input, &req)
+	err := copier.Copy(&input, &req)
 
 	if err != nil {
-		r.l.Error().Err(err).Msg("http - v1 - backend - CreateUser")
-		adapter.HandleErrorResponse(c, err)
+		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
+		http.HandleErrorResponse(c, NewCopyError(err))
 
 		return
 	}
 
+	input.Permissions = strings.Join(req.Permissions, ",")
+
 	roleEntity, err := r.u.CreateRole(ctx, &input)
 	if err != nil {
-		r.l.Error().Err(err).Msg("http - v1 - backend - CreateUser")
-		adapter.HandleErrorResponse(c, err)
+		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - CreateRole")
+		http.HandleErrorResponse(c, NewUsecaseError(err))
 
 		return
 	}
 
 	res := NewResponse(roleEntity)
-	adapter.SuccessResponse(c, res)
+	http.SuccessResponse(c, res)
 }

@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
 	"github.com/program-world-labs/DDDGo/internal/infra/base/datasource"
@@ -22,19 +21,19 @@ func NewCacheUpdateImpl(remoteCache datasource.ICacheDataSource, cache datasourc
 
 // Save -.
 func (r *CacheUpdateImpl) Save(ctx context.Context, e domain.IEntity) error {
-	info, err := Transform(e, r.DTOEntity)
+	info, err := r.DTOEntity.Transform(e)
 	if err != nil {
-		return fmt.Errorf("CacheUpdateImpl - Save - r.entityEntity.Transform: %w", err)
+		return NewDatasourceError(err)
 	}
 	// 將資料寫入Redis
 	_, err = r.RemoteCache.Set(ctx, info)
 	if err != nil {
-		return fmt.Errorf("CacheUpdateImpl - Save - r.Redis.Save: %w", err)
+		return NewDatasourceError(err)
 	}
 	// 將資料寫入Local Cache
 	_, err = r.Cache.Set(ctx, info)
 	if err != nil {
-		return fmt.Errorf("CacheUpdateImpl - Save - r.Cache.Save: %w", err)
+		return NewDatasourceError(err)
 	}
 
 	return nil
@@ -42,20 +41,20 @@ func (r *CacheUpdateImpl) Save(ctx context.Context, e domain.IEntity) error {
 
 // Delete -.
 func (r *CacheUpdateImpl) Delete(ctx context.Context, e domain.IEntity) error {
-	info, err := Transform(e, r.DTOEntity)
+	info, err := r.DTOEntity.Transform(e)
 	if err != nil {
-		return fmt.Errorf("CacheUpdateImpl - Delete - r.entityEntity.Transform: %w", err)
+		return err
 	}
 
 	// 將資料從Redis刪除
 	err = r.RemoteCache.Delete(ctx, info)
 	if err != nil {
-		return fmt.Errorf("CacheUpdateImpl - Delete - r.Redis.Delete: %w", err)
+		return NewDatasourceError(err)
 	}
 	// 將資料從Local Cache刪除
 	err = r.Cache.Delete(ctx, info)
 	if err != nil {
-		return fmt.Errorf("CacheUpdateImpl - Delete - r.Cache.Delete: %w", err)
+		return NewDatasourceError(err)
 	}
 
 	return nil

@@ -2,6 +2,7 @@ package datasource
 
 import (
 	"context"
+	"time"
 
 	"github.com/program-world-labs/DDDGo/internal/infra/base/entity"
 )
@@ -15,7 +16,7 @@ type IDataSource interface {
 }
 
 type ICacheDataSource interface {
-	Get(ctx context.Context, e entity.IEntity) (entity.IEntity, error)
-	Set(ctx context.Context, e entity.IEntity) (entity.IEntity, error)
+	Get(ctx context.Context, e entity.IEntity, ttl ...time.Duration) (entity.IEntity, error)
+	Set(ctx context.Context, e entity.IEntity, ttl ...time.Duration) (entity.IEntity, error)
 	Delete(ctx context.Context, e entity.IEntity) error
 }

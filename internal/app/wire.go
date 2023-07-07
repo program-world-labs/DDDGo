@@ -5,6 +5,7 @@ package app
 
 import (
 	"github.com/allegro/bigcache/v3"
+	"github.com/dtm-labs/rockscache"
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 	"github.com/program-world-labs/pwlogger"
@@ -37,17 +38,31 @@ func provideRedisCache(cfg *config.Config) (*redis.Client, error) {
 	return c.Client, err
 }
 
+func provideRocksCache(r *redis.Client) *rockscache.Client {
+	rc := rockscache.NewClient(r, rockscache.NewDefaultOptions())
+
+	return rc
+}
+
 func provideLocalCache() (*bigcache.BigCache, error) {
 	c, err := local.New()
 
 	return c.Client, err
 }
 
-func provideUserRepo(sqlDatasource *user.DatasourceImpl, redisCacheDatasource *cache.RedisCacheDataSourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl) *user.RepoImpl {
+func provideUserCacheDatasource(client *rockscache.Client, sqlDatasource *user.DatasourceImpl) *user.CacheDatasourceImpl {
+	return user.NewCacheDatasourceImpl(client, sqlDatasource)
+}
+
+func provideRoleCacheDatasource(client *rockscache.Client, sqlDatasource *role.DatasourceImpl) *role.CacheDatasourceImpl {
+	return role.NewCacheDatasourceImpl(client, sqlDatasource)
+}
+
+func provideUserRepo(sqlDatasource *user.DatasourceImpl, redisCacheDatasource *user.CacheDatasourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl) *user.RepoImpl {
 	return user.NewRepoImpl(sqlDatasource, redisCacheDatasource, bigCacheDatasource)
 }
 
-func provideRoleRepo(sqlDatasource *role.DatasourceImpl, redisCacheDatasource *cache.RedisCacheDataSourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl) *role.RepoImpl {
+func provideRoleRepo(sqlDatasource *role.DatasourceImpl, redisCacheDatasource *role.CacheDatasourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl) *role.RepoImpl {
 	return role.NewRepoImpl(sqlDatasource, redisCacheDatasource, bigCacheDatasource)
 }
 
@@ -74,9 +89,11 @@ var appSet = wire.NewSet(
 	providePostgres,
 	provideRedisCache,
 	provideLocalCache,
+	provideRocksCache,
 	user.NewDatasourceImpl,
 	role.NewDatasourceImpl,
-	cache.NewRedisCacheDataSourceImpl,
+	provideUserCacheDatasource,
+	provideRoleCacheDatasource,
 	cache.NewBigCacheDataSourceImp,
 	provideUserRepo,
 	provideRoleRepo,

@@ -46,7 +46,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/adapter.Response"
+                                    "$ref": "#/definitions/http.Response"
                                 },
                                 {
                                     "type": "object",
@@ -62,13 +62,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/adapter.Response"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/adapter.Response"
+                            "$ref": "#/definitions/http.Response"
                         }
                     }
                 }
@@ -76,7 +76,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "adapter.Response": {
+        "http.Response": {
             "type": "object",
             "properties": {
                 "code": {
@@ -98,12 +98,10 @@ const docTemplate = `{
             "properties": {
                 "description": {
                     "type": "string",
-                    "maxLength": 200,
                     "example": "this is for admin role"
                 },
                 "name": {
                     "type": "string",
-                    "maxLength": 30,
                     "example": "admin"
                 },
                 "permissions": {
