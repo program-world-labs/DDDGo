@@ -63,11 +63,11 @@ github.com/Eun/yaegi-template v1.5.16/go.mod h1:eyFQ1QHbKLNHKpUvdjt8+99ZR1ji7lVV
 github.com/Eun/yaegi-template v1.5.18/go.mod h1:iVHjge496SWL7hLf1euBZIO40Bk0R38g6lu8iyvpc30=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.13.1 h1:hR+NqMEDDSR8hLc5ZybuWtPfhmFVZwd6Ft7n25XnVjk=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.13.1/go.mod h1:Xx0VKh7GJ4si3rmElbh19Mejxz68ibWg/J30ZOMrqzU=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.15.2 h1:L8Rzas9w4DGt1bMOhT3DI7DD0jJUX1StWGZJEQ+JoJY=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.15.2/go.mod h1:9sKVjE4anClH/s9HTxPfCUA/LvKjCSXQT43KV+3GETg=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.39.2 h1:Wrmrz5DzrFUug42f/bmHtZ5jZoAVzIYj8bIGJdebLQM=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.39.2 h1:XIERWzKobhRJHSzZwhPKCY7TCPiYJp/mEbSSKEgYCzU=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.39.2/go.mod h1:lz6DEePTxmjvYMtusOoS3qDAErC0STi/wmvqJucKY28=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.16.1 h1:dkIyFw11w878MSG5kegjr9Oept42iCjNvhO2BVRrr60=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.16.1/go.mod h1:iyJ7cfLP5PVMo/55aIBBndyeFcMDXKUfbfZxaMM5GeU=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.40.1 h1:Mkm1EDj1blE1U31XI4GOwhMrTK0czB2HouHKxzr2ORo=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.40.1 h1:FFGWjWC0sCZgJziVe/yP39XjlQlf+MIEYXoRPJq8YX0=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.40.1/go.mod h1:lz6DEePTxmjvYMtusOoS3qDAErC0STi/wmvqJucKY28=
 github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc=
 github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6XgeJcm8brE=
 github.com/Microsoft/go-winio v0.6.1 h1:9/kr64B9VUZrLm5YYwbGtUJnMgqWVOdUAXu6Migciow=
