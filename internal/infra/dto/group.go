@@ -9,10 +9,9 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
-	"github.com/program-world-labs/DDDGo/internal/infra/base/entity"
 )
 
-var _ entity.IEntity = (*Group)(nil)
+var _ IRepoEntity = (*Group)(nil)
 
 type Group struct {
 	ID          string    `json:"id" gorm:"primary_key"`
@@ -30,10 +29,13 @@ func (a *Group) TableName() string {
 	return "Groups"
 }
 
-func (a *Group) Transform(i domain.IEntity) (entity.IEntity, error) {
+func (a *Group) Transform(i domain.IEntity) (IRepoEntity, error) {
 	if err := copier.Copy(a, i); err != nil {
 		return nil, NewGroupTransformError(err)
 	}
+
+	a.UpdatedAt = time.Now()
+	a.CreatedAt = time.Now()
 
 	return a, nil
 }

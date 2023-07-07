@@ -9,7 +9,6 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
-	"github.com/program-world-labs/DDDGo/internal/infra/base/entity"
 )
 
 type Chain string
@@ -21,7 +20,7 @@ const (
 	Polygon  Chain = "Polygon"
 )
 
-var _ entity.IEntity = (*Wallet)(nil)
+var _ IRepoEntity = (*Wallet)(nil)
 
 type Wallet struct {
 	ID          string    `json:"id" gorm:"primary_key"`
@@ -40,10 +39,13 @@ func (a *Wallet) TableName() string {
 	return "Wallets"
 }
 
-func (a *Wallet) Transform(i domain.IEntity) (entity.IEntity, error) {
+func (a *Wallet) Transform(i domain.IEntity) (IRepoEntity, error) {
 	if err := copier.Copy(a, i); err != nil {
 		return nil, NewWalletTransformError(err)
 	}
+
+	a.UpdatedAt = time.Now()
+	a.CreatedAt = time.Now()
 
 	return a, nil
 }

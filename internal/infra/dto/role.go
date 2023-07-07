@@ -9,10 +9,9 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
-	"github.com/program-world-labs/DDDGo/internal/infra/base/entity"
 )
 
-var _ entity.IEntity = (*Role)(nil)
+var _ IRepoEntity = (*Role)(nil)
 
 type Role struct {
 	ID          string         `json:"id" gorm:"type:varchar(20);primary_key"`
@@ -29,10 +28,13 @@ func (a *Role) TableName() string {
 	return "Roles"
 }
 
-func (a *Role) Transform(i domain.IEntity) (entity.IEntity, error) {
+func (a *Role) Transform(i domain.IEntity) (IRepoEntity, error) {
 	if err := copier.Copy(a, i); err != nil {
 		return nil, NewRoleTransformError(err)
 	}
+
+	a.UpdatedAt = time.Now()
+	a.CreatedAt = time.Now()
 
 	return a, nil
 }

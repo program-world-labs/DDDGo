@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
-	"github.com/program-world-labs/DDDGo/internal/infra/base/datasource"
-	"github.com/program-world-labs/DDDGo/internal/infra/base/entity"
+	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
+	"github.com/program-world-labs/DDDGo/internal/infra/dto"
 )
 
 var _ domain.ICRUDRepository = (*CRUDImpl)(nil)
@@ -15,11 +15,11 @@ type CRUDImpl struct {
 	DB        datasource.IDataSource
 	Redis     datasource.ICacheDataSource
 	Cache     datasource.ICacheDataSource
-	DTOEntity entity.IEntity
+	DTOEntity dto.IRepoEntity
 }
 
 // NewCRUDImpl -.
-func NewCRUDImpl(db datasource.IDataSource, redis datasource.ICacheDataSource, cache datasource.ICacheDataSource, data entity.IEntity) *CRUDImpl {
+func NewCRUDImpl(db datasource.IDataSource, redis datasource.ICacheDataSource, cache datasource.ICacheDataSource, data dto.IRepoEntity) *CRUDImpl {
 	return &CRUDImpl{DB: db, Redis: redis, Cache: cache, DTOEntity: data}
 }
 

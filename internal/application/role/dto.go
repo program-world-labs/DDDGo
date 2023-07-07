@@ -81,8 +81,6 @@ func (c *CreatedInput) ToEntity() *entity.Role {
 		Name:        c.Name,
 		Description: c.Description,
 		Permissions: strings.Split(c.Permissions, ","),
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
 	}
 }
 

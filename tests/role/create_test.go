@@ -20,8 +20,8 @@ import (
 	application_role "github.com/program-world-labs/DDDGo/internal/application/role"
 	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
-	infra_sql "github.com/program-world-labs/DDDGo/internal/infra/base/datasource/sql"
-	infra_repo "github.com/program-world-labs/DDDGo/internal/infra/base/repository"
+	infra_sql "github.com/program-world-labs/DDDGo/internal/infra/datasource/sql"
+	infra_repo "github.com/program-world-labs/DDDGo/internal/infra/repository"
 	"github.com/program-world-labs/DDDGo/tests"
 	mocks "github.com/program-world-labs/DDDGo/tests/mocks/role"
 )

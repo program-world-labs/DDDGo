@@ -2,9 +2,9 @@ package wallet
 
 import (
 	"github.com/program-world-labs/DDDGo/internal/domain/user/repository"
-	"github.com/program-world-labs/DDDGo/internal/infra/base/datasource"
-	base_repository "github.com/program-world-labs/DDDGo/internal/infra/base/repository"
+	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
 	"github.com/program-world-labs/DDDGo/internal/infra/dto"
+	base_repository "github.com/program-world-labs/DDDGo/internal/infra/repository"
 )
 
 var _ repository.WalletRepository = (*RepoImpl)(nil)

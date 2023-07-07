@@ -1,11 +1,11 @@
-package entity
+package dto
 
 import "github.com/program-world-labs/DDDGo/internal/domain"
 
-type IEntity interface {
+type IRepoEntity interface {
 	domain.IEntity
 	TableName() string
-	Transform(domain.IEntity) (IEntity, error)
+	Transform(domain.IEntity) (IRepoEntity, error)
 	ToJSON() (string, error)
 	DecodeJSON(string) error
 }

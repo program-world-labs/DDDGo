@@ -9,6 +9,7 @@ import (
 const (
 	GruopID                          = "A"
 	ErrorCodeAdapterRole             = 10000000
+	ErrorCodeAdapterUser             = 20000000
 	ErrorCodeApplicationRole         = 1000000
 	ErrorCodeDomainRole              = 100000
 	ErrorCodeRepo                    = 10000

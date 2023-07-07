@@ -8,8 +8,8 @@ import (
 
 	"github.com/allegro/bigcache/v3"
 
-	"github.com/program-world-labs/DDDGo/internal/infra/base/datasource"
-	"github.com/program-world-labs/DDDGo/internal/infra/base/entity"
+	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
+	"github.com/program-world-labs/DDDGo/internal/infra/dto"
 )
 
 var _ datasource.ICacheDataSource = (*BigCacheDataSourceImpl)(nil)
@@ -24,12 +24,12 @@ func NewBigCacheDataSourceImp(cache *bigcache.BigCache) *BigCacheDataSourceImpl 
 	return &BigCacheDataSourceImpl{Cache: cache}
 }
 
-func (r *BigCacheDataSourceImpl) cacheKey(model entity.IEntity) string {
+func (r *BigCacheDataSourceImpl) cacheKey(model dto.IRepoEntity) string {
 	return fmt.Sprintf("%s-%s", model.TableName(), model.GetID())
 }
 
 // Get -.
-func (r *BigCacheDataSourceImpl) Get(_ context.Context, model entity.IEntity, _ ...time.Duration) (entity.IEntity, error) {
+func (r *BigCacheDataSourceImpl) Get(_ context.Context, model dto.IRepoEntity, _ ...time.Duration) (dto.IRepoEntity, error) {
 	data, err := r.Cache.Get(r.cacheKey(model))
 	if err != nil {
 		return nil, NewGetError(err)
@@ -44,7 +44,7 @@ func (r *BigCacheDataSourceImpl) Get(_ context.Context, model entity.IEntity, _ 
 }
 
 // Set -.
-func (r *BigCacheDataSourceImpl) Set(_ context.Context, model entity.IEntity, _ ...time.Duration) (entity.IEntity, error) {
+func (r *BigCacheDataSourceImpl) Set(_ context.Context, model dto.IRepoEntity, _ ...time.Duration) (dto.IRepoEntity, error) {
 	data, err := json.Marshal(model)
 	if err != nil {
 		return nil, NewSetError(err)
@@ -59,7 +59,7 @@ func (r *BigCacheDataSourceImpl) Set(_ context.Context, model entity.IEntity, _ 
 }
 
 // Delete -.
-func (r *BigCacheDataSourceImpl) Delete(_ context.Context, model entity.IEntity) error {
+func (r *BigCacheDataSourceImpl) Delete(_ context.Context, model dto.IRepoEntity) error {
 	err := r.Cache.Delete(r.cacheKey(model))
 	if err != nil {
 		return NewDeleteError(err)

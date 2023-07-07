@@ -5,8 +5,8 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/program-world-labs/DDDGo/internal/infra/base/datasource"
-	"github.com/program-world-labs/DDDGo/internal/infra/base/entity"
+	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
+	"github.com/program-world-labs/DDDGo/internal/infra/dto"
 	"github.com/program-world-labs/DDDGo/pkg/pwsql"
 )
 
@@ -23,7 +23,7 @@ func NewCRUDDatasourceImpl(db pwsql.ISQLGorm) *CRUDDatasourceImpl {
 }
 
 // GetByID -.
-func (r *CRUDDatasourceImpl) GetByID(_ context.Context, model entity.IEntity) (entity.IEntity, error) {
+func (r *CRUDDatasourceImpl) GetByID(_ context.Context, model dto.IRepoEntity) (dto.IRepoEntity, error) {
 	err := r.DB.First(model, model.GetID()).Error
 	if err != nil {
 		return nil, NewGetError(err)
@@ -33,7 +33,7 @@ func (r *CRUDDatasourceImpl) GetByID(_ context.Context, model entity.IEntity) (e
 }
 
 // Create -.
-func (r *CRUDDatasourceImpl) Create(_ context.Context, model entity.IEntity) (entity.IEntity, error) {
+func (r *CRUDDatasourceImpl) Create(_ context.Context, model dto.IRepoEntity) (dto.IRepoEntity, error) {
 	err := r.DB.Create(model).Error
 	if err != nil {
 		return nil, NewCreateError(err)
@@ -43,7 +43,7 @@ func (r *CRUDDatasourceImpl) Create(_ context.Context, model entity.IEntity) (en
 }
 
 // Update -.
-func (r *CRUDDatasourceImpl) Update(_ context.Context, model entity.IEntity) (entity.IEntity, error) {
+func (r *CRUDDatasourceImpl) Update(_ context.Context, model dto.IRepoEntity) (dto.IRepoEntity, error) {
 	err := r.DB.Save(model).Error
 	if err != nil {
 		return nil, NewUpdateError(err)
@@ -53,7 +53,7 @@ func (r *CRUDDatasourceImpl) Update(_ context.Context, model entity.IEntity) (en
 }
 
 // UpdateWithFields -.
-func (r *CRUDDatasourceImpl) UpdateWithFields(_ context.Context, model entity.IEntity, fields []string) (entity.IEntity, error) {
+func (r *CRUDDatasourceImpl) UpdateWithFields(_ context.Context, model dto.IRepoEntity, fields []string) (dto.IRepoEntity, error) {
 	err := r.DB.Model(model).Select(fields).Updates(model).Error
 	if err != nil {
 		return nil, NewUpdateWithFieldsError(err)
@@ -63,7 +63,7 @@ func (r *CRUDDatasourceImpl) UpdateWithFields(_ context.Context, model entity.IE
 }
 
 // Delete -.
-func (r *CRUDDatasourceImpl) Delete(_ context.Context, model entity.IEntity) error {
+func (r *CRUDDatasourceImpl) Delete(_ context.Context, model dto.IRepoEntity) error {
 	err := r.DB.Delete(model, model.GetID()).Error
 	if err != nil {
 		return NewDeleteError(err)

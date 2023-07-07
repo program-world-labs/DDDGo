@@ -15,7 +15,8 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/adapter/http/v1"
 	role2 "github.com/program-world-labs/DDDGo/internal/application/role"
 	user2 "github.com/program-world-labs/DDDGo/internal/application/user"
-	"github.com/program-world-labs/DDDGo/internal/infra/base/datasource/cache"
+	"github.com/program-world-labs/DDDGo/internal/infra/datasource/cache"
+	"github.com/program-world-labs/DDDGo/internal/infra/datasource/sql"
 	"github.com/program-world-labs/DDDGo/internal/infra/dto"
 	"github.com/program-world-labs/DDDGo/internal/infra/role"
 	"github.com/program-world-labs/DDDGo/internal/infra/user"
@@ -34,23 +35,20 @@ func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server
 	if err != nil {
 		return nil, err
 	}
-	datasourceImpl := user.NewDatasourceImpl(isqlGorm)
-	client, err := provideRedisCache(cfg)
-	if err != nil {
-		return nil, err
-	}
-	rockscacheClient := provideRocksCache(client)
-	cacheDatasourceImpl := provideUserCacheDatasource(rockscacheClient, datasourceImpl)
+	crudDatasourceImpl := sql.NewCRUDDatasourceImpl(isqlGorm)
 	bigCache, err := provideLocalCache()
 	if err != nil {
 		return nil, err
 	}
 	bigCacheDataSourceImpl := cache.NewBigCacheDataSourceImp(bigCache)
-	repoImpl := provideUserRepo(datasourceImpl, cacheDatasourceImpl, bigCacheDataSourceImpl)
+	client, err := provideRedisCache(cfg)
+	if err != nil {
+		return nil, err
+	}
+	rockscacheClient := provideRocksCache(client)
+	repoImpl := provideUserRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
 	iService := provideUserService(repoImpl, l)
-	roleDatasourceImpl := role.NewDatasourceImpl(isqlGorm)
-	roleCacheDatasourceImpl := provideRoleCacheDatasource(rockscacheClient, roleDatasourceImpl)
-	roleRepoImpl := provideRoleRepo(roleDatasourceImpl, roleCacheDatasourceImpl, bigCacheDataSourceImpl)
+	roleRepoImpl := provideRoleRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
 	roleIService := provideRoleService(roleRepoImpl, l)
 	services := provideServices(iService, roleIService)
 	engine := v1.NewRouter(l, services)
@@ -85,20 +83,14 @@ func provideLocalCache() (*bigcache.BigCache, error) {
 	return c.Client, err
 }
 
-func provideUserCacheDatasource(client *rockscache.Client, sqlDatasource *user.DatasourceImpl) *user.CacheDatasourceImpl {
-	return user.NewCacheDatasourceImpl(client, sqlDatasource)
+func provideUserRepo(sqlDatasource *sql.CRUDDatasourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl, client *rockscache.Client) *user.RepoImpl {
+	userCache := cache.NewRedisCacheDataSourceImpl(client, sqlDatasource)
+	return user.NewRepoImpl(sqlDatasource, userCache, bigCacheDatasource)
 }
 
-func provideRoleCacheDatasource(client *rockscache.Client, sqlDatasource *role.DatasourceImpl) *role.CacheDatasourceImpl {
-	return role.NewCacheDatasourceImpl(client, sqlDatasource)
-}
-
-func provideUserRepo(sqlDatasource *user.DatasourceImpl, redisCacheDatasource *user.CacheDatasourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl) *user.RepoImpl {
-	return user.NewRepoImpl(sqlDatasource, redisCacheDatasource, bigCacheDatasource)
-}
-
-func provideRoleRepo(sqlDatasource *role.DatasourceImpl, redisCacheDatasource *role.CacheDatasourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl) *role.RepoImpl {
-	return role.NewRepoImpl(sqlDatasource, redisCacheDatasource, bigCacheDatasource)
+func provideRoleRepo(sqlDatasource *sql.CRUDDatasourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl, client *rockscache.Client) *role.RepoImpl {
+	roleCache := cache.NewRedisCacheDataSourceImpl(client, sqlDatasource)
+	return role.NewRepoImpl(sqlDatasource, roleCache, bigCacheDatasource)
 }
 
 func provideServices(user3 user2.IService, role3 role2.IService) v1.Services {
@@ -124,8 +116,7 @@ var appSet = wire.NewSet(
 	providePostgres,
 	provideRedisCache,
 	provideLocalCache,
-	provideRocksCache, user.NewDatasourceImpl, role.NewDatasourceImpl, provideUserCacheDatasource,
-	provideRoleCacheDatasource, cache.NewBigCacheDataSourceImp, provideUserRepo,
+	provideRocksCache, sql.NewCRUDDatasourceImpl, cache.NewBigCacheDataSourceImp, provideUserRepo,
 	provideRoleRepo,
 	provideUserService,
 	provideRoleService,
