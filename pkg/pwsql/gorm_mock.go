@@ -1,10 +1,10 @@
 package pwsql
 
 import (
+	"database/sql"
 	"log"
 	"os"
 
-	"github.com/DATA-DOG/go-sqlmock"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -14,16 +14,10 @@ import (
 var _ ISQLGorm = (*MockSQL)(nil)
 
 type MockSQL struct {
-	db   *gorm.DB
-	mock sqlmock.Sqlmock
+	db *gorm.DB
 }
 
-func NewMock() *MockSQL {
-	mockdb, mock, err := sqlmock.New()
-	if err != nil {
-		panic(err)
-	}
-
+func NewMock(mockdb *sql.DB) *MockSQL {
 	db, err := gorm.Open(
 		postgres.New(postgres.Config{
 			PreferSimpleProtocol: true,
@@ -46,7 +40,7 @@ func NewMock() *MockSQL {
 		panic(err)
 	}
 
-	return &MockSQL{db: db, mock: mock}
+	return &MockSQL{db: db}
 }
 
 func (m *MockSQL) GetDB() *gorm.DB {
