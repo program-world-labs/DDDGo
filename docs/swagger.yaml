@@ -1,47 +1,67 @@
 basePath: /v1
 definitions:
-  entity.Translation:
+  http.Response:
     properties:
-      destination:
-        example: en
-        type: string
-      original:
-        example: текст для перевода
-        type: string
-      source:
-        example: auto
-        type: string
-      translation:
-        example: text for translation
+      code:
+        type: integer
+      data: {}
+      error:
         type: string
     type: object
-  v1.doTranslateRequest:
+  role.CreatedRequest:
     properties:
-      destination:
-        example: en
+      description:
+        example: this is for admin role
         type: string
-      original:
-        example: текст для перевода
+      name:
+        example: admin
         type: string
-      source:
-        example: auto
-        type: string
-    required:
-      - destination
-      - original
-      - source
-    type: object
-  v1.historyResponse:
-    properties:
-      history:
+      permissions:
+        example:
+        - read:all
+        - write:all
         items:
-          $ref: '#/definitions/entity.Translation'
+          type: string
+        type: array
+    required:
+    - description
+    - name
+    - permissions
+    type: object
+  role.Response:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      permissions:
+        items:
+          type: string
+        type: array
+      updatedAt:
+        type: string
+      users:
+        items:
+          $ref: '#/definitions/user.Response'
         type: array
     type: object
-  v1.response:
+  user.Response:
     properties:
-      error:
-        example: message
+      avatar:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: string
+      last_name:
+        type: string
+      username:
         type: string
     type: object
 host: localhost:8080
@@ -51,55 +71,40 @@ info:
   title: Go Clean Template API
   version: "1.0"
 paths:
-  /translation/do-translate:
+  /role/create:
     post:
       consumes:
-        - application/json
-      description: Translate a text
-      operationId: do-translate
+      - application/json
+      description: Create role
+      operationId: CreateRole
       parameters:
-        - description: Set up translation
-          in: body
-          name: request
-          required: true
-          schema:
-            $ref: '#/definitions/v1.doTranslateRequest'
+      - description: Role Create Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/role.CreatedRequest'
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/entity.Translation'
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/role.Response'
+              type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/http.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
-      summary: Translate
+            $ref: '#/definitions/http.Response'
+      summary: Create role
       tags:
-        - translation
-  /translation/history:
-    get:
-      consumes:
-        - application/json
-      description: Show all translation history
-      operationId: history
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/v1.historyResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/v1.response'
-      summary: Show history
-      tags:
-        - translation
+      - Role
 swagger: "2.0"

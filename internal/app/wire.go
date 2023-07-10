@@ -5,51 +5,80 @@ package app
 
 import (
 	"github.com/allegro/bigcache/v3"
+	"github.com/dtm-labs/rockscache"
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 	"github.com/program-world-labs/pwlogger"
+	"github.com/redis/go-redis/v9"
 
 	"github.com/program-world-labs/DDDGo/config"
 	v1 "github.com/program-world-labs/DDDGo/internal/adapter/http/v1"
-	usecase "github.com/program-world-labs/DDDGo/internal/application/user"
+	application_role "github.com/program-world-labs/DDDGo/internal/application/role"
+	application_user "github.com/program-world-labs/DDDGo/internal/application/user"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource/cache"
-	repo "github.com/program-world-labs/DDDGo/internal/infra/datasource/sql"
+	"github.com/program-world-labs/DDDGo/internal/infra/datasource/sql"
+	"github.com/program-world-labs/DDDGo/internal/infra/dto"
 	"github.com/program-world-labs/DDDGo/internal/infra/repository"
+	"github.com/program-world-labs/DDDGo/internal/infra/role"
+	"github.com/program-world-labs/DDDGo/internal/infra/user"
 	"github.com/program-world-labs/DDDGo/pkg/cache/local"
 	redisCache "github.com/program-world-labs/DDDGo/pkg/cache/redis"
 	"github.com/program-world-labs/DDDGo/pkg/httpserver"
-	"github.com/program-world-labs/DDDGo/pkg/operations"
-	sqlgorm "github.com/program-world-labs/DDDGo/pkg/sql_gorm"
-	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
+	"github.com/program-world-labs/DDDGo/pkg/pwsql"
 )
 
-func provideTracer(cfg *config.Config) (operations.ITracer, error) {
-	operations.GoogleCloudOperationInit(cfg.GCP.Project, cfg.GCP.Monitor)
-	return operations.NewTracer(cfg.App.Name), nil
-}
+func providePostgres(cfg *config.Config) (pwsql.ISQLGorm, error) {
+	client, err := pwsql.New(cfg.PG.URL, pwsql.MaxPoolSize(cfg.PG.PoolMax))
+	client.GetDB().AutoMigrate(&dto.User{}, &dto.Role{})
 
-func providePostgres(cfg *config.Config) (*gorm.DB, error) {
-	client, err := sqlgorm.New(cfg.PG.URL, sqlgorm.MaxPoolSize(cfg.PG.PoolMax))
-	return client.DB, err
+	return client, err
 }
 
 func provideRedisCache(cfg *config.Config) (*redis.Client, error) {
-	cache, err := redisCache.New(cfg.Redis.DSN)
-	return cache.Client, err
+	c, err := redisCache.New(cfg.Redis.DSN)
+
+	return c.Client, err
+}
+
+func provideRocksCache(r *redis.Client) *rockscache.Client {
+	rc := rockscache.NewClient(r, rockscache.NewDefaultOptions())
+
+	return rc
 }
 
 func provideLocalCache() (*bigcache.BigCache, error) {
-	cache, err := local.New()
-	return cache.Client, err
+	c, err := local.New()
+
+	return c.Client, err
 }
 
-func provideUserRepo(sqlDatasource *repo.UserDatasourceImpl, redisCacheDatasource *cache.RedisCacheDataSourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl) *repository.UserRepoImpl {
-	return repository.NewUserRepoImpl(sqlDatasource, redisCacheDatasource, bigCacheDatasource)
+func provideTransactionRepo(datasource *sql.TransactionDataSourceImpl) *repository.TransactionRunRepoImpl {
+	return repository.NewTransactionRunRepoImpl(datasource)
 }
 
-func provideService(userRepo *repository.UserRepoImpl, l pwlogger.Interface, t operations.ITracer) usecase.IUserService {
-	return usecase.NewServiceImpl(userRepo, l, t)
+func provideUserRepo(sqlDatasource *sql.CRUDDatasourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl, client *rockscache.Client) *user.RepoImpl {
+	userCache := cache.NewRedisCacheDataSourceImpl(client, sqlDatasource)
+	return user.NewRepoImpl(sqlDatasource, userCache, bigCacheDatasource)
+}
+
+func provideRoleRepo(sqlDatasource *sql.CRUDDatasourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl, client *rockscache.Client) *role.RepoImpl {
+	roleCache := cache.NewRedisCacheDataSourceImpl(client, sqlDatasource)
+	return role.NewRepoImpl(sqlDatasource, roleCache, bigCacheDatasource)
+}
+
+func provideServices(user application_user.IService, role application_role.IService) v1.Services {
+	return v1.Services{
+		User: user,
+		Role: role,
+	}
+}
+
+func provideUserService(userRepo *user.RepoImpl, l pwlogger.Interface) application_user.IService {
+	return application_user.NewServiceImpl(userRepo, l)
+}
+
+func provideRoleService(roleRepo *role.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, l pwlogger.Interface) application_role.IService {
+	return application_role.NewServiceImpl(roleRepo, transactionRepo, l)
 }
 
 func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Server {
@@ -57,20 +86,25 @@ func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Serv
 }
 
 var appSet = wire.NewSet(
-	provideTracer,
 	providePostgres,
 	provideRedisCache,
 	provideLocalCache,
-	repo.NewUserDatasourceImpl,
-	cache.NewRedisCacheDataSourceImpl,
+	provideRocksCache,
+	sql.NewTransactionRunDataSourceImpl,
+	sql.NewCRUDDatasourceImpl,
 	cache.NewBigCacheDataSourceImp,
+	provideTransactionRepo,
 	provideUserRepo,
-	provideService,
+	provideRoleRepo,
+	provideUserService,
+	provideRoleService,
+	provideServices,
 	v1.NewRouter,
 	provideHTTPServer,
 )
 
 func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server, error) {
 	wire.Build(appSet)
+
 	return &httpserver.Server{}, nil
 }

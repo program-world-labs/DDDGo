@@ -25,7 +25,7 @@ compose-down: ### Down docker-compose
 .PHONY: compose-down
 
 swag-v1: ### swag init
-	swag init -g internal/controller/http/v1/router.go
+	swag init -g internal/adapter/http/v1/router.go
 .PHONY: swag-v1
 
 run: swag-v1 ### swag run
@@ -58,10 +58,16 @@ integration-test: ### run integration-test
 .PHONY: integration-test
 
 mock: ### run mockgen
-	mockgen -source=internal/domain/user/repository/user_repository.go -destination=tests/mock/UserRepository_mock.go -package=mock
-	mockgen -source=internal/application/user/user_interface.go -destination=tests/mock/UserService_mock.go -package=mock
-	mockgen -source=internal/infra/datasource/interface.go -destination=tests/mock/DataSource_mock.go -package=mock
-	mockgen -source=pkg/operations/tracer.go -destination=tests/mock/Tracer_mock.go -package=mock
+	mockgen -source=internal/infra/datasource/interface.go -destination=tests/mocks/DataSource_mock.go -package=mocks
+	mockgen -source=internal/domain/repository.go -destination=tests/mocks/Repository_mock.go -package=mocks
+	
+	mockgen -source=internal/application/user/interface.go -destination=tests/mocks/user/UserService_mock.go -package=user
+	mockgen -source=internal/domain/user/repository/user_repository.go -destination=tests/mocks/user/UserRepository_mock.go -package=user
+
+	mockgen -source=internal/application/role/interface.go -destination=tests/mocks/role/RoleService_mock.go -package=role
+	mockgen -source=internal/domain/user/repository/role_repository.go -destination=tests/mocks/role/RoleRepository_mock.go -package=role
+
+
 .PHONY: mock
 
 wire: ### run mockgen

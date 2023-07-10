@@ -13,8 +13,16 @@ import (
 	// Blank import removed as it is not justified
 	// _ "github.com/program-world-labs/DDDGo/docs".
 	_ "github.com/program-world-labs/DDDGo/docs"
-	usecase "github.com/program-world-labs/DDDGo/internal/application/user"
+	"github.com/program-world-labs/DDDGo/internal/adapter/http/v1/role"
+	"github.com/program-world-labs/DDDGo/internal/adapter/http/v1/user"
+	application_role "github.com/program-world-labs/DDDGo/internal/application/role"
+	application_user "github.com/program-world-labs/DDDGo/internal/application/user"
 )
+
+type Services struct {
+	User application_user.IService
+	Role application_role.IService
+}
 
 // NewRouter -.
 // Swagger spec:
@@ -22,8 +30,9 @@ import (
 // @description Using a translation service as an example
 // @version     1.0
 // @host        localhost:8080
-// @BasePath    /v1.
-func NewRouter(l pwlogger.Interface, t usecase.IUserService) *gin.Engine {
+// @BasePath    /v1
+// Swagger base path.
+func NewRouter(l pwlogger.Interface, s Services) *gin.Engine {
 	handler := gin.New()
 	// Options
 	handler.Use(gin.Logger())
@@ -42,7 +51,8 @@ func NewRouter(l pwlogger.Interface, t usecase.IUserService) *gin.Engine {
 	// Routers
 	h := handler.Group("/v1")
 	{
-		newUserRoutes(h, t, l)
+		user.NewUserRoutes(h, s.User, l)
+		role.NewRoleRoutes(h, s.Role, l)
 	}
 
 	return handler

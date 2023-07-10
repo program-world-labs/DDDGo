@@ -19,6 +19,31 @@ services:
       - redis-data:/data
     ports:
       - 6379:6379
+
+  dtm:
+    image: yedf/dtm
+    environment:
+      STORE_DRIVER: mysql
+      STORE_HOST: test_mysql
+      STORE_USER: root
+      STORE_PASSWORD: 'pass'
+      STORE_PORT: 3306
+    ports:
+      - '36789:36789'
+      - '36790:36790'
+
+  test_mysql:
+    container_name: mysql
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "pass"
+      MYSQL_DATABASE: "dtm"
+    ports:
+      - 3306:3306
 volumes:
   pg-data:
   redis-data:
+  mysql-data:

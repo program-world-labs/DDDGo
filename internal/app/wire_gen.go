@@ -8,81 +8,111 @@ package app
 
 import (
 	"github.com/allegro/bigcache/v3"
+	"github.com/dtm-labs/rockscache"
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 	"github.com/program-world-labs/DDDGo/config"
 	"github.com/program-world-labs/DDDGo/internal/adapter/http/v1"
-	"github.com/program-world-labs/DDDGo/internal/application/user"
+	role2 "github.com/program-world-labs/DDDGo/internal/application/role"
+	user2 "github.com/program-world-labs/DDDGo/internal/application/user"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource/cache"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource/sql"
+	"github.com/program-world-labs/DDDGo/internal/infra/dto"
 	"github.com/program-world-labs/DDDGo/internal/infra/repository"
+	"github.com/program-world-labs/DDDGo/internal/infra/role"
+	"github.com/program-world-labs/DDDGo/internal/infra/user"
 	"github.com/program-world-labs/DDDGo/pkg/cache/local"
 	redis2 "github.com/program-world-labs/DDDGo/pkg/cache/redis"
 	"github.com/program-world-labs/DDDGo/pkg/httpserver"
-	"github.com/program-world-labs/DDDGo/pkg/operations"
-	"github.com/program-world-labs/DDDGo/pkg/sql_gorm"
+	"github.com/program-world-labs/DDDGo/pkg/pwsql"
 	"github.com/program-world-labs/pwlogger"
 	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 )
 
 // Injectors from wire.go:
 
 func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server, error) {
-	db, err := providePostgres(cfg)
+	isqlGorm, err := providePostgres(cfg)
 	if err != nil {
 		return nil, err
 	}
-	userDatasourceImpl := sql.NewUserDatasourceImpl(db)
-	client, err := provideRedisCache(cfg)
-	if err != nil {
-		return nil, err
-	}
-	redisCacheDataSourceImpl := cache.NewRedisCacheDataSourceImpl(client)
+	crudDatasourceImpl := sql.NewCRUDDatasourceImpl(isqlGorm)
 	bigCache, err := provideLocalCache()
 	if err != nil {
 		return nil, err
 	}
 	bigCacheDataSourceImpl := cache.NewBigCacheDataSourceImp(bigCache)
-	userRepoImpl := provideUserRepo(userDatasourceImpl, redisCacheDataSourceImpl, bigCacheDataSourceImpl)
-	iTracer, err := provideTracer(cfg)
+	client, err := provideRedisCache(cfg)
 	if err != nil {
 		return nil, err
 	}
-	iUserService := provideService(userRepoImpl, l, iTracer)
-	engine := v1.NewRouter(l, iUserService)
+	rockscacheClient := provideRocksCache(client)
+	repoImpl := provideUserRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
+	iService := provideUserService(repoImpl, l)
+	roleRepoImpl := provideRoleRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
+	transactionDataSourceImpl := sql.NewTransactionRunDataSourceImpl(isqlGorm)
+	transactionRunRepoImpl := provideTransactionRepo(transactionDataSourceImpl)
+	roleIService := provideRoleService(roleRepoImpl, transactionRunRepoImpl, l)
+	services := provideServices(iService, roleIService)
+	engine := v1.NewRouter(l, services)
 	server := provideHTTPServer(engine, cfg)
 	return server, nil
 }
 
 // wire.go:
 
-func provideTracer(cfg *config.Config) (operations.ITracer, error) {
-	operations.GoogleCloudOperationInit(cfg.GCP.Project, cfg.GCP.Monitor)
-	return operations.NewTracer(cfg.App.Name), nil
-}
+func providePostgres(cfg *config.Config) (pwsql.ISQLGorm, error) {
+	client, err := pwsql.New(cfg.PG.URL, pwsql.MaxPoolSize(cfg.PG.PoolMax))
+	client.GetDB().AutoMigrate(&dto.User{}, &dto.Role{})
 
-func providePostgres(cfg *config.Config) (*gorm.DB, error) {
-	client, err := sqlgorm.New(cfg.PG.URL, sqlgorm.MaxPoolSize(cfg.PG.PoolMax))
-	return client.DB, err
+	return client, err
 }
 
 func provideRedisCache(cfg *config.Config) (*redis.Client, error) {
-	cache2, err := redis2.New(cfg.Redis.DSN)
-	return cache2.Client, err
+	c, err := redis2.New(cfg.Redis.DSN)
+
+	return c.Client, err
+}
+
+func provideRocksCache(r *redis.Client) *rockscache.Client {
+	rc := rockscache.NewClient(r, rockscache.NewDefaultOptions())
+
+	return rc
 }
 
 func provideLocalCache() (*bigcache.BigCache, error) {
-	cache2, err := local.New()
-	return cache2.Client, err
+	c, err := local.New()
+
+	return c.Client, err
 }
 
-func provideUserRepo(sqlDatasource *sql.UserDatasourceImpl, redisCacheDatasource *cache.RedisCacheDataSourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl) *repository.UserRepoImpl {
-	return repository.NewUserRepoImpl(sqlDatasource, redisCacheDatasource, bigCacheDatasource)
+func provideTransactionRepo(datasource *sql.TransactionDataSourceImpl) *repository.TransactionRunRepoImpl {
+	return repository.NewTransactionRunRepoImpl(datasource)
 }
 
-func provideService(userRepo *repository.UserRepoImpl, l pwlogger.Interface, t operations.ITracer) user.IUserService {
-	return user.NewServiceImpl(userRepo, l, t)
+func provideUserRepo(sqlDatasource *sql.CRUDDatasourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl, client *rockscache.Client) *user.RepoImpl {
+	userCache := cache.NewRedisCacheDataSourceImpl(client, sqlDatasource)
+	return user.NewRepoImpl(sqlDatasource, userCache, bigCacheDatasource)
+}
+
+func provideRoleRepo(sqlDatasource *sql.CRUDDatasourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl, client *rockscache.Client) *role.RepoImpl {
+	roleCache := cache.NewRedisCacheDataSourceImpl(client, sqlDatasource)
+	return role.NewRepoImpl(sqlDatasource, roleCache, bigCacheDatasource)
+}
+
+func provideServices(user3 user2.IService, role3 role2.IService) v1.Services {
+	return v1.Services{
+		User: user3,
+		Role: role3,
+	}
+}
+
+func provideUserService(userRepo *user.RepoImpl, l pwlogger.Interface) user2.IService {
+	return user2.NewServiceImpl(userRepo, l)
+}
+
+func provideRoleService(roleRepo *role.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, l pwlogger.Interface) role2.IService {
+	return role2.NewServiceImpl(roleRepo, transactionRepo, l)
 }
 
 func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Server {
@@ -90,9 +120,13 @@ func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Serv
 }
 
 var appSet = wire.NewSet(
-	provideTracer,
 	providePostgres,
 	provideRedisCache,
-	provideLocalCache, sql.NewUserDatasourceImpl, cache.NewRedisCacheDataSourceImpl, cache.NewBigCacheDataSourceImp, provideUserRepo,
-	provideService, v1.NewRouter, provideHTTPServer,
+	provideLocalCache,
+	provideRocksCache, sql.NewTransactionRunDataSourceImpl, sql.NewCRUDDatasourceImpl, cache.NewBigCacheDataSourceImp, provideTransactionRepo,
+	provideUserRepo,
+	provideRoleRepo,
+	provideUserService,
+	provideRoleService,
+	provideServices, v1.NewRouter, provideHTTPServer,
 )
