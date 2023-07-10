@@ -1,6 +1,7 @@
 package sql
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
@@ -13,6 +14,11 @@ const (
 	ErrorCodeSQLUpdateWithFields
 	ErrorCodeSQLGet
 	ErrorCodeSQLGetAll
+	ErrorCodeSQLCast
+)
+
+var (
+	ErrCastToEntityFailed = errors.New("cast to entity failed")
 )
 
 func NewCreateError(err error) *domainerrors.ErrorInfo {
@@ -37,4 +43,10 @@ func NewGetError(err error) *domainerrors.ErrorInfo {
 
 func NewGetAllError(err error) *domainerrors.ErrorInfo {
 	return domainerrors.New(fmt.Sprint(ErrorCodeSQLGetAll), err.Error())
+}
+
+func NewCastError(err error) *domainerrors.ErrorInfo {
+	errCast := domainerrors.New(fmt.Sprint(ErrorCodeSQLCast), err.Error())
+
+	return errCast
 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/program-world-labs/pwlogger"
 
+	"github.com/program-world-labs/DDDGo/internal/domain"
 	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 	"github.com/program-world-labs/DDDGo/internal/domain/user/repository"
 )
@@ -13,13 +14,14 @@ var _ IService = (*ServiceImpl)(nil)
 
 // ServiceImpl -.
 type ServiceImpl struct {
-	RoleRepo repository.RoleRepository
-	log      pwlogger.Interface
+	TransactionRepo domain.ITransactionRepo
+	RoleRepo        repository.RoleRepository
+	log             pwlogger.Interface
 }
 
 // NewServiceImpl -.
-func NewServiceImpl(roleRepo repository.RoleRepository, l pwlogger.Interface) *ServiceImpl {
-	return &ServiceImpl{RoleRepo: roleRepo, log: l}
+func NewServiceImpl(roleRepo repository.RoleRepository, transactionRepo domain.ITransactionRepo, l pwlogger.Interface) *ServiceImpl {
+	return &ServiceImpl{RoleRepo: roleRepo, TransactionRepo: transactionRepo, log: l}
 }
 
 // CreateRole creates a role.

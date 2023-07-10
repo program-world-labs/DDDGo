@@ -18,6 +18,7 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource/cache"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource/sql"
 	"github.com/program-world-labs/DDDGo/internal/infra/dto"
+	"github.com/program-world-labs/DDDGo/internal/infra/repository"
 	"github.com/program-world-labs/DDDGo/internal/infra/role"
 	"github.com/program-world-labs/DDDGo/internal/infra/user"
 	"github.com/program-world-labs/DDDGo/pkg/cache/local"
@@ -49,7 +50,9 @@ func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server
 	repoImpl := provideUserRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
 	iService := provideUserService(repoImpl, l)
 	roleRepoImpl := provideRoleRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
-	roleIService := provideRoleService(roleRepoImpl, l)
+	transactionDataSourceImpl := sql.NewTransactionRunDataSourceImpl(isqlGorm)
+	transactionRunRepoImpl := provideTransactionRepo(transactionDataSourceImpl)
+	roleIService := provideRoleService(roleRepoImpl, transactionRunRepoImpl, l)
 	services := provideServices(iService, roleIService)
 	engine := v1.NewRouter(l, services)
 	server := provideHTTPServer(engine, cfg)
@@ -83,6 +86,10 @@ func provideLocalCache() (*bigcache.BigCache, error) {
 	return c.Client, err
 }
 
+func provideTransactionRepo(datasource *sql.TransactionDataSourceImpl) *repository.TransactionRunRepoImpl {
+	return repository.NewTransactionRunRepoImpl(datasource)
+}
+
 func provideUserRepo(sqlDatasource *sql.CRUDDatasourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl, client *rockscache.Client) *user.RepoImpl {
 	userCache := cache.NewRedisCacheDataSourceImpl(client, sqlDatasource)
 	return user.NewRepoImpl(sqlDatasource, userCache, bigCacheDatasource)
@@ -104,8 +111,8 @@ func provideUserService(userRepo *user.RepoImpl, l pwlogger.Interface) user2.ISe
 	return user2.NewServiceImpl(userRepo, l)
 }
 
-func provideRoleService(roleRepo *role.RepoImpl, l pwlogger.Interface) role2.IService {
-	return role2.NewServiceImpl(roleRepo, l)
+func provideRoleService(roleRepo *role.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, l pwlogger.Interface) role2.IService {
+	return role2.NewServiceImpl(roleRepo, transactionRepo, l)
 }
 
 func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Server {
@@ -116,7 +123,8 @@ var appSet = wire.NewSet(
 	providePostgres,
 	provideRedisCache,
 	provideLocalCache,
-	provideRocksCache, sql.NewCRUDDatasourceImpl, cache.NewBigCacheDataSourceImp, provideUserRepo,
+	provideRocksCache, sql.NewTransactionRunDataSourceImpl, sql.NewCRUDDatasourceImpl, cache.NewBigCacheDataSourceImp, provideTransactionRepo,
+	provideUserRepo,
 	provideRoleRepo,
 	provideUserService,
 	provideRoleService,

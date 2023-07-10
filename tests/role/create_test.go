@@ -23,6 +23,7 @@ import (
 	infra_sql "github.com/program-world-labs/DDDGo/internal/infra/datasource/sql"
 	infra_repo "github.com/program-world-labs/DDDGo/internal/infra/repository"
 	"github.com/program-world-labs/DDDGo/tests"
+	mock_repo "github.com/program-world-labs/DDDGo/tests/mocks"
 	mocks "github.com/program-world-labs/DDDGo/tests/mocks/role"
 )
 
@@ -60,10 +61,11 @@ type ServiceTest struct {
 	t        *testing.T
 	mockCtrl *gomock.Controller
 
-	input    *application_role.CreatedInput
-	expect   *application_role.Output
-	repoMock *mocks.MockRoleRepository
-	service  *application_role.ServiceImpl
+	input         *application_role.CreatedInput
+	expect        *application_role.Output
+	repoMock      *mocks.MockRoleRepository
+	transRepoMock *mock_repo.MockITransactionRepo
+	service       *application_role.ServiceImpl
 }
 
 func (st *ServiceTest) InitializeScenario(ctx *godog.ScenarioContext) {
@@ -130,7 +132,8 @@ func (st *ServiceTest) reset() {
 	st.input = nil
 	st.expect = nil
 	st.repoMock = mocks.NewMockRoleRepository(st.mockCtrl)
-	st.service = application_role.NewServiceImpl(st.repoMock, logger)
+	st.transRepoMock = mock_repo.NewMockITransactionRepo(st.mockCtrl)
+	st.service = application_role.NewServiceImpl(st.repoMock, st.transRepoMock, logger)
 }
 
 func (st *ServiceTest) givenData(name, description, permission string) error {

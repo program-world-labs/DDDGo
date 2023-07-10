@@ -59,6 +59,7 @@ integration-test: ### run integration-test
 
 mock: ### run mockgen
 	mockgen -source=internal/infra/datasource/interface.go -destination=tests/mocks/DataSource_mock.go -package=mocks
+	mockgen -source=internal/domain/repository.go -destination=tests/mocks/Repository_mock.go -package=mocks
 	
 	mockgen -source=internal/application/user/interface.go -destination=tests/mocks/user/UserService_mock.go -package=user
 	mockgen -source=internal/domain/user/repository/user_repository.go -destination=tests/mocks/user/UserRepository_mock.go -package=user
