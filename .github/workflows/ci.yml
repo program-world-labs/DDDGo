@@ -65,14 +65,14 @@ jobs:
           -coverprofile=coverage.txt \
           ./tests/..."
       - name: Zip files
-        run: zip -r tests/report.zip tests/report
+        run: zip -j tests/report/report.zip tests/report/*.json
       - name: Upload report to Jira Zephyr
         uses: program-world-labs/jira-zephyr-action@v1
         with:
           project_key: ${{ secrets.JIRA_ZEPHYR_PROJECT_KEY }}
           format: "cucumber"
           auth: ${{ secrets.JIRA_ZEPHYR_TOKEN }}
-          file_path: "tests/report.zip"
+          file_path: "tests/report/report.zip"
           auto_create_test_cases: "false"
           test_cycle: '{"name": "Auto Test Regression", "description": "Regression test cycle 1 to ensure no breaking changes", "jiraProjectVersion": 10000}'
       - name: Generate coverage report

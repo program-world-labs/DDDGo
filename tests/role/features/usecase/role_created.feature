@@ -1,7 +1,6 @@
 Feature: 創建角色
     測試創建角色相關的usecase功能
 
-    @TestCaseKey=LA-T1
     Scenario Outline: 創建角色成功
         
         Given 提供 <name>, <description>, <permissions>
@@ -15,7 +14,6 @@ Feature: 創建角色
             |owner|this is owner role|read:all,write:all|
             |test|this is test role|read:all,delete:all|
 
-    @TestCaseKey=LA-T2
     Scenario Outline: 創建一個已存在的角色名稱
         
         Given 提供 <name>, <description>, <permissions>
@@ -26,7 +24,6 @@ Feature: 創建角色
         	|name|description|permissions|
             |admin|this is admin role|read:all,write:all,delete:all|
 
-    @TestCaseKey=LA-T3
     Scenario Outline: 提供的權限格式不正確
         
         Given 提供 <name>, <description>, <permissions>
@@ -37,7 +34,6 @@ Feature: 創建角色
             |name|description|permissions|
             |invalid|this is invalid role|read:all,write:all,delete:all,invalid:all|
 
-    @TestCaseKey=LA-T4
     Scenario Outline: 提供的名稱格式不正確
         
         Given 提供 <name>, <description>, <permissions>
@@ -48,7 +44,6 @@ Feature: 創建角色
             |name|description|permissions|
             |@|this is invalid role|read:all,write:all,delete:all|
 
-    @TestCaseKey=LA-T5
     Scenario Outline: 提供的角色名稱或描述長度為最大值
             
         Given 提供 <name>, <description>, <permissions>
@@ -59,7 +54,6 @@ Feature: 創建角色
             |name|description|permissions|
             |eMAWSxvuWc36VAKVFxMmeYHmr70GvI|rfgkzDeNnc69zIDnsxdZTfEazl2sXEfCKhFds6ydEWfzN5pGrRlQa22524xvzLS7gtgKFzqizI4aCxXIB7Vni2uPbWjy4vBntNc9XvnSKvAfqzbMOgmD3jxmKuJGNRO4zfX6HNykFQJfSB4qCu47bE6Uzhzul1uHXcrKQWRR85ziXcHMfu1g4NmMHQBpWiFswexTwn4g|read:all|
 
-    @TestCaseKey=LA-T6
     Scenario Outline: 提供的角色描述長度超過最大值
         
         Given 提供 <name>, <description>, <permissions>
@@ -72,7 +66,6 @@ Feature: 創建角色
             |o8SA8aJMn1EaBjMS3l6UPdLPZ931T9|AQTdYDISBUy7YFfrPHAA9R34GHEPmotoGkT9k0JPXbZk5P2vk1WudZbwhVk2KrtgDrRPK9uaPcryLIFdBVL6l4ct2SdyBq7WI0htPXinMhjACuaN7x6RL7rhAeS3Esa6h9kNPoB3mAsFkzr9ysCFnlLajh8a0KlkJcAplKYvPOXVbrnEJ3mdfH3rzIaCxjCM4FU69K7ht|read:all|
             |o8SA8aJMn1EaBjMS3l6UPdLPZ931T9|CQTdYDISBUy7YFfrPHAA9R34GHEPmotoGkT9k0JPXbZk5P2vk1WudZbwhVk2KrtgDrRPK9uaPcryLIFdBVL6l4ct2SdyBq7WI0htPXinMhjACuaN7x6RL7rhAeS3Esa6h9kNPoB3mAsFkzr9ysCFnlLajh8a0KlkJcAplKYvPOXVbrnEJ3mdfH3rzIaCxjCM4FU69K7ht|read:all|
 
-    @TestCaseKey=LA-T7
     Scenario Outline: 提供的角色名稱長度超過最大值
         
         Given 提供 <name>, <description>, <permissions>
