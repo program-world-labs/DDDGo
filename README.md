@@ -1,4 +1,3 @@
-
 <div align="center">
 <h1 align="center">
 <img src="https://raw.githubusercontent.com/PKief/vscode-material-icon-theme/ec559a9f6bfd399b82bb44393651661b08aaf7ba/icons/folder-markdown-open.svg" width="100" />
@@ -28,6 +27,7 @@
 ---
 
 ## 📒 Table of Contents
+
 - [📒 Table of Contents](#-table-of-contents)
 - [📍 Overview](#-overview)
 - [⚙️ Features](#️-features)
@@ -43,7 +43,6 @@
 
 ---
 
-
 ## 📍 Overview
 
 This project is an API service designed and implemented using Domain-Driven Design (DDD) principles. DDD is an approach to software development that greatly emphasizes the importance of understanding and modeling the domain. It aims to ease the creation of complex applications by connecting the related pieces of the software into an evolving model.
@@ -52,7 +51,7 @@ The API service is structured around business domains, each represented by a bou
 
 The service is built with a layered architecture, typical in DDD:
 
-- **Domain Layer**: This is the heart of the software, containing business logic and types, which doesn't depend on other layers.
+- **Domain Layer**: This is the core of the software, containing business logic and types, which doesn't depend on other layers.
 - **Application Layer**: This layer drives the workflow of the application, directing the domain layer, and is kept thin with logic that does not belong in the domain.
 - **Infrastructure Layer**: This layer provides generic technical capabilities that support higher layers (message sending, persistence, drawing UI components, and so on).
 - **Adapter Layer (or Presentation Layer)**: This layer is responsible for presenting information to the user and interpreting the user's commands.
@@ -61,24 +60,21 @@ This DDD approach ensures that the focus is on the core domain and domain logic,
 
 The API service is designed to be scalable, maintainable, and organized around the business domain, providing a strong foundation for further development and adjustments as the understanding of the domain evolves.
 
-
 ---
 
 ## ⚙️ Features
+
 - **HTTP Support**: The service can handle HTTP requests and responses.
 - **Behavior-Driven Development (BDD)**: The service is developed with a focus on behavior, making it more aligned with business requirements and easier to understand.
 - **Event Sourcing**: The state of the business objects is determined by a sequence of events, providing a great audit trail and history that can enable various business insights.
 - **SQL Transactions**: The service supports SQL transactions to ensure data consistency and integrity.
-- **Anti-Penetration Measures**: The service includes measures to prevent unauthorized access or penetration.
-- **Anti-Avalanche Measures**: The service has mechanisms to prevent system failures due to sudden spikes in usage or demand.
-- **Anti-Breakdown Measures**: The service is designed to prevent system breakdowns and ensure high availability.
-
+- **Anti-Breakdown**
+- **Anti-Penetration**
+- **Anti-Avalanche**
 
 ---
 
-
 ## 📂 Project Structure
-
 
 ```bash
 repo
@@ -254,7 +250,7 @@ repo
 <details closed><summary>Root</summary>
 
 | File                                                                           | Summary                                                                                                                                                                                                                                                                          |
-| ---                                                                            | ---                                                                                                                                                                                                                                                                              |
+| ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [go.mod](https://github.com/program-world-labs/DDDGo/blob/main/go.mod)         | The code snippet is a Go module file that lists the required dependencies for a project. It includes various packages and libraries from different sources that are necessary for the project's functionality.                                                                   |
 | [Dockerfile](https://github.com/program-world-labs/DDDGo/blob/main/Dockerfile) | The provided code snippet uses Docker to build a Go application in three steps. First, it caches the Go modules. Then, it builds the application. Finally, it creates a minimal Docker image with the necessary files and runs the application.                                  |
 | [Makefile](https://github.com/program-world-labs/DDDGo/blob/main/Makefile)     | This code snippet is a Makefile that provides various commands for managing and running a Go application. It includes functionality for running Docker-compose, generating Swagger documentation, running tests, running linters, creating migrations, and mocking dependencies. |
@@ -264,7 +260,7 @@ repo
 <details closed><summary>App</summary>
 
 | File                                                                                          | Summary                                                                                                                                                                                                                                                                    |
-| ---                                                                                           | ---                                                                                                                                                                                                                                                                        |
+| --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [main.go](https://github.com/program-world-labs/DDDGo/blob/main/cmd/app/main.go)              | This code snippet sets up the main application by handling the configuration and running the app with the provided configuration.                                                                                                                                          |
 | [wire_gen.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/app/wire_gen.go) | This code snippet sets up dependency injection and wiring for an application. It provides functions to create various services and repositories for users, roles, transactions, and caches. It also initializes an HTTP server with a specified configuration.             |
 | [app.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/app/app.go)           | This code snippet initializes a logger and an HTTP server, and then waits for a signal or an error. Upon receiving a signal or error, it shuts down the server.                                                                                                            |
@@ -276,7 +272,7 @@ repo
 <details closed><summary>Migrations</summary>
 
 | File                                                                                                                                          | Summary                                                                                                                                                                                                                                                                                                         |
-| ---                                                                                                                                           | ---                                                                                                                                                                                                                                                                                                             |
+| --------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [20210221023242_migrate_name.up.sql](https://github.com/program-world-labs/DDDGo/blob/main/migrations/20210221023242_migrate_name.up.sql)     | The code snippet creates a table named "history" with five columns: id, source, destination, original, and translation. The table will be created only if it doesn't already exist. The "id" column is a serial primary key, and the other columns are of type VARCHAR with a maximum length of 255 characters. |
 | [20210221023242_migrate_name.down.sql](https://github.com/program-world-labs/DDDGo/blob/main/migrations/20210221023242_migrate_name.down.sql) | The code snippet drops the "history" table if it already exists. This ensures a clean slate for creating or re-creating the table in the future.                                                                                                                                                                |
 
@@ -285,7 +281,7 @@ repo
 <details closed><summary>Config</summary>
 
 | File                                                                                | Summary                                                                                                                                                                                                                                                                                                                   |
-| ---                                                                                 | ---                                                                                                                                                                                                                                                                                                                       |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [config.go](https://github.com/program-world-labs/DDDGo/blob/main/config/config.go) | This code snippet defines a Config struct and a NewConfig function that reads configuration values from environment variables and a YAML file using the viper package. It sets the values of various fields in the Config struct based on the environment and loads the necessary environment variables for GCP services. |
 
 </details>
@@ -293,7 +289,7 @@ repo
 <details closed><summary>Dto</summary>
 
 | File                                                                                                  | Summary                                                                                                                                                                                                                                                                                                                        |
-| ---                                                                                                   | ---                                                                                                                                                                                                                                                                                                                            |
+| ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [error.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/infra/dto/error.go)         | This code snippet defines functions for creating error information objects for different DTO transformations, such as user, role, group, wallet, and amount. These functions utilize the domainerrors package to generate unique error codes based on the corresponding DTO and domain errors.                                 |
 | [amount.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/infra/dto/amount.go)       | This code snippet defines a data transfer object (DTO) named "Amount" with various methods for transforming, copying, and interacting with the data. It also includes functionality for JSON encoding and decoding, as well as hooks for updating and creating records in a database.                                          |
 | [user.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/infra/dto/user.go)           | This code snippet defines a User struct with various properties and methods for data transformation, JSON encoding and decoding, and database operations using GORM. It also includes implementation for interface methods and hooks for updating and creating records.                                                        |
@@ -308,7 +304,7 @@ repo
 <details closed><summary>Datasource</summary>
 
 | File                                                                                                         | Summary                                                                                                                                                                                                                                                                                      |
-| ---                                                                                                          | ---                                                                                                                                                                                                                                                                                          |
+| ------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [interface.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/infra/datasource/interface.go) | The provided code snippet defines interfaces for a data source and cache data source, as well as an interface for running transactions. These interfaces define core functionalities such as creating, deleting, updating, and retrieving data, both with and without transactional support. |
 
 </details>
@@ -316,7 +312,7 @@ repo
 <details closed><summary>Cache</summary>
 
 | File                                                                                                                             | Summary                                                                                                                                                                                                                                                                                   |
-| ---                                                                                                                              | ---                                                                                                                                                                                                                                                                                       |
+| -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [cache_local_impl.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/infra/datasource/cache/cache_local_impl.go) | The provided code snippet is an implementation of a cache data source using the BigCache library. It includes functions for retrieving, storing, and deleting data in the cache using a key generated from the model's table name and ID.                                                 |
 | [error.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/infra/datasource/cache/error.go)                       | The code snippet defines error handling functions for cache operations, including setting, deleting, and getting data from the cache. These functions generate error information using an error code and the associated error message.                                                    |
 | [cache_redis_impl.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/infra/datasource/cache/cache_redis_impl.go) | The provided code snippet is a Go package that implements a Redis cache data source. It includes functions to get data from the cache, set data in the cache, and delete data from the cache. The cache uses a Redis client and interacts with an SQL data source to fetch or store data. |
@@ -326,7 +322,7 @@ repo
 <details closed><summary>Sql</summary>
 
 | File                                                                                                                                           | Summary                                                                                                                                                                                                                                                                                                                         |
-| ---                                                                                                                                            | ---                                                                                                                                                                                                                                                                                                                             |
+| ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [transaction_event_impl.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/infra/datasource/sql/transaction_event_impl.go)     | The code snippet defines a package for SQL operations. It implements an interface for transaction events using GORM as the ORM library. It provides a method to retrieve the database transaction.                                                                                                                              |
 | [error.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/infra/datasource/sql/error.go)                                       | This code snippet defines error handling functions for common SQL operations such as create, delete, update, get, and cast. It uses domain specific error codes to provide more meaningful error messages.                                                                                                                      |
 | [crud_sql_impl.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/infra/datasource/sql/crud_sql_impl.go)                       | This code snippet is a CRUD (Create, Read, Update, Delete) implementation for interacting with a SQL database using GORM. It provides methods for performing these operations on a given model, both within and outside of a transaction.                                                                                       |
@@ -337,7 +333,7 @@ repo
 <details closed><summary>Repository</summary>
 
 | File                                                                                                                                   | Summary                                                                                                                                                                                                                                                                                                    |
-| ---                                                                                                                                    | ---                                                                                                                                                                                                                                                                                                        |
+| -------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [error.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/infra/repository/error.go)                                   | This code snippet defines error codes and provides a function to create a new error instance. It handles errors from a datasource and converts them into domain-specific errors with appropriate error codes.                                                                                              |
 | [crud_repo_impl.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/infra/repository/crud_repo_impl.go)                 | The provided code snippet is a CRUD repository implementation that interacts with a database, Redis cache, and local cache. It provides functions for retrieving, creating, updating, and deleting entities. It also includes transactional versions of these functions for use with transactional events. |
 | [cache_update_repo_impl.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/infra/repository/cache_update_repo_impl.go) | This code snippet defines a struct called CacheUpdateImpl that implements methods for saving and deleting data from a remote cache and a local cache. It uses a DTOEntity to transform the data and interacts with the cache through the RemoteCache and Cache data sources.                               |
@@ -353,7 +349,7 @@ repo
 <details closed><summary>Role</summary>
 
 | File                                                                                                           | Summary                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| ---                                                                                                            | ---                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [repo_impl.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/infra/role/repo_impl.go)         | The provided code snippet is a package named "role" that implements the RoleRepository interface. It includes dependencies for user repository, database, cache, and DTO. The RepoImpl struct provides CRUD functionality for roles using these dependencies. The NewRepoImpl function initializes a new RepoImpl instance.                                                                                                                                |
 | [error.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/adapter/http/v1/role/error.go)       | This code snippet includes functions for creating and handling various errors related to the role domain. It also defines a struct for an error event that can be logged using zerolog.                                                                                                                                                                                                                                                                    |
 | [response.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/adapter/http/v1/role/response.go) | The code snippet defines a response struct and a function to create a new response object. The response object contains various fields such as ID, name, description, permissions, users, created at, and updated at. The NewResponse function initializes a response object by mapping values from the input model object and creating a list of user responses.                                                                                          |
@@ -369,7 +365,7 @@ repo
 <details closed><summary>Group</summary>
 
 | File                                                                                                    | Summary                                                                                                                                                                                                                                                                                                               |
-| ---                                                                                                     | ---                                                                                                                                                                                                                                                                                                                   |
+| ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [repo_impl.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/infra/group/repo_impl.go) | The provided code snippet is a Go package that includes a GroupRepository implementation. It uses various dependencies for data storage and caching, and extends a base CRUD implementation. The NewRepoImpl function initializes the repository with the necessary data sources and returns an instance of RepoImpl. |
 
 </details>
@@ -377,7 +373,7 @@ repo
 <details closed><summary>Amount</summary>
 
 | File                                                                                                     | Summary                                                                                                                                                                                                                                |
-| ---                                                                                                      | ---                                                                                                                                                                                                                                    |
+| -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [repo_impl.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/infra/amount/repo_impl.go) | The code snippet provides a repository implementation for managing amount-related data in the domain. It utilizes CRUD operations and relies on different data sources such as a database and cache to store and retrieve amount data. |
 
 </details>
@@ -385,7 +381,7 @@ repo
 <details closed><summary>User</summary>
 
 | File                                                                                                           | Summary                                                                                                                                                                                                                                                                                                                                                                        |
-| ---                                                                                                            | ---                                                                                                                                                                                                                                                                                                                                                                            |
+| -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [repo_impl.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/infra/user/repo_impl.go)         | The code snippet defines a user repository implementation that incorporates CRUD operations using a database and cache. It utilizes data transfer objects (DTOs) and is based on an underlying CRUD implementation.                                                                                                                                                            |
 | [response.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/adapter/http/v1/user/response.go) | The code snippet defines a Response struct with fields for user information. It provides a NewResponse function that creates a Response object from an application_user.Output model. Only specific fields from the model are included in the Response object.                                                                                                                 |
 | [request.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/adapter/http/v1/user/request.go)   | The provided code snippet is a package called "user" that likely contains functionalities related to managing user information or interactions.                                                                                                                                                                                                                                |
@@ -399,7 +395,7 @@ repo
 <details closed><summary>Wallet</summary>
 
 | File                                                                                                     | Summary                                                                                                                                                                                                                           |
-| ---                                                                                                      | ---                                                                                                                                                                                                                               |
+| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [repo_impl.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/infra/wallet/repo_impl.go) | The code snippet defines a WalletRepository implementation that leverages a CRUDImpl to interact with a database, Redis cache, and another cache. It also provides a constructor function for creating instances of the RepoImpl. |
 
 </details>
@@ -407,7 +403,7 @@ repo
 <details closed><summary>Http</summary>
 
 | File                                                                                                   | Summary                                                                                                                                                                                                                                                                                                                     |
-| ---                                                                                                    | ---                                                                                                                                                                                                                                                                                                                         |
+| ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [error.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/adapter/http/error.go)       | The code snippet defines an AdapterError struct that wraps around a domain error. It also provides a function to create a new AdapterError instance by converting an error into a domain error.                                                                                                                             |
 | [response.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/adapter/http/response.go) | The code snippet provides functionalities for handling error responses and generating success responses in an HTTP server using the Gin framework. It includes a struct for the response format, functions for handling error responses and success responses, and an adapter for converting errors to the response format. |
 
@@ -416,7 +412,7 @@ repo
 <details closed><summary>V1</summary>
 
 | File                                                                                                  | Summary                                                                                                                                                                                                                                                                                |
-| ---                                                                                                   | ---                                                                                                                                                                                                                                                                                    |
+| ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [router.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/adapter/http/v1/router.go) | The code snippet implements routing paths for a Go API. It includes functionality for handling Swagger documentation, Kubernetes probes, Prometheus metrics, and routes for user and role operations. The code uses the Gin framework and follows a clean architecture design pattern. |
 
 </details>
@@ -424,7 +420,7 @@ repo
 <details closed><summary>Domain</summary>
 
 | File                                                                                                     | Summary                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| ---                                                                                                      | ---                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [search_query.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/domain/search_query.go) | The code snippet defines a package "domain" containing struct types and methods for a search query feature. The "Page" struct represents pagination information, the "Filter" struct represents query filters, and the "Sort" struct represents sorting criteria. The "SearchQuery" struct combines these elements. The code also includes methods to retrieve the WHERE clause, arguments, and order for the search query. |
 | [entity.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/domain/entity.go)             | The code snippet defines an interface called IEntity that includes methods for getting and setting the ID of an entity.                                                                                                                                                                                                                                                                                                     |
 | [repository.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/domain/repository.go)     | The code snippet defines interfaces for CRUD operations, transaction handling, and cache updates in a domain package. It provides methods for retrieving, creating, updating, and deleting entities, as well as transactional versions of these operations. Additionally, there is an interface for cache-related operations.                                                                                               |
@@ -434,7 +430,7 @@ repo
 <details closed><summary>Domainerrors</summary>
 
 | File                                                                                                    | Summary                                                                                                                                                                                                                                                                                                  |
-| ---                                                                                                     | ---                                                                                                                                                                                                                                                                                                      |
+| ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [error.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/domain/domainerrors/error.go) | The provided code snippet defines a package for handling domain-specific errors. It includes functions for creating new errors, checking error codes, and retrieving the underlying cause of an error. The code also includes a struct for storing error information and implements the error interface. |
 
 </details>
@@ -442,7 +438,7 @@ repo
 <details closed><summary>Aggregate</summary>
 
 | File                                                                                                                     | Summary                                                                                                                                                                                                                                               |
-| ---                                                                                                                      | ---                                                                                                                                                                                                                                                   |
+| ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [order_aggregate.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/domain/aggregate/order_aggregate.go) | The code snippet is part of a package called "aggregate". It likely contains functions or classes that perform aggregation operations on data. Further details or specific functionality cannot be determined without examining the rest of the code. |
 
 </details>
@@ -450,7 +446,7 @@ repo
 <details closed><summary>Entity</summary>
 
 | File                                                                                                     | Summary                                                                                                                                                                                                                                                                                                          |
-| ---                                                                                                      | ---                                                                                                                                                                                                                                                                                                              |
+| -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [amount.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/domain/user/entity/amount.go) | The code snippet defines an Amount struct that represents a monetary amount. It implements the IEntity interface with GetID and SetID methods. It includes fields for ID, currency, icon, balance, decimal, wallet ID, creation/update/delete timestamps.                                                        |
 | [user.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/domain/user/entity/user.go)     | The provided code snippet defines a User entity structure with various fields such as ID, Username, Password, and more. It implements the IEntity interface and provides methods to get and set the ID. There is also a NewUser function to create a new User instance.                                          |
 | [role.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/domain/user/entity/role.go)     | This code snippet defines a Role struct with various attributes such as ID, name, description, permissions, users, and timestamps. It also includes methods to get and set the ID. The NewRole function creates a new Role instance with specified attributes. The code implements the domain.IEntity interface. |
@@ -462,7 +458,7 @@ repo
 <details closed><summary>Event</summary>
 
 | File                                                                                                            | Summary                                                                                                                                                       |
-| ---                                                                                                             | ---                                                                                                                                                           |
+| --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [user_event.go](https://github.com/program-world-labs/DDDGo/blob/main/internal/domain/user/event/user_event.go) | The code snippet defines a package called "event." It is likely to contain functionality related to events, such as event creation, handling, and management. |
 
 </details>
@@ -470,7 +466,7 @@ repo
 <details closed><summary>Integration-test</summary>
 
 | File                                                                                                              | Summary                                                                                                                                                                                                                                                                                                                                                                                          |
-| ---                                                                                                               | ---                                                                                                                                                                                                                                                                                                                                                                                              |
+| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [Dockerfile](https://github.com/program-world-labs/DDDGo/blob/main/integration-test/Dockerfile)                   | This code snippet sets up a multi-stage build process. In the first stage, it caches the Go modules by copying the go.mod and go.sum files, downloading the modules using'go mod download'. In the second stage, it copies the downloaded modules, source code, and sets the necessary environment variables for building a Linux binary. Finally, it runs the integration tests using'go test'. |
 | [integration_test.go](https://github.com/program-world-labs/DDDGo/blob/main/integration-test/integration_test.go) | The provided code snippet is an integration test that checks the availability of a host by performing a health check HTTP request. It retries the request a specified number of times until a successful response is received or the attempts are exhausted. If the host is not available, it logs an error and exits the test.                                                                  |
 
@@ -479,7 +475,7 @@ repo
 <details closed><summary>Redis</summary>
 
 | File                                                                                                   | Summary                                                                                                                                                                                                                                                   |
-| ---                                                                                                    | ---                                                                                                                                                                                                                                                       |
+| ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [options.go](https://github.com/program-world-labs/DDDGo/blob/main/pkg/cache/redis/options.go)         | The code snippet provides a package for interacting with Redis. It includes two options: MaxRetries sets the maximum number of retries for failed operations, and RetryDelay sets the delay between retries.                                              |
 | [redis_cache.go](https://github.com/program-world-labs/DDDGo/blob/main/pkg/cache/redis/redis_cache.go) | This code snippet provides a Redis struct with a New function for creating a Redis client using the provided Redis URL. It supports custom options for max retries and retry delay. The Close function is available to gracefully close the Redis client. |
 
@@ -488,7 +484,7 @@ repo
 <details closed><summary>Local</summary>
 
 | File                                                                                                         | Summary                                                                                                                                                                                                                                                                                                                                                         |
-| ---                                                                                                          | ---                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [bigcache_cache.go](https://github.com/program-world-labs/DDDGo/blob/main/pkg/cache/local/bigcache_cache.go) | The provided code snippet is a wrapper around the BigCache library, which helps in creating and managing a high-performance, in-memory cache. It sets up the cache with various configurations, such as the number of shards, expiration time, memory allocation, size limit, and callbacks. It also provides functions to create and close the cache instance. |
 
 </details>
@@ -496,7 +492,7 @@ repo
 <details closed><summary>Pwsql</summary>
 
 | File                                                                                                 | Summary                                                                                                                                                                                                                                                                |
-| ---                                                                                                  | ---                                                                                                                                                                                                                                                                    |
+| ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [options.go](https://github.com/program-world-labs/DDDGo/blob/main/pkg/pwsql/options.go)             | The code snippet defines three options (MaxPoolSize, ConnAttempts, and ConnTimeout) for configuring a Postgres database connection. These options modify the Postgres struct to set the maximum pool size, connection attempts, and connection timeout respectively.   |
 | [gorm_postgres.go](https://github.com/program-world-labs/DDDGo/blob/main/pkg/pwsql/gorm_postgres.go) | The provided code snippet is a package for interacting with a PostgreSQL database using the Gorm ORM. It establishes a connection to the database, sets pool size and connection attempts, and provides methods for accessing the database and closing the connection. |
 | [interface.go](https://github.com/program-world-labs/DDDGo/blob/main/pkg/pwsql/interface.go)         | The code snippet provides an interface named ISQLGorm with two core functionalities-GetDB() returns an instance of gorm.DB, and Close() closes the connection to the database.                                                                                         |
@@ -507,7 +503,7 @@ repo
 <details closed><summary>Operations</summary>
 
 | File                                                                                                    | Summary                                                                                                                                                                               |
-| ---                                                                                                     | ---                                                                                                                                                                                   |
+| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [stack_driver.go](https://github.com/program-world-labs/DDDGo/blob/main/pkg/operations/stack_driver.go) | The code snippet initializes and configures OpenTelemetry for Google Cloud Platform (GCP) operations, including trace exporting, resource detection, and setting the tracer provider. |
 
 </details>
@@ -515,7 +511,7 @@ repo
 <details closed><summary>Httpserver</summary>
 
 | File                                                                                          | Summary                                                                                                                                                                                                                                                                                                                  |
-| ---                                                                                           | ---                                                                                                                                                                                                                                                                                                                      |
+| --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [server.go](https://github.com/program-world-labs/DDDGo/blob/main/pkg/httpserver/server.go)   | The code snippet defines a package that implements an HTTP server. It allows creating and starting an HTTP server with custom options. It also provides methods for receiving notifications and gracefully shutting down the server. The default settings for timeouts, address, and shutdown duration are also defined. |
 | [options.go](https://github.com/program-world-labs/DDDGo/blob/main/pkg/httpserver/options.go) | This code snippet provides options to configure a HTTP server. It allows setting the server's port, read and write timeouts, and shutdown timeout. These options can be customized using the provided functions.                                                                                                         |
 
@@ -525,75 +521,80 @@ repo
 
 ## 🚀 Getting Started
 
-
 ### 📦 Installation
 
 1. Clone the DDDGo repository:
+
 ```sh
 git clone https://github.com/program-world-labs/DDDGo
 ```
 
 2. Change to the project directory:
+
 ```sh
 cd DDDGo
 ```
 
 3. Install the dependencies:
+
 ```sh
 go mod tidy
 ```
 
-
 ### 🧪 Running Tests
+
 ```sh
 make test
 ```
 
 ---
 
-
 ## 🗺 Roadmap
 
-> - [X] `ℹ️ Role Implementation`
+> - [x] `ℹ️ Role Implementation`
 > - [ ] `ℹ️ Event Sourcing Implementation`
 > - [ ] `ℹ️ User Implementation`
 > - [ ] `ℹ️ Group Implementation`
 > - [ ] `ℹ️ Wallet Implementation`
-
 
 ---
 
 ## 🤝 Contributing
 
 Contributions are always welcome! Please follow these steps:
+
 1. Fork the project repository. This creates a copy of the project on your account that you can modify without affecting the original project.
 2. Clone the forked repository to your local machine using a Git client like Git or GitHub Desktop.
 3. Create a new branch with a descriptive name (e.g., `new-feature-branch` or `bugfix-issue-123`).
+
 ```sh
 git checkout -b new-feature-branch
 ```
+
 4. Make changes to the project's codebase.
 5. Commit your changes to your local branch with a clear commit message that explains the changes you've made.
+
 ```sh
 git commit -m 'Implemented new feature.'
 ```
+
 6. Push your changes to your forked repository on GitHub using the following command
+
 ```sh
 git push origin new-feature-branch
 ```
+
 7. Create a new pull request to the original project repository. In the pull request, describe the changes you've made and why they're necessary.
-The project maintainers will review your changes and provide feedback or merge them into the main branch.
+   The project maintainers will review your changes and provide feedback or merge them into the main branch.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the `ℹ️  INSERT-LICENSE-TYPE` License. See the [LICENSE](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/adding-a-license-to-a-repository) file for additional info.
+This project is licensed under the `ℹ️ INSERT-LICENSE-TYPE` License. See the [LICENSE](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/adding-a-license-to-a-repository) file for additional info.
 
 ---
 
 ## 👏 Acknowledgments
-
-> - `ℹ️  List any resources, contributors, inspiration, etc.`
 
 ---
