@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jinzhu/copier"
+	"github.com/mitchellh/mapstructure"
 	"gorm.io/gorm"
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
@@ -86,6 +87,14 @@ func (a *User) DecodeJSON(data string) error {
 	err := json.Unmarshal([]byte(data), &a)
 	if err != nil {
 		return NewUserDecodeJSONError(err)
+	}
+
+	return nil
+}
+
+func (a *User) ParseMap(data map[string]interface{}) error {
+	if err := mapstructure.Decode(data, &a); err != nil {
+		return NewUserParseMapError(err)
 	}
 
 	return nil

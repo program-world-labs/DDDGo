@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jinzhu/copier"
+	"github.com/mitchellh/mapstructure"
 	"gorm.io/gorm"
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
@@ -91,6 +92,15 @@ func (a *Wallet) DecodeJSON(data string) error {
 	err := json.Unmarshal([]byte(data), &a)
 	if err != nil {
 		return NewWalletDecodeJSONError(err)
+	}
+
+	return nil
+}
+
+func (a *Wallet) ParseMap(data map[string]interface{}) error {
+	err := mapstructure.Decode(data, &a)
+	if err != nil {
+		return NewWalletParseMapError(err)
 	}
 
 	return nil

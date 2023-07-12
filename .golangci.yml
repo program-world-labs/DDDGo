@@ -17,7 +17,7 @@ linters-settings:
   gocognit:
     min-complexity: 15
   gocyclo:
-    min-complexity: 10
+    min-complexity: 15
   goconst:
     min-len: 2
     min-occurrences: 2

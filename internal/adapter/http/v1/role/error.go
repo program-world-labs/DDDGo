@@ -11,15 +11,29 @@ import (
 )
 
 const (
-	ErrorCodeRoleUsecase     = domainerrors.ErrorCodeAdapterRole + iota // 1000000
-	ErrorCodeRoleBindJSON                                               // 1000001
-	ErrorCodeRoleCopyToInput                                            // 1000002
+	ErrorCodeRoleUsecase       = domainerrors.ErrorCodeAdapterRole + iota // 1000000
+	ErrorCodeRoleBindJSON                                                 // 1000001
+	ErrorCodeRoleCopyToInput                                              // 1000002
+	ErrorCodeRoleBindQuery                                                // 1000003
+	ErrorCodeRoleValidateInput                                            // 1000004
 )
 
 func NewBindJSONError(err error) *domainerrors.ErrorInfo {
 	errBindJSON := domainerrors.New(domainerrors.GruopID+fmt.Sprint(ErrorCodeRoleBindJSON), err.Error())
 
 	return errBindJSON
+}
+
+func NewBindQueryError(err error) *domainerrors.ErrorInfo {
+	errBindQuery := domainerrors.New(domainerrors.GruopID+fmt.Sprint(ErrorCodeRoleBindQuery), err.Error())
+
+	return errBindQuery
+}
+
+func NewValidateInputError(err error) *domainerrors.ErrorInfo {
+	errValidateInput := domainerrors.New(domainerrors.GruopID+fmt.Sprint(ErrorCodeRoleValidateInput), err.Error())
+
+	return errValidateInput
 }
 
 func NewCopyError(err error) *domainerrors.ErrorInfo {

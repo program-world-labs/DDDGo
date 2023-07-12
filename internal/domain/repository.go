@@ -6,7 +6,7 @@ import (
 
 type ICRUDRepository interface {
 	GetByID(ctx context.Context, e IEntity) (IEntity, error)
-	GetAll(ctx context.Context, e IEntity, sq *SearchQuery) ([]IEntity, error)
+	GetAll(ctx context.Context, sq *SearchQuery, e IEntity) (*List, error)
 	Create(ctx context.Context, e IEntity) (IEntity, error)
 	Update(ctx context.Context, e IEntity) (IEntity, error)
 	UpdateWithFields(ctx context.Context, e IEntity, keys []string) (IEntity, error)

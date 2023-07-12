@@ -24,13 +24,15 @@ func NewCRUDDatasourceImpl(db pwsql.ISQLGorm) *CRUDDatasourceImpl {
 }
 
 // GetByID -.
-func (r *CRUDDatasourceImpl) GetByID(_ context.Context, model dto.IRepoEntity) (dto.IRepoEntity, error) {
-	err := r.DB.First(model, model.GetID()).Error
+func (r *CRUDDatasourceImpl) GetByID(_ context.Context, model dto.IRepoEntity) (map[string]interface{}, error) {
+	var data map[string]interface{}
+	err := r.DB.Table(model.TableName()).First(&data, model.GetID()).Error
+
 	if err != nil {
 		return nil, NewGetError(err)
 	}
 
-	return model, nil
+	return data, nil
 }
 
 // Create -.
@@ -54,13 +56,13 @@ func (r *CRUDDatasourceImpl) Update(_ context.Context, model dto.IRepoEntity) (d
 }
 
 // UpdateWithFields -.
-func (r *CRUDDatasourceImpl) UpdateWithFields(_ context.Context, model dto.IRepoEntity, fields []string) (dto.IRepoEntity, error) {
+func (r *CRUDDatasourceImpl) UpdateWithFields(_ context.Context, model dto.IRepoEntity, fields []string) error {
 	err := r.DB.Model(model).Select(fields).Updates(model).Error
 	if err != nil {
-		return nil, NewUpdateWithFieldsError(err)
+		return NewUpdateWithFieldsError(err)
 	}
 
-	return model, nil
+	return nil
 }
 
 // Delete -.
@@ -73,15 +75,29 @@ func (r *CRUDDatasourceImpl) Delete(_ context.Context, model dto.IRepoEntity) er
 	return nil
 }
 
-func (r *CRUDDatasourceImpl) GetAll(ctx context.Context, e dto.IRepoEntity, sq *domain.SearchQuery) ([]dto.IRepoEntity, error) {
-	var data []dto.IRepoEntity
-	err := r.DB.Where(sq.GetWhere(), sq.GetArgs()...).Order(sq.GetOrder()).Find(&data).Error
+func (r *CRUDDatasourceImpl) GetAll(_ context.Context, sq *domain.SearchQuery, model dto.IRepoEntity) (map[string]interface{}, error) {
+	var data []map[string]interface{}
+	err := r.DB.Table(model.TableName()).Limit(sq.Page.Limit).Offset(sq.Page.Offset).Where(sq.GetWhere(), sq.GetArgs()...).Order(sq.GetOrder()).Find(&data).Error
 
 	if err != nil {
 		return nil, NewGetAllError(err)
 	}
 
-	return data, nil
+	var count int64
+	err = r.DB.Table(model.TableName()).Where(sq.GetWhere(), sq.GetArgs()...).Count(&count).Error
+
+	if err != nil {
+		return nil, NewGetAllError(err)
+	}
+
+	var result = map[string]interface{}{
+		"data":   data,
+		"total":  count,
+		"limit":  sq.Page.Limit,
+		"offset": sq.Page.Offset,
+	}
+
+	return result, nil
 }
 
 // Create -.
