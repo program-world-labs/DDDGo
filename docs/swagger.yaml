@@ -107,4 +107,49 @@ paths:
       summary: Create role
       tags:
       - Role
+  /role/list:
+    get:
+      consumes:
+      - application/json
+      description: List role
+      operationId: ListRole
+      parameters:
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      - description: FilterName
+        in: query
+        name: filterName
+        type: string
+      - description: SortFields
+        in: query
+        name: sortFields
+        type: string
+      - description: Dir
+        in: query
+        name: dir
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: List role
+      tags:
+      - Role
 swagger: "2.0"

@@ -49,3 +49,18 @@ func (mr *MockIServiceMockRecorder) CreateRole(ctx, roleInfo interface{}) *gomoc
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRole", reflect.TypeOf((*MockIService)(nil).CreateRole), ctx, roleInfo)
 }
+
+// GetRoleList mocks base method.
+func (m *MockIService) GetRoleList(ctx context.Context, roleInfo *role.ListGotInput) ([]*role.Output, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRoleList", ctx, roleInfo)
+	ret0, _ := ret[0].([]*role.Output)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRoleList indicates an expected call of GetRoleList.
+func (mr *MockIServiceMockRecorder) GetRoleList(ctx, roleInfo interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRoleList", reflect.TypeOf((*MockIService)(nil).GetRoleList), ctx, roleInfo)
+}

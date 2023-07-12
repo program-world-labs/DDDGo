@@ -7,6 +7,7 @@ type IRepoEntity interface {
 	TableName() string
 	Transform(domain.IEntity) (IRepoEntity, error)
 	BackToDomain() (domain.IEntity, error)
+	ParseMap(map[string]interface{}) error
 	ToJSON() (string, error)
 	DecodeJSON(string) error
 }

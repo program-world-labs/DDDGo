@@ -2,10 +2,12 @@ package dto
 
 import (
 	"encoding/json"
+	"strings"
 	"time"
 
 	"github.com/jinzhu/copier"
 	"github.com/lib/pq"
+	"github.com/mitchellh/mapstructure"
 	"gorm.io/gorm"
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
@@ -20,9 +22,9 @@ type Role struct {
 	Description string         `json:"description"`
 	Permissions pq.StringArray `json:"permissions" gorm:"type:varchar(100)[]"`
 	Users       []User         `json:"users" gorm:"many2many:user_roles;"`
-	CreatedAt   time.Time      `json:"createdAt"`
-	UpdatedAt   time.Time      `json:"updatedAt"`
-	DeletedAt   time.Time      `json:"deletedAt" gorm:"index"`
+	CreatedAt   time.Time      `json:"created_at" mapstructure:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at" mapstructure:"updated_at"`
+	DeletedAt   time.Time      `json:"deleted_at" mapstructure:"deleted_at" gorm:"index"`
 }
 
 func (a *Role) TableName() string {
@@ -81,6 +83,56 @@ func (a *Role) DecodeJSON(data string) error {
 	err := json.Unmarshal([]byte(data), &a)
 	if err != nil {
 		return NewRoleDecodeJSONError(err)
+	}
+
+	return nil
+}
+
+func (a *Role) ParseMap(data map[string]interface{}) error {
+	// Permissions is a slice of string, so we need to decode it manually, data like {read:all,write:all}
+	permission, ok := data["permissions"].(string)
+	if !ok {
+		return NewRoleParseMapError(nil)
+	}
+
+	s := strings.Trim(permission, "{}") // 删除开头和结尾的大括号
+	result := strings.Split(s, ",")     // 以逗号为分割符，分割字符串
+	data["permissions"] = result
+
+	switch data["created_at"].(type) {
+	case string:
+		t, err := time.Parse(time.RFC3339Nano, data["created_at"].(string))
+		if err != nil {
+			return NewRoleParseMapError(err)
+		}
+
+		data["created_at"] = t
+	}
+
+	switch data["updated_at"].(type) {
+	case string:
+		t, err := time.Parse(time.RFC3339Nano, data["updated_at"].(string))
+		if err != nil {
+			return NewRoleParseMapError(err)
+		}
+
+		data["updated_at"] = t
+	}
+
+	switch data["deleted_at"].(type) {
+	case string:
+		t, err := time.Parse(time.RFC3339Nano, data["deleted_at"].(string))
+		if err != nil {
+			return NewRoleParseMapError(err)
+		}
+
+		data["deleted_at"] = t
+	}
+
+	err := mapstructure.Decode(data, &a)
+
+	if err != nil {
+		return NewRoleParseMapError(err)
 	}
 
 	return nil

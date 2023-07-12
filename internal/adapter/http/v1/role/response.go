@@ -17,6 +17,13 @@ type Response struct {
 	UpdatedAt   time.Time       `json:"updatedAt"`
 }
 
+type ResponseList struct {
+	Offset int64      `json:"offset"`
+	Limit  int64      `json:"limit"`
+	Total  int64      `json:"total"`
+	Items  []Response `json:"items"`
+}
+
 func NewResponse(model *application_role.Output) Response {
 	userList := make([]user.Response, len(model.Users))
 	for i, v := range model.Users {
@@ -31,5 +38,19 @@ func NewResponse(model *application_role.Output) Response {
 		Users:       userList,
 		CreatedAt:   model.CreatedAt,
 		UpdatedAt:   model.UpdatedAt,
+	}
+}
+
+func NewResponseList(modelList *application_role.OutputList) ResponseList {
+	responseList := make([]Response, len(modelList.Items))
+	for i, v := range modelList.Items {
+		responseList[i] = NewResponse(&v)
+	}
+
+	return ResponseList{
+		Offset: modelList.Offset,
+		Limit:  modelList.Limit,
+		Total:  modelList.Total,
+		Items:  responseList,
 	}
 }

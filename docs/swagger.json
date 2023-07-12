@@ -67,6 +67,74 @@
                     }
                 }
             }
+        },
+        "/role/list": {
+            "get": {
+                "description": "List role",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Role"
+                ],
+                "summary": "List role",
+                "operationId": "ListRole",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "FilterName",
+                        "name": "filterName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SortFields",
+                        "name": "sortFields",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Dir",
+                        "name": "dir",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {

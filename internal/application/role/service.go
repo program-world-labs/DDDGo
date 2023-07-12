@@ -16,6 +16,7 @@ var _ IService = (*ServiceImpl)(nil)
 type ServiceImpl struct {
 	TransactionRepo domain.ITransactionRepo
 	RoleRepo        repository.RoleRepository
+	UserRepo        repository.UserRepository
 	log             pwlogger.Interface
 }
 
@@ -34,6 +35,7 @@ func (u *ServiceImpl) CreateRole(ctx context.Context, roleInfo *CreatedInput) (*
 
 	// Create role.
 	e := roleInfo.ToEntity()
+
 	createdRole, err := u.RoleRepo.Create(ctx, e)
 
 	if err != nil {
@@ -47,4 +49,23 @@ func (u *ServiceImpl) CreateRole(ctx context.Context, roleInfo *CreatedInput) (*
 	}
 
 	return NewOutput(createdRoleEntity), nil
+}
+
+// GetRoleList gets role list.
+func (u *ServiceImpl) GetRoleList(ctx context.Context, roleInfo *ListGotInput) (*OutputList, error) {
+	// Validate input.
+	err := roleInfo.Validate()
+	if err != nil {
+		return nil, NewValidateInputError(err)
+	}
+
+	sq := roleInfo.ToSearchQuery()
+
+	// Get role list.
+	list, err := u.RoleRepo.GetAll(ctx, sq, &entity.Role{})
+	if err != nil {
+		return nil, NewRepositoryError(err)
+	}
+
+	return NewListOutput(list), nil
 }

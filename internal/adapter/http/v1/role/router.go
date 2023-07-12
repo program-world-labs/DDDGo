@@ -23,6 +23,11 @@ func NewRoleRoutes(handler *gin.RouterGroup, u application_role.IService, l pwlo
 	h := handler.Group("/role")
 	{
 		h.POST("/create", r.create)
+		h.GET("/list", r.list)
+		// h.GET("/detail/:id", r.detail)
+		// h.PUT("/update/:id", r.update)
+		// h.DELETE("/delete/:id", r.delete)
+		// h.PUT("/assign-role/:id", r.assignRole)
 	}
 }
 
@@ -78,6 +83,62 @@ func (r *roleRoutes) create(c *gin.Context) {
 		return
 	}
 
-	res := NewResponse(roleEntity)
-	http.SuccessResponse(c, res)
+	http.SuccessResponse(c, NewResponse(roleEntity))
+}
+
+// @Summary     List role
+// @Description List role
+// @ID          ListRole
+// @Tags  	    Role
+// @Accept      json
+// @Produce     json
+// @Param		limit	query	int		false	"Limit"
+// @Param		offset	query	int		false	"Offset"
+// @Param		filterName	query	string		false	"FilterName"
+// @Param		sortFields	query	string		false	"SortFields"
+// @Param		dir	query	string		false	"Dir"
+// @Success		200		{object}	http.Response
+// @Failure		400		{object}	http.Response
+// @Failure		500		{object}	http.Response
+// @Router			/role/list [get].
+func (r *roleRoutes) list(c *gin.Context) {
+	// 開始追蹤
+	var tracer = otel.Tracer("")
+	ctx, span := tracer.Start(c.Request.Context(), "")
+	// // 設定追蹤屬性
+	// if kv, err := operations.TransformToAttribute("request/", req); err == nil {
+	// 	span.SetAttributes(kv...)
+	// }
+
+	defer span.End()
+
+	// 參數驗證
+	var req ListGotInput
+	if err := c.ShouldBindQuery(&req); err != nil {
+		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindQuery")
+		http.HandleErrorResponse(c, NewBindQueryError(err))
+
+		return
+	}
+
+	var input application_role.ListGotInput
+	err := copier.Copy(&input, &req)
+
+	if err != nil {
+		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
+		http.HandleErrorResponse(c, NewCopyError(err))
+
+		return
+	}
+
+	// // 執行UseCase
+	roleEntities, err := r.u.GetRoleList(ctx, &input)
+	if err != nil {
+		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - ListRole")
+		http.HandleErrorResponse(c, NewUsecaseError(err))
+
+		return
+	}
+
+	http.SuccessResponse(c, NewResponseList(roleEntities))
 }

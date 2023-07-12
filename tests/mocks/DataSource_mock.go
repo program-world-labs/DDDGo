@@ -96,10 +96,10 @@ func (mr *MockIDataSourceMockRecorder) DeleteTx(arg0, arg1, arg2 interface{}) *g
 }
 
 // GetAll mocks base method.
-func (m *MockIDataSource) GetAll(arg0 context.Context, arg1 dto.IRepoEntity, arg2 *domain.SearchQuery) ([]dto.IRepoEntity, error) {
+func (m *MockIDataSource) GetAll(arg0 context.Context, arg1 *domain.SearchQuery, arg2 dto.IRepoEntity) (map[string]interface{}, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAll", arg0, arg1, arg2)
-	ret0, _ := ret[0].([]dto.IRepoEntity)
+	ret0, _ := ret[0].(map[string]interface{})
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -111,10 +111,10 @@ func (mr *MockIDataSourceMockRecorder) GetAll(arg0, arg1, arg2 interface{}) *gom
 }
 
 // GetByID mocks base method.
-func (m *MockIDataSource) GetByID(arg0 context.Context, arg1 dto.IRepoEntity) (dto.IRepoEntity, error) {
+func (m *MockIDataSource) GetByID(arg0 context.Context, arg1 dto.IRepoEntity) (map[string]interface{}, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByID", arg0, arg1)
-	ret0, _ := ret[0].(dto.IRepoEntity)
+	ret0, _ := ret[0].(map[string]interface{})
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -156,12 +156,11 @@ func (mr *MockIDataSourceMockRecorder) UpdateTx(arg0, arg1, arg2 interface{}) *g
 }
 
 // UpdateWithFields mocks base method.
-func (m *MockIDataSource) UpdateWithFields(arg0 context.Context, arg1 dto.IRepoEntity, arg2 []string) (dto.IRepoEntity, error) {
+func (m *MockIDataSource) UpdateWithFields(arg0 context.Context, arg1 dto.IRepoEntity, arg2 []string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateWithFields", arg0, arg1, arg2)
-	ret0, _ := ret[0].(dto.IRepoEntity)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // UpdateWithFields indicates an expected call of UpdateWithFields.
@@ -221,6 +220,20 @@ func (mr *MockICacheDataSourceMockRecorder) Delete(ctx, e interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockICacheDataSource)(nil).Delete), ctx, e)
 }
 
+// DeleteListItem mocks base method.
+func (m *MockICacheDataSource) DeleteListItem(ctx context.Context, e dto.IRepoEntity, sq *domain.SearchQuery) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteListItem", ctx, e, sq)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteListItem indicates an expected call of DeleteListItem.
+func (mr *MockICacheDataSourceMockRecorder) DeleteListItem(ctx, e, sq interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteListItem", reflect.TypeOf((*MockICacheDataSource)(nil).DeleteListItem), ctx, e, sq)
+}
+
 // Get mocks base method.
 func (m *MockICacheDataSource) Get(ctx context.Context, e dto.IRepoEntity, ttl ...time.Duration) (dto.IRepoEntity, error) {
 	m.ctrl.T.Helper()
@@ -241,6 +254,26 @@ func (mr *MockICacheDataSourceMockRecorder) Get(ctx, e interface{}, ttl ...inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockICacheDataSource)(nil).Get), varargs...)
 }
 
+// GetListItem mocks base method.
+func (m *MockICacheDataSource) GetListItem(ctx context.Context, e dto.IRepoEntity, sq *domain.SearchQuery, ttl ...time.Duration) (map[string]interface{}, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, e, sq}
+	for _, a := range ttl {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetListItem", varargs...)
+	ret0, _ := ret[0].(map[string]interface{})
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetListItem indicates an expected call of GetListItem.
+func (mr *MockICacheDataSourceMockRecorder) GetListItem(ctx, e, sq interface{}, ttl ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, e, sq}, ttl...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetListItem", reflect.TypeOf((*MockICacheDataSource)(nil).GetListItem), varargs...)
+}
+
 // Set mocks base method.
 func (m *MockICacheDataSource) Set(ctx context.Context, e dto.IRepoEntity, ttl ...time.Duration) (dto.IRepoEntity, error) {
 	m.ctrl.T.Helper()
@@ -259,6 +292,25 @@ func (mr *MockICacheDataSourceMockRecorder) Set(ctx, e interface{}, ttl ...inter
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, e}, ttl...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*MockICacheDataSource)(nil).Set), varargs...)
+}
+
+// SetListItem mocks base method.
+func (m *MockICacheDataSource) SetListItem(ctx context.Context, e []dto.IRepoEntity, sq *domain.SearchQuery, count int64, ttl ...time.Duration) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, e, sq, count}
+	for _, a := range ttl {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SetListItem", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetListItem indicates an expected call of SetListItem.
+func (mr *MockICacheDataSourceMockRecorder) SetListItem(ctx, e, sq, count interface{}, ttl ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, e, sq, count}, ttl...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetListItem", reflect.TypeOf((*MockICacheDataSource)(nil).SetListItem), varargs...)
 }
 
 // MockITransactionRun is a mock of ITransactionRun interface.

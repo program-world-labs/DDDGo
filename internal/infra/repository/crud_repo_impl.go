@@ -62,29 +62,61 @@ func (r *CRUDImpl) GetByID(ctx context.Context, e domain.IEntity) (domain.IEntit
 }
 
 // GetAll -.
-func (r *CRUDImpl) GetAll(ctx context.Context, e domain.IEntity, sq *domain.SearchQuery) ([]domain.IEntity, error) {
+func (r *CRUDImpl) GetAll(ctx context.Context, sq *domain.SearchQuery, e domain.IEntity) (*domain.List, error) {
 	info, err := r.DTOEntity.Transform(e)
 	if err != nil {
 		return nil, NewDatasourceError(err)
 	}
 
-	list, err := r.DB.GetAll(ctx, info, sq)
+	// Define a helper function to handle data
+	handleData := func(data map[string]interface{}) (*domain.List, error) {
+		var list []domain.IEntity
+
+		for _, v := range data["data"].([]interface{}) {
+			// cast to map[string]interface{}
+			v, ok := v.(map[string]interface{})
+			if !ok {
+				return nil, NewDatasourceError(err)
+			}
+
+			err = info.ParseMap(v)
+			if err != nil {
+				return nil, NewDatasourceError(err)
+			}
+
+			var et domain.IEntity
+			et, err = info.BackToDomain()
+
+			if err != nil {
+				return nil, NewDatasourceError(err)
+			}
+
+			list = append(list, et)
+		}
+
+		result := &domain.List{
+			Total:  int64(data["total"].(float64)),
+			Limit:  int64(data["limit"].(float64)),
+			Offset: int64(data["offset"].(float64)),
+			Data:   list,
+		}
+
+		return result, nil
+	}
+
+	// Try to get data from local cache
+	data, err := r.Cache.GetListItem(ctx, info, sq)
+	if err == nil {
+		return handleData(data)
+	}
+
+	// If not in local cache, try to get data from Redis
+	data, err = r.Redis.GetListItem(ctx, info, sq)
 	if err != nil {
 		return nil, NewDatasourceError(err)
 	}
 
-	var listAll []domain.IEntity
-
-	for _, v := range list {
-		d, err := v.BackToDomain()
-		if err != nil {
-			return nil, NewDatasourceError(err)
-		}
-
-		listAll = append(listAll, d)
-	}
-
-	return listAll, nil
+	return handleData(data)
 }
 
 // Create -.
@@ -107,14 +139,13 @@ func (r *CRUDImpl) Create(ctx context.Context, e domain.IEntity) (domain.IEntity
 	return d, nil
 }
 
-// Update -.
-func (r *CRUDImpl) Update(ctx context.Context, e domain.IEntity) (domain.IEntity, error) {
+func (r *CRUDImpl) performUpdate(ctx context.Context, e domain.IEntity, action func(ctx context.Context, info dto.IRepoEntity) (dto.IRepoEntity, error)) (domain.IEntity, error) {
 	info, err := r.DTOEntity.Transform(e)
 	if err != nil {
 		return nil, NewDatasourceError(err)
 	}
 
-	_, err = r.DB.Update(ctx, info)
+	data, err := action(ctx, info)
 	if err != nil {
 		return nil, NewDatasourceError(err)
 	}
@@ -129,7 +160,11 @@ func (r *CRUDImpl) Update(ctx context.Context, e domain.IEntity) (domain.IEntity
 		return nil, NewDatasourceError(err)
 	}
 
-	d, err := info.BackToDomain()
+	if data == nil {
+		return nil, nil
+	}
+
+	d, err := data.BackToDomain()
 	if err != nil {
 		return nil, NewDatasourceError(err)
 	}
@@ -137,34 +172,15 @@ func (r *CRUDImpl) Update(ctx context.Context, e domain.IEntity) (domain.IEntity
 	return d, nil
 }
 
-// UpdateWithFields -.
+// Update -.
+func (r *CRUDImpl) Update(ctx context.Context, e domain.IEntity) (domain.IEntity, error) {
+	return r.performUpdate(ctx, e, r.DB.Update)
+}
+
 func (r *CRUDImpl) UpdateWithFields(ctx context.Context, e domain.IEntity, keys []string) (domain.IEntity, error) {
-	info, err := r.DTOEntity.Transform(e)
-	if err != nil {
-		return nil, NewDatasourceError(err)
-	}
-
-	_, err = r.DB.UpdateWithFields(ctx, info, keys)
-	if err != nil {
-		return nil, NewDatasourceError(err)
-	}
-
-	err = r.Cache.Delete(ctx, info)
-	if err != nil {
-		return nil, NewDatasourceError(err)
-	}
-
-	err = r.Redis.Delete(ctx, info)
-	if err != nil {
-		return nil, NewDatasourceError(err)
-	}
-
-	d, err := info.BackToDomain()
-	if err != nil {
-		return nil, NewDatasourceError(err)
-	}
-
-	return d, nil
+	return r.performUpdate(ctx, e, func(ctx context.Context, info dto.IRepoEntity) (dto.IRepoEntity, error) {
+		return nil, r.DB.UpdateWithFields(ctx, info, keys)
+	})
 }
 
 // Delete -.
@@ -212,59 +228,18 @@ func (r *CRUDImpl) CreateTx(ctx context.Context, e domain.IEntity, tx domain.ITr
 	return d, nil
 }
 
-// UpdateTx -.
 func (r *CRUDImpl) UpdateTx(ctx context.Context, e domain.IEntity, tx domain.ITransactionEvent) (domain.IEntity, error) {
-	info, err := r.DTOEntity.Transform(e)
-	if err != nil {
-		return nil, NewDatasourceError(err)
-	}
-
-	_, err = r.DB.UpdateTx(ctx, info, tx)
-	if err != nil {
-		return nil, NewDatasourceError(err)
-	}
-
-	err = r.Cache.Delete(ctx, info)
-	if err != nil {
-		return nil, NewDatasourceError(err)
-	}
-
-	err = r.Redis.Delete(ctx, info)
-	if err != nil {
-		return nil, NewDatasourceError(err)
-	}
-
-	d, err := info.BackToDomain()
-	if err != nil {
-		return nil, NewDatasourceError(err)
-	}
-
-	return d, nil
+	return r.performUpdate(ctx, e, func(ctx context.Context, info dto.IRepoEntity) (dto.IRepoEntity, error) {
+		return r.DB.UpdateTx(ctx, info, tx)
+	})
 }
 
-// UpdateWithFieldsTx -.
 func (r *CRUDImpl) UpdateWithFieldsTx(ctx context.Context, e domain.IEntity, keys []string, tx domain.ITransactionEvent) error {
-	info, err := r.DTOEntity.Transform(e)
-	if err != nil {
-		return NewDatasourceError(err)
-	}
+	_, err := r.performUpdate(ctx, e, func(ctx context.Context, info dto.IRepoEntity) (dto.IRepoEntity, error) {
+		return nil, r.DB.UpdateWithFieldsTx(ctx, info, keys, tx)
+	})
 
-	err = r.DB.UpdateWithFieldsTx(ctx, info, keys, tx)
-	if err != nil {
-		return NewDatasourceError(err)
-	}
-
-	err = r.Cache.Delete(ctx, info)
-	if err != nil {
-		return NewDatasourceError(err)
-	}
-
-	err = r.Redis.Delete(ctx, info)
-	if err != nil {
-		return NewDatasourceError(err)
-	}
-
-	return nil
+	return err
 }
 
 // DeleteTx -.

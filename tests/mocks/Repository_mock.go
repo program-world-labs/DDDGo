@@ -94,18 +94,18 @@ func (mr *MockICRUDRepositoryMockRecorder) DeleteTx(arg0, arg1, arg2 interface{}
 }
 
 // GetAll mocks base method.
-func (m *MockICRUDRepository) GetAll(ctx context.Context, e domain.IEntity, sq *domain.SearchQuery) ([]domain.IEntity, error) {
+func (m *MockICRUDRepository) GetAll(ctx context.Context, sq *domain.SearchQuery, e domain.IEntity) (*domain.List, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAll", ctx, e, sq)
-	ret0, _ := ret[0].([]domain.IEntity)
+	ret := m.ctrl.Call(m, "GetAll", ctx, sq, e)
+	ret0, _ := ret[0].(*domain.List)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAll indicates an expected call of GetAll.
-func (mr *MockICRUDRepositoryMockRecorder) GetAll(ctx, e, sq interface{}) *gomock.Call {
+func (mr *MockICRUDRepositoryMockRecorder) GetAll(ctx, sq, e interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockICRUDRepository)(nil).GetAll), ctx, e, sq)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockICRUDRepository)(nil).GetAll), ctx, sq, e)
 }
 
 // GetByID mocks base method.
