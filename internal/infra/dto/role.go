@@ -99,9 +99,8 @@ func (a *Role) ParseMap(data map[string]interface{}) error {
 	result := strings.Split(s, ",")     // 以逗号为分割符，分割字符串
 	data["permissions"] = result
 
-	switch data["created_at"].(type) {
-	case string:
-		t, err := time.Parse(time.RFC3339Nano, data["created_at"].(string))
+	if tm, ok := data["created_at"].(string); ok {
+		t, err := time.Parse(time.RFC3339Nano, tm)
 		if err != nil {
 			return NewRoleParseMapError(err)
 		}
@@ -109,9 +108,8 @@ func (a *Role) ParseMap(data map[string]interface{}) error {
 		data["created_at"] = t
 	}
 
-	switch data["updated_at"].(type) {
-	case string:
-		t, err := time.Parse(time.RFC3339Nano, data["updated_at"].(string))
+	if tm, ok := data["updated_at"].(string); ok {
+		t, err := time.Parse(time.RFC3339Nano, tm)
 		if err != nil {
 			return NewRoleParseMapError(err)
 		}
@@ -119,9 +117,8 @@ func (a *Role) ParseMap(data map[string]interface{}) error {
 		data["updated_at"] = t
 	}
 
-	switch data["deleted_at"].(type) {
-	case string:
-		t, err := time.Parse(time.RFC3339Nano, data["deleted_at"].(string))
+	if tm, ok := data["deleted_at"].(string); ok {
+		t, err := time.Parse(time.RFC3339Nano, tm)
 		if err != nil {
 			return NewRoleParseMapError(err)
 		}
