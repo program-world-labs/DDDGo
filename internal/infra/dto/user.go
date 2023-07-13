@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
+	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 )
 
@@ -37,7 +38,7 @@ func (a *User) TableName() string {
 
 func (a *User) Transform(i domain.IEntity) (IRepoEntity, error) {
 	if err := copier.Copy(a, i); err != nil {
-		return nil, NewUserTransformError(err)
+		return nil, domainerrors.Wrap(ErrorCodeUserTransform, err)
 	}
 
 	return a, nil
@@ -46,7 +47,7 @@ func (a *User) Transform(i domain.IEntity) (IRepoEntity, error) {
 func (a *User) BackToDomain() (domain.IEntity, error) {
 	i := &entity.User{}
 	if err := copier.Copy(&i, a); err != nil {
-		return nil, NewUserBackToDomainError(err)
+		return nil, domainerrors.Wrap(ErrorCodeUserBackToDomain, err)
 	}
 
 	return i, nil
@@ -76,7 +77,7 @@ func (a *User) SetID(id string) {
 func (a *User) ToJSON() (string, error) {
 	jsonData, err := json.Marshal(a)
 	if err != nil {
-		return "", NewUserToJSONError(err)
+		return "", domainerrors.Wrap(ErrorCodeUserToJSON, err)
 	}
 
 	return string(jsonData), nil
@@ -85,7 +86,7 @@ func (a *User) ToJSON() (string, error) {
 func (a *User) DecodeJSON(data string) error {
 	err := json.Unmarshal([]byte(data), &a)
 	if err != nil {
-		return NewUserDecodeJSONError(err)
+		return domainerrors.Wrap(ErrorCodeUserDecodeJSON, err)
 	}
 
 	return nil
@@ -93,7 +94,7 @@ func (a *User) DecodeJSON(data string) error {
 
 func (a *User) ParseMap(data map[string]interface{}) error {
 	if err := mapstructure.Decode(data, &a); err != nil {
-		return NewUserParseMapError(err)
+		return domainerrors.Wrap(ErrorCodeUserParseMap, err)
 	}
 
 	return nil

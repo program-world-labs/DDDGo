@@ -9,6 +9,7 @@ import (
 	"github.com/dtm-labs/rockscache"
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
+	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
 	"github.com/program-world-labs/DDDGo/internal/infra/dto"
 )
@@ -60,12 +61,12 @@ func (r *RedisCacheDataSourceImpl) Get(ctx context.Context, model dto.IRepoEntit
 		return string(jsonData), nil
 	})
 	if err != nil {
-		return nil, NewGetError(err)
+		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
 	}
 
 	err = model.DecodeJSON(v)
 	if err != nil {
-		return nil, NewGetError(err)
+		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
 	}
 
 	return model, nil
@@ -90,7 +91,7 @@ func (r *RedisCacheDataSourceImpl) Set(_ context.Context, model dto.IRepoEntity,
 func (r *RedisCacheDataSourceImpl) Delete(ctx context.Context, model dto.IRepoEntity) error {
 	err := r.Client.TagAsDeleted2(ctx, r.redisKey(model))
 	if err != nil {
-		return NewDeleteError(err)
+		return domainerrors.Wrap(ErrorCodeCacheDelete, err)
 	}
 
 	return nil
@@ -122,14 +123,14 @@ func (r *RedisCacheDataSourceImpl) GetListItem(ctx context.Context, model dto.IR
 		return string(jsonData), nil
 	})
 	if err != nil {
-		return nil, NewGetError(err)
+		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
 	}
 
 	var value map[string]interface{}
 	err = json.Unmarshal([]byte(v), &value)
 
 	if err != nil {
-		return nil, NewGetError(err)
+		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
 	}
 
 	return value, nil
@@ -144,7 +145,7 @@ func (r *RedisCacheDataSourceImpl) SetListItem(_ context.Context, _ []dto.IRepoE
 func (r *RedisCacheDataSourceImpl) DeleteListItem(ctx context.Context, model dto.IRepoEntity, sq *domain.SearchQuery) error {
 	err := r.Client.TagAsDeleted2(ctx, r.redisKey(model, sq))
 	if err != nil {
-		return NewDeleteError(err)
+		return domainerrors.Wrap(ErrorCodeCacheDelete, err)
 	}
 
 	return nil

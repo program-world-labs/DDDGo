@@ -9,6 +9,7 @@ import (
 	"github.com/allegro/bigcache/v3"
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
+	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
 	"github.com/program-world-labs/DDDGo/internal/infra/dto"
 )
@@ -37,12 +38,12 @@ func (r *BigCacheDataSourceImpl) cacheKey(model dto.IRepoEntity, sq ...*domain.S
 func (r *BigCacheDataSourceImpl) Get(_ context.Context, model dto.IRepoEntity, _ ...time.Duration) (dto.IRepoEntity, error) {
 	data, err := r.Cache.Get(r.cacheKey(model))
 	if err != nil {
-		return nil, NewGetError(err)
+		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
 	}
 
 	err = json.Unmarshal(data, &model)
 	if err != nil {
-		return nil, NewGetError(err)
+		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
 	}
 
 	return model, nil
@@ -52,12 +53,12 @@ func (r *BigCacheDataSourceImpl) Get(_ context.Context, model dto.IRepoEntity, _
 func (r *BigCacheDataSourceImpl) Set(_ context.Context, model dto.IRepoEntity, _ ...time.Duration) (dto.IRepoEntity, error) {
 	data, err := json.Marshal(model)
 	if err != nil {
-		return nil, NewSetError(err)
+		return nil, domainerrors.Wrap(ErrorCodeCacheSet, err)
 	}
 
 	err = r.Cache.Set(r.cacheKey(model), data)
 	if err != nil {
-		return nil, NewSetError(err)
+		return nil, domainerrors.Wrap(ErrorCodeCacheSet, err)
 	}
 
 	return model, nil
@@ -67,7 +68,7 @@ func (r *BigCacheDataSourceImpl) Set(_ context.Context, model dto.IRepoEntity, _
 func (r *BigCacheDataSourceImpl) Delete(_ context.Context, model dto.IRepoEntity) error {
 	err := r.Cache.Delete(r.cacheKey(model))
 	if err != nil {
-		return NewDeleteError(err)
+		return domainerrors.Wrap(ErrorCodeCacheDelete, err)
 	}
 
 	return nil
@@ -77,14 +78,14 @@ func (r *BigCacheDataSourceImpl) Delete(_ context.Context, model dto.IRepoEntity
 func (r *BigCacheDataSourceImpl) GetListItem(_ context.Context, model dto.IRepoEntity, sq *domain.SearchQuery, _ ...time.Duration) (map[string]interface{}, error) {
 	data, err := r.Cache.Get(r.cacheKey(model, sq))
 	if err != nil {
-		return nil, NewGetError(err)
+		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
 	}
 
 	var result map[string]interface{}
 	err = json.Unmarshal(data, &result)
 
 	if err != nil {
-		return nil, NewGetError(err)
+		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
 	}
 
 	return result, nil
@@ -94,14 +95,14 @@ func (r *BigCacheDataSourceImpl) GetListItem(_ context.Context, model dto.IRepoE
 func (r *BigCacheDataSourceImpl) SetListItem(_ context.Context, model []dto.IRepoEntity, sq *domain.SearchQuery, count int64, _ ...time.Duration) error {
 	data, err := json.Marshal(model)
 	if err != nil {
-		return NewSetError(err)
+		return domainerrors.Wrap(ErrorCodeCacheSet, err)
 	}
 
 	var info []map[string]interface{}
 	err = json.Unmarshal(data, &info)
 
 	if err != nil {
-		return NewSetError(err)
+		return domainerrors.Wrap(ErrorCodeCacheSet, err)
 	}
 
 	var domainList = map[string]interface{}{
@@ -113,12 +114,12 @@ func (r *BigCacheDataSourceImpl) SetListItem(_ context.Context, model []dto.IRep
 
 	result, err := json.Marshal(domainList)
 	if err != nil {
-		return NewSetError(err)
+		return domainerrors.Wrap(ErrorCodeCacheSet, err)
 	}
 
 	err = r.Cache.Set(r.cacheKey(model[0], sq), result)
 	if err != nil {
-		return NewSetError(err)
+		return domainerrors.Wrap(ErrorCodeCacheSet, err)
 	}
 
 	return nil
@@ -128,7 +129,7 @@ func (r *BigCacheDataSourceImpl) SetListItem(_ context.Context, model []dto.IRep
 func (r *BigCacheDataSourceImpl) DeleteListItem(_ context.Context, model dto.IRepoEntity, sq *domain.SearchQuery) error {
 	err := r.Cache.Delete(r.cacheKey(model, sq))
 	if err != nil {
-		return NewDeleteError(err)
+		return domainerrors.Wrap(ErrorCodeCacheDelete, err)
 	}
 
 	return nil

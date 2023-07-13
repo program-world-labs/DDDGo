@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
+	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 )
 
@@ -42,7 +43,7 @@ func (a *Wallet) TableName() string {
 
 func (a *Wallet) Transform(i domain.IEntity) (IRepoEntity, error) {
 	if err := copier.Copy(a, i); err != nil {
-		return nil, NewWalletTransformError(err)
+		return nil, domainerrors.Wrap(ErrorCodeWalletTransform, err)
 	}
 
 	return a, nil
@@ -51,7 +52,7 @@ func (a *Wallet) Transform(i domain.IEntity) (IRepoEntity, error) {
 func (a *Wallet) BackToDomain() (domain.IEntity, error) {
 	i := &entity.Wallet{}
 	if err := copier.Copy(&i, a); err != nil {
-		return nil, NewWalletBackToDomainError(err)
+		return nil, domainerrors.Wrap(ErrorCodeWalletBackToDomain, err)
 	}
 
 	return i, nil
@@ -81,7 +82,7 @@ func (a *Wallet) SetID(id string) {
 func (a *Wallet) ToJSON() (string, error) {
 	jsonData, err := json.Marshal(a)
 	if err != nil {
-		return "", NewWalletToJSONError(err)
+		return "", domainerrors.Wrap(ErrorCodeWalletToJSON, err)
 	}
 
 	return string(jsonData), nil
@@ -90,7 +91,7 @@ func (a *Wallet) ToJSON() (string, error) {
 func (a *Wallet) DecodeJSON(data string) error {
 	err := json.Unmarshal([]byte(data), &a)
 	if err != nil {
-		return NewWalletDecodeJSONError(err)
+		return domainerrors.Wrap(ErrorCodeWalletDecodeJSON, err)
 	}
 
 	return nil
@@ -99,7 +100,7 @@ func (a *Wallet) DecodeJSON(data string) error {
 func (a *Wallet) ParseMap(data map[string]interface{}) error {
 	err := mapstructure.Decode(data, &a)
 	if err != nil {
-		return NewWalletParseMapError(err)
+		return domainerrors.Wrap(ErrorCodeWalletParseMap, err)
 	}
 
 	return nil

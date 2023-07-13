@@ -103,27 +103,27 @@ var (
 )
 
 func newRolseExistError() error {
-	return infra_repo.NewDatasourceError(infra_sql.NewCreateError(ErrRoleIsExist))
+	return domainerrors.Wrap(infra_repo.ErrorCodeDatasource, domainerrors.Wrap(infra_sql.ErrorCodeSQLCreate, ErrRoleIsExist))
 }
 
 func newRoleExistFullError() error {
-	return application_role.NewRepositoryError(infra_repo.NewDatasourceError(infra_sql.NewCreateError(ErrRoleIsExist)))
+	return domainerrors.Wrap(application_role.ErrorCodeRepository, domainerrors.Wrap(infra_repo.ErrorCodeDatasource, domainerrors.Wrap(infra_sql.ErrorCodeSQLCreate, ErrRoleIsExist)))
 }
 
 func newRolePermissionError() error {
-	return application_role.NewValidateInputError(ErrRolePermission)
+	return domainerrors.Wrap(application_role.ErrorCodeValidateInput, ErrRolePermission)
 }
 
 func newRoleNameTooLongError() error {
-	return application_role.NewValidateInputError(ErrRoleNameExceedsMaxLength)
+	return domainerrors.Wrap(application_role.ErrorCodeValidateInput, ErrRoleNameExceedsMaxLength)
 }
 
 func newRoleDescriptionTooLongError() error {
-	return application_role.NewValidateInputError(ErrRoleDescriptionExceedsMaxLength)
+	return domainerrors.Wrap(application_role.ErrorCodeValidateInput, ErrRoleDescriptionExceedsMaxLength)
 }
 
 func newRoleNameFormatError() error {
-	return application_role.NewValidateInputError(ErrRoleNameFormat)
+	return domainerrors.Wrap(application_role.ErrorCodeValidateInput, ErrRoleNameFormat)
 }
 
 func (st *ServiceTest) reset() {

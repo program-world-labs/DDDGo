@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
+	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 )
 
@@ -32,7 +33,7 @@ func (a *Amount) TableName() string {
 
 func (a *Amount) Transform(i domain.IEntity) (IRepoEntity, error) {
 	if err := copier.Copy(a, i); err != nil {
-		return nil, NewAmountTransformError(err)
+		return nil, domainerrors.Wrap(ErrorCodeAmountTransform, err)
 	}
 
 	return a, nil
@@ -41,7 +42,7 @@ func (a *Amount) Transform(i domain.IEntity) (IRepoEntity, error) {
 func (a *Amount) BackToDomain() (domain.IEntity, error) {
 	i := &entity.Amount{}
 	if err := copier.Copy(&i, a); err != nil {
-		return nil, NewAmountBackToDomainError(err)
+		return nil, domainerrors.Wrap(ErrorCodeAmountBackToDomain, err)
 	}
 
 	return i, nil
@@ -72,7 +73,7 @@ func (a *Amount) SetID(id string) {
 func (a *Amount) ToJSON() (string, error) {
 	jsonData, err := json.Marshal(a)
 	if err != nil {
-		return "", NewAmountToJSONError(err)
+		return "", domainerrors.Wrap(ErrorCodeAmountToJSON, err)
 	}
 
 	return string(jsonData), nil
@@ -81,7 +82,7 @@ func (a *Amount) ToJSON() (string, error) {
 func (a *Amount) DecodeJSON(data string) error {
 	err := json.Unmarshal([]byte(data), &a)
 	if err != nil {
-		return NewAmountDecodeJSONError(err)
+		return domainerrors.Wrap(ErrorCodeAmountDecodeJSON, err)
 	}
 
 	return nil
@@ -90,7 +91,7 @@ func (a *Amount) DecodeJSON(data string) error {
 func (a *Amount) ParseMap(data map[string]interface{}) error {
 	err := mapstructure.Decode(data, &a)
 	if err != nil {
-		return NewAmountParseMapError(err)
+		return domainerrors.Wrap(ErrorCodeAmountParseMap, err)
 	}
 
 	return nil
