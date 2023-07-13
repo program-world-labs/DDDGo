@@ -49,6 +49,19 @@ definitions:
           $ref: '#/definitions/user.Response'
         type: array
     type: object
+  role.ResponseList:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/role.Response'
+        type: array
+      limit:
+        type: integer
+      offset:
+        type: integer
+      total:
+        type: integer
+    type: object
   user.Response:
     properties:
       avatar:
@@ -107,6 +120,41 @@ paths:
       summary: Create role
       tags:
       - Role
+  /role/detail/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Detail role
+      operationId: DetailRole
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/role.Response'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: Detail role
+      tags:
+      - Role
   /role/list:
     get:
       consumes:
@@ -140,7 +188,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/http.Response'
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/role.ResponseList'
+              type: object
         "400":
           description: Bad Request
           schema:

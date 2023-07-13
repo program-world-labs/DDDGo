@@ -16,6 +16,7 @@ const (
 	ErrorCodeRoleCopyToInput                                              // 1000002
 	ErrorCodeRoleBindQuery                                                // 1000003
 	ErrorCodeRoleValidateInput                                            // 1000004
+	ErrorCodeRoleBindUri                                                  // 1000005
 )
 
 func NewBindJSONError(err error) *domainerrors.ErrorInfo {
@@ -28,6 +29,12 @@ func NewBindQueryError(err error) *domainerrors.ErrorInfo {
 	errBindQuery := domainerrors.New(domainerrors.GruopID+fmt.Sprint(ErrorCodeRoleBindQuery), err.Error())
 
 	return errBindQuery
+}
+
+func NewBindUriError(err error) *domainerrors.ErrorInfo {
+	errBindUri := domainerrors.New(domainerrors.GruopID+fmt.Sprint(ErrorCodeRoleBindUri), err.Error())
+
+	return errBindUri
 }
 
 func NewValidateInputError(err error) *domainerrors.ErrorInfo {

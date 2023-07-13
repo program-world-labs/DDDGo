@@ -12,4 +12,5 @@ type IService interface {
 	// DeleteRole(ctx context.Context, id string) error
 	// // Query
 	GetRoleList(ctx context.Context, roleInfo *ListGotInput) (*OutputList, error)
+	GetRoleDetail(ctx context.Context, roleInfo *DetailGotInput) (*Output, error)
 }

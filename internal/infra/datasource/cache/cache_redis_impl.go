@@ -37,7 +37,7 @@ func (r *RedisCacheDataSourceImpl) redisKey(model dto.IRepoEntity, sq ...*domain
 // GetByID -.
 func (r *RedisCacheDataSourceImpl) Get(ctx context.Context, model dto.IRepoEntity, ttl ...time.Duration) (dto.IRepoEntity, error) {
 	// 預設10秒
-	const defaultTTL = 10 * time.Second
+	const defaultTTL = 60 * time.Second
 
 	var t time.Duration
 

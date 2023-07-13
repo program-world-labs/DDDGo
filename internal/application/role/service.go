@@ -69,3 +69,26 @@ func (u *ServiceImpl) GetRoleList(ctx context.Context, roleInfo *ListGotInput) (
 
 	return NewListOutput(list), nil
 }
+
+// GetRoleDetail gets role detail.
+func (u *ServiceImpl) GetRoleDetail(ctx context.Context, roleInfo *DetailGotInput) (*Output, error) {
+	// Validate input.
+	err := roleInfo.Validate()
+	if err != nil {
+		return nil, NewValidateInputError(err)
+	}
+
+	// Get role detail.
+	role, err := u.RoleRepo.GetByID(ctx, &entity.Role{ID: roleInfo.ID})
+	if err != nil {
+		return nil, NewRepositoryError(err)
+	}
+
+	// Cast to entity.Role.
+	roleEntity, ok := role.(*entity.Role)
+	if !ok {
+		return nil, NewCastError(ErrCastToEntityFailed)
+	}
+
+	return NewOutput(roleEntity), nil
+}
