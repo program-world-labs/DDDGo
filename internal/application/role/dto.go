@@ -98,6 +98,23 @@ type UpdatedInput struct {
 	Permissions []string `json:"permissions"`
 }
 
+type DeletedInput struct {
+	ID string `json:"id"`
+}
+
+type DetailGotInput struct {
+	ID string `json:"id" validate:"required,alphanum,len=20"`
+}
+
+func (i *DetailGotInput) Validate() error {
+	err := validator.New().Struct(i)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 type ListGotInput struct {
 	Limit      int      `json:"limit"`
 	Offset     int      `json:"offset"`

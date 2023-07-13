@@ -134,3 +134,9 @@ func (a *Role) ParseMap(data map[string]interface{}) error {
 
 	return nil
 }
+
+func (a *Role) GetPreloads() []string {
+	return []string{
+		"Users",
+	}
+}

@@ -24,7 +24,7 @@ func NewRoleRoutes(handler *gin.RouterGroup, u application_role.IService, l pwlo
 	{
 		h.POST("/create", r.create)
 		h.GET("/list", r.list)
-		// h.GET("/detail/:id", r.detail)
+		h.GET("/detail/:id", r.detail)
 		// h.PUT("/update/:id", r.update)
 		// h.DELETE("/delete/:id", r.delete)
 		// h.PUT("/assign-role/:id", r.assignRole)
@@ -97,7 +97,7 @@ func (r *roleRoutes) create(c *gin.Context) {
 // @Param		filterName	query	string		false	"FilterName"
 // @Param		sortFields	query	string		false	"SortFields"
 // @Param		dir	query	string		false	"Dir"
-// @Success		200		{object}	http.Response
+// @Success		200		{object}	http.Response{data=ResponseList}
 // @Failure		400		{object}	http.Response
 // @Failure		500		{object}	http.Response
 // @Router			/role/list [get].
@@ -141,4 +141,57 @@ func (r *roleRoutes) list(c *gin.Context) {
 	}
 
 	http.SuccessResponse(c, NewResponseList(roleEntities))
+}
+
+// @Summary     Detail role
+// @Description Detail role
+// @ID          DetailRole
+// @Tags  	    Role
+// @Accept      json
+// @Produce     json
+// @Param		id	path	string	true	"ID"
+// @Success		200		{object}	http.Response{data=Response}
+// @Failure		400		{object}	http.Response
+// @Failure		500		{object}	http.Response
+// @Router			/role/detail/{id} [get].
+func (r *roleRoutes) detail(c *gin.Context) {
+	// 開始追蹤
+	var tracer = otel.Tracer("")
+	ctx, span := tracer.Start(c.Request.Context(), "")
+	// // 設定追蹤屬性
+	// if kv, err := operations.TransformToAttribute("request/", req); err == nil {
+	// 	span.SetAttributes(kv...)
+	// }
+
+	defer span.End()
+
+	// 參數驗證
+	var req DetailGotInput
+	if err := c.ShouldBindUri(&req); err != nil {
+		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindUri")
+		http.HandleErrorResponse(c, NewBindUriError(err))
+
+		return
+	}
+
+	var input application_role.DetailGotInput
+	err := copier.Copy(&input, &req)
+
+	if err != nil {
+		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
+		http.HandleErrorResponse(c, NewCopyError(err))
+
+		return
+	}
+
+	// // 執行UseCase
+	roleEntity, err := r.u.GetRoleDetail(ctx, &input)
+	if err != nil {
+		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - DetailRole")
+		http.HandleErrorResponse(c, NewUsecaseError(err))
+
+		return
+	}
+
+	http.SuccessResponse(c, NewResponse(roleEntity))
 }

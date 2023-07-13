@@ -13,12 +13,6 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/infra/dto"
 )
 
-const (
-	ListTotalCountKey = "domain.list.total_count"
-	ListLimitKey      = "domain.list.limit"
-	ListOffsetKey     = "domain.list.offset"
-)
-
 var _ datasource.ICacheDataSource = (*BigCacheDataSourceImpl)(nil)
 
 // BigCacheDataSourceImpl -.

@@ -10,4 +10,5 @@ type IRepoEntity interface {
 	ParseMap(map[string]interface{}) error
 	ToJSON() (string, error)
 	DecodeJSON(string) error
+	GetPreloads() []string
 }

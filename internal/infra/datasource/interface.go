@@ -13,13 +13,29 @@ type IDataSource interface {
 	Delete(context.Context, dto.IRepoEntity) error
 	Update(context.Context, dto.IRepoEntity) (dto.IRepoEntity, error)
 	UpdateWithFields(context.Context, dto.IRepoEntity, []string) error
-	GetByID(context.Context, dto.IRepoEntity) (map[string]interface{}, error)
+	GetByID(context.Context, dto.IRepoEntity) (dto.IRepoEntity, error)
 	GetAll(context.Context, *domain.SearchQuery, dto.IRepoEntity) (map[string]interface{}, error)
 
 	CreateTx(context.Context, dto.IRepoEntity, domain.ITransactionEvent) (dto.IRepoEntity, error)
 	DeleteTx(context.Context, dto.IRepoEntity, domain.ITransactionEvent) error
 	UpdateTx(context.Context, dto.IRepoEntity, domain.ITransactionEvent) (dto.IRepoEntity, error)
 	UpdateWithFieldsTx(context.Context, dto.IRepoEntity, []string, domain.ITransactionEvent) error
+}
+
+type IAssociationDataSource interface {
+	AppendAssociation(context.Context, string, dto.IRepoEntity, []dto.IRepoEntity) error
+	ReplaceAssociation(context.Context, string, dto.IRepoEntity, []dto.IRepoEntity) error
+	RemoveAssociation(context.Context, string, dto.IRepoEntity, []dto.IRepoEntity) error
+	GetAssociationCount(context.Context, string, dto.IRepoEntity) (int64, error)
+
+	AppendAssociationTx(context.Context, string, dto.IRepoEntity, []dto.IRepoEntity, domain.ITransactionEvent) error
+	ReplaceAssociationTx(context.Context, string, dto.IRepoEntity, []dto.IRepoEntity, domain.ITransactionEvent) error
+	RemoveAssociationTx(context.Context, string, dto.IRepoEntity, []dto.IRepoEntity, domain.ITransactionEvent) error
+}
+
+type IRelationDataSource interface {
+	IDataSource
+	IAssociationDataSource
 }
 
 type ICacheDataSource interface {

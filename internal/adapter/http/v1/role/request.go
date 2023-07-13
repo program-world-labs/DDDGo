@@ -13,3 +13,7 @@ type ListGotInput struct {
 	SortFields []string `json:"sortFields" form:"sortFields"`
 	Dir        string   `json:"dir" form:"dir"`
 }
+
+type DetailGotInput struct {
+	ID string `json:"id" uri:"id" binding:"required"`
+}

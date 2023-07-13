@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/jinzhu/copier"
 	"github.com/mitchellh/mapstructure"
 	"gorm.io/gorm"
@@ -55,7 +54,7 @@ func (a *Amount) BeforeUpdate(_ *gorm.DB) (err error) {
 }
 
 func (a *Amount) BeforeCreate(_ *gorm.DB) (err error) {
-	a.ID = uuid.New().String()
+	a.ID, err = generateID()
 	a.UpdatedAt = time.Now()
 	a.CreatedAt = time.Now()
 
@@ -93,5 +92,10 @@ func (a *Amount) ParseMap(data map[string]interface{}) error {
 	if err != nil {
 		return NewAmountParseMapError(err)
 	}
+
 	return nil
+}
+
+func (a *Amount) GetPreloads() []string {
+	return []string{}
 }
