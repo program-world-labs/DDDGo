@@ -45,13 +45,13 @@ func (r *CRUDImpl) GetByID(ctx context.Context, e domain.IEntity) (domain.IEntit
 	// 從Redis取得資料, 取不到資料會自動從db取得資料
 	data, err = r.Redis.Get(ctx, info)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoGet, err)
+		return nil, domainerrors.Wrap(ErrorCodeDatasource, err)
 	}
 
 	// 將資料存入Local Cache
 	_, err = r.Cache.Set(ctx, data)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoSet, err)
+		return nil, domainerrors.Wrap(ErrorCodeDatasource, err)
 	}
 
 	d, err := data.BackToDomain()
@@ -70,54 +70,20 @@ func (r *CRUDImpl) GetAll(ctx context.Context, sq *domain.SearchQuery, e domain.
 	}
 
 	// Define a helper function to handle data
-	handleData := func(data map[string]interface{}) (*domain.List, error) {
-		var list []domain.IEntity
-
-		for _, v := range data["data"].([]interface{}) {
-			// cast to map[string]interface{}
-			v, ok := v.(map[string]interface{})
-			if !ok {
-				return nil, domainerrors.Wrap(ErrorCodeRepoCast, err)
-			}
-
-			err = info.ParseMap(v)
-			if err != nil {
-				return nil, domainerrors.Wrap(ErrorCodeRepoParseMap, err)
-			}
-
-			var et domain.IEntity
-			et, err = info.BackToDomain()
-
-			if err != nil {
-				return nil, domainerrors.Wrap(ErrorCodeRepoBackToDomain, err)
-			}
-
-			list = append(list, et)
-		}
-
-		result := &domain.List{
-			Total:  int64(data["total"].(float64)),
-			Limit:  int64(data["limit"].(float64)),
-			Offset: int64(data["offset"].(float64)),
-			Data:   list,
-		}
-
-		return result, nil
-	}
 
 	// Try to get data from local cache
 	data, err := r.Cache.GetListItem(ctx, info, sq)
 	if err == nil {
-		return handleData(data)
+		return data.BackToDomain(info)
 	}
 
 	// If not in local cache, try to get data from Redis
 	data, err = r.Redis.GetListItem(ctx, info, sq)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoGetAll, err)
+		return nil, domainerrors.Wrap(ErrorCodeDatasource, err)
 	}
 
-	return handleData(data)
+	return data.BackToDomain(info)
 }
 
 // Create -.
@@ -148,17 +114,17 @@ func (r *CRUDImpl) performUpdate(ctx context.Context, e domain.IEntity, action f
 
 	data, err := action(ctx, info)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoUpdate, err)
+		return nil, domainerrors.Wrap(ErrorCodeDatasource, err)
 	}
 
 	err = r.Cache.Delete(ctx, info)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoDelete, err)
+		return nil, domainerrors.Wrap(ErrorCodeDatasource, err)
 	}
 
 	err = r.Redis.Delete(ctx, info)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoDelete, err)
+		return nil, domainerrors.Wrap(ErrorCodeDatasource, err)
 	}
 
 	if data == nil {
@@ -193,17 +159,17 @@ func (r *CRUDImpl) Delete(ctx context.Context, e domain.IEntity) error {
 
 	err = r.DB.Delete(ctx, info)
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeRepoDelete, err)
+		return domainerrors.Wrap(ErrorCodeDatasource, err)
 	}
 
 	err = r.Cache.Delete(ctx, info)
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeRepoDelete, err)
+		return domainerrors.Wrap(ErrorCodeDatasource, err)
 	}
 
 	err = r.Redis.Delete(ctx, info)
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeRepoDelete, err)
+		return domainerrors.Wrap(ErrorCodeDatasource, err)
 	}
 
 	return nil
@@ -252,17 +218,17 @@ func (r *CRUDImpl) DeleteTx(ctx context.Context, e domain.IEntity, tx domain.ITr
 
 	err = r.DB.DeleteTx(ctx, info, tx)
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeRepoDeleteTx, err)
+		return domainerrors.Wrap(ErrorCodeDatasource, err)
 	}
 
 	err = r.Cache.Delete(ctx, info)
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeRepoDelete, err)
+		return domainerrors.Wrap(ErrorCodeDatasource, err)
 	}
 
 	err = r.Redis.Delete(ctx, info)
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeRepoDelete, err)
+		return domainerrors.Wrap(ErrorCodeDatasource, err)
 	}
 
 	return nil

@@ -2,6 +2,7 @@ package dto
 
 import (
 	"encoding/json"
+	"reflect"
 	"time"
 
 	"github.com/jinzhu/copier"
@@ -83,23 +84,46 @@ func (a *User) ToJSON() (string, error) {
 	return string(jsonData), nil
 }
 
-func (a *User) DecodeJSON(data string) error {
-	err := json.Unmarshal([]byte(data), &a)
-	if err != nil {
+func (a *User) UnmarshalJSON(data []byte) error {
+	type Alias User
+
+	aux := &struct {
+		*Alias
+	}{
+		Alias: (*Alias)(a),
+	}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
 		return domainerrors.Wrap(ErrorCodeUserDecodeJSON, err)
 	}
 
 	return nil
 }
 
-func (a *User) ParseMap(data map[string]interface{}) error {
-	if err := mapstructure.Decode(data, &a); err != nil {
-		return domainerrors.Wrap(ErrorCodeUserParseMap, err)
+func (a *User) ParseMap(data map[string]interface{}) (IRepoEntity, error) {
+	err := ParseDateString(data)
+	if err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeUserParseMap, err)
 	}
 
-	return nil
+	var info *User
+	err = mapstructure.Decode(data, &info)
+
+	if err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeUserDecodeJSON, err)
+	}
+
+	return info, nil
 }
 
 func (a *User) GetPreloads() []string {
 	return []string{"Roles", "Wallets", "Group"}
+}
+
+func (a *User) GetListType() interface{} {
+	entityType := reflect.TypeOf(Role{})
+	sliceType := reflect.SliceOf(entityType)
+	sliceValue := reflect.MakeSlice(sliceType, 0, 0)
+
+	return sliceValue.Interface()
 }

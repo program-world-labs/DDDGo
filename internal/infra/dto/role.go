@@ -2,7 +2,7 @@ package dto
 
 import (
 	"encoding/json"
-	"strings"
+	"reflect"
 	"time"
 
 	"github.com/jinzhu/copier"
@@ -80,64 +80,58 @@ func (a *Role) ToJSON() (string, error) {
 	return string(jsonData), nil
 }
 
-func (a *Role) DecodeJSON(data string) error {
-	err := json.Unmarshal([]byte(data), &a)
-	if err != nil {
+func (a *Role) UnmarshalJSON(data []byte) error {
+	type Alias Role
+
+	aux := &struct {
+		*Alias
+	}{
+		Alias: (*Alias)(a),
+	}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
 		return domainerrors.Wrap(ErrorCodeRoleDecodeJSON, err)
 	}
 
 	return nil
 }
 
-func (a *Role) ParseMap(data map[string]interface{}) error {
+func (a *Role) ParseMap(data map[string]interface{}) (IRepoEntity, error) {
+	err := ParseDateString(data)
+	if err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeRoleParseMap, err)
+	}
+
+	var info *Role
 	// Permissions is a slice of string, so we need to decode it manually, data like {read:all,write:all}
-	permission, ok := data["permissions"].(string)
-	if !ok {
-		return domainerrors.Wrap(ErrorCodeRoleParseMap, ErrParesMapFailed)
-	}
+	// permission, ok := data["permissions"].(string)
+	// if !ok {
+	// 	return nil, NewRoleParseMapError(nil)
+	// }
 
-	s := strings.Trim(permission, "{}") // 删除开头和结尾的大括号
-	result := strings.Split(s, ",")     // 以逗号为分割符，分割字符串
-	data["permissions"] = result
+	// s := strings.Trim(permission, "{}") // 删除开头和结尾的大括号
+	// result := strings.Split(s, ",")     // 以逗号为分割符，分割字符串
+	// data["permissions"] = result
 
-	if tm, ok := data["created_at"].(string); ok {
-		t, err := time.Parse(time.RFC3339Nano, tm)
-		if err != nil {
-			return domainerrors.Wrap(ErrorCodeRoleParseMap, err)
-		}
-
-		data["created_at"] = t
-	}
-
-	if tm, ok := data["updated_at"].(string); ok {
-		t, err := time.Parse(time.RFC3339Nano, tm)
-		if err != nil {
-			return domainerrors.Wrap(ErrorCodeRoleParseMap, err)
-		}
-
-		data["updated_at"] = t
-	}
-
-	if tm, ok := data["deleted_at"].(string); ok {
-		t, err := time.Parse(time.RFC3339Nano, tm)
-		if err != nil {
-			return domainerrors.Wrap(ErrorCodeRoleParseMap, err)
-		}
-
-		data["deleted_at"] = t
-	}
-
-	err := mapstructure.Decode(data, &a)
+	err = mapstructure.Decode(data, &info)
 
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeRoleParseMap, err)
+		return nil, domainerrors.Wrap(ErrorCodeRoleParseMap, err)
 	}
 
-	return nil
+	return info, nil
 }
 
 func (a *Role) GetPreloads() []string {
 	return []string{
 		"Users",
 	}
+}
+
+func (a *Role) GetListType() interface{} {
+	entityType := reflect.TypeOf(Role{})
+	sliceType := reflect.SliceOf(entityType)
+	sliceValue := reflect.MakeSlice(sliceType, 0, 0)
+
+	return sliceValue.Interface()
 }

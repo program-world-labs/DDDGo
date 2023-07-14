@@ -2,6 +2,7 @@ package dto
 
 import (
 	"encoding/json"
+	"reflect"
 	"time"
 
 	"github.com/jinzhu/copier"
@@ -88,24 +89,46 @@ func (a *Wallet) ToJSON() (string, error) {
 	return string(jsonData), nil
 }
 
-func (a *Wallet) DecodeJSON(data string) error {
-	err := json.Unmarshal([]byte(data), &a)
-	if err != nil {
+func (a *Wallet) UnmarshalJSON(data []byte) error {
+	type Alias Wallet
+
+	aux := &struct {
+		*Alias
+	}{
+		Alias: (*Alias)(a),
+	}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
 		return domainerrors.Wrap(ErrorCodeWalletDecodeJSON, err)
 	}
 
 	return nil
 }
 
-func (a *Wallet) ParseMap(data map[string]interface{}) error {
-	err := mapstructure.Decode(data, &a)
+func (a *Wallet) ParseMap(data map[string]interface{}) (IRepoEntity, error) {
+	err := ParseDateString(data)
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeWalletParseMap, err)
+		return nil, domainerrors.Wrap(ErrorCodeWalletParseMap, err)
 	}
 
-	return nil
+	var info *Wallet
+	err = mapstructure.Decode(data, &info)
+
+	if err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeWalletParseMap, err)
+	}
+
+	return info, nil
 }
 
 func (a *Wallet) GetPreloads() []string {
 	return []string{"Amounts"}
+}
+
+func (a *Wallet) GetListType() interface{} {
+	entityType := reflect.TypeOf(Role{})
+	sliceType := reflect.SliceOf(entityType)
+	sliceValue := reflect.MakeSlice(sliceType, 0, 0)
+
+	return sliceValue.Interface()
 }
