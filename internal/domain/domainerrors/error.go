@@ -51,7 +51,7 @@ func New(code string, msg string) *ErrorInfo {
 }
 
 // Wrap returns a new error with an error code and error message, wrapping an existing error.
-func Wrap(errorCode int, err error) error {
+func Wrap(errorCode int, err error) *ErrorInfo {
 	// Check if error code is adapter error code
 	var group = ""
 	if errorCode >= ErrorCodeAdapterRole {

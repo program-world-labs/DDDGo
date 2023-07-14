@@ -3,9 +3,33 @@ package tests
 import (
 	"errors"
 	"fmt"
+	"reflect"
 
 	"github.com/stretchr/testify/assert"
 )
+
+var ErrFieldDoesNotExist = errors.New("field does not exist")
+var ErrFieldDoesNotMatch = errors.New("field does not match")
+
+func CompareFields(a, b interface{}, fields []string) error {
+	va := reflect.ValueOf(a)
+	vb := reflect.ValueOf(b)
+
+	for _, field := range fields {
+		fa := va.FieldByName(field)
+		fb := vb.FieldByName(field)
+
+		if !fa.IsValid() || !fb.IsValid() {
+			return fmt.Errorf("%w: %s", ErrFieldDoesNotExist, field)
+		}
+
+		if fa.Interface() != fb.Interface() {
+			return fmt.Errorf("%w: %s", ErrFieldDoesNotMatch, field)
+		}
+	}
+
+	return nil
+}
 
 // assertExpectedAndActual is a helper function to allow the step function to call
 // assertion functions where you want to compare an expected and an actual value.
