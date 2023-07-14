@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
+	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 )
 
@@ -33,7 +34,7 @@ func (a *Role) TableName() string {
 
 func (a *Role) Transform(i domain.IEntity) (IRepoEntity, error) {
 	if err := copier.Copy(a, i); err != nil {
-		return nil, NewRoleTransformError(err)
+		return nil, domainerrors.Wrap(ErrorCodeRoleTransform, err)
 	}
 
 	return a, nil
@@ -42,7 +43,7 @@ func (a *Role) Transform(i domain.IEntity) (IRepoEntity, error) {
 func (a *Role) BackToDomain() (domain.IEntity, error) {
 	i := &entity.Role{}
 	if err := copier.Copy(i, a); err != nil {
-		return nil, NewRoleBackToDomainError(err)
+		return nil, domainerrors.Wrap(ErrorCodeRoleBackToDomain, err)
 	}
 
 	return i, nil
@@ -73,7 +74,7 @@ func (a *Role) SetID(id string) {
 func (a *Role) ToJSON() (string, error) {
 	jsonData, err := json.Marshal(a)
 	if err != nil {
-		return "", NewRoleToJSONError(err)
+		return "", domainerrors.Wrap(ErrorCodeRoleToJSON, err)
 	}
 
 	return string(jsonData), nil
@@ -82,7 +83,7 @@ func (a *Role) ToJSON() (string, error) {
 func (a *Role) DecodeJSON(data string) error {
 	err := json.Unmarshal([]byte(data), &a)
 	if err != nil {
-		return NewRoleDecodeJSONError(err)
+		return domainerrors.Wrap(ErrorCodeRoleDecodeJSON, err)
 	}
 
 	return nil
@@ -92,7 +93,7 @@ func (a *Role) ParseMap(data map[string]interface{}) error {
 	// Permissions is a slice of string, so we need to decode it manually, data like {read:all,write:all}
 	permission, ok := data["permissions"].(string)
 	if !ok {
-		return NewRoleParseMapError(nil)
+		return domainerrors.Wrap(ErrorCodeRoleParseMap, ErrParesMapFailed)
 	}
 
 	s := strings.Trim(permission, "{}") // 删除开头和结尾的大括号
@@ -102,7 +103,7 @@ func (a *Role) ParseMap(data map[string]interface{}) error {
 	if tm, ok := data["created_at"].(string); ok {
 		t, err := time.Parse(time.RFC3339Nano, tm)
 		if err != nil {
-			return NewRoleParseMapError(err)
+			return domainerrors.Wrap(ErrorCodeRoleParseMap, err)
 		}
 
 		data["created_at"] = t
@@ -111,7 +112,7 @@ func (a *Role) ParseMap(data map[string]interface{}) error {
 	if tm, ok := data["updated_at"].(string); ok {
 		t, err := time.Parse(time.RFC3339Nano, tm)
 		if err != nil {
-			return NewRoleParseMapError(err)
+			return domainerrors.Wrap(ErrorCodeRoleParseMap, err)
 		}
 
 		data["updated_at"] = t
@@ -120,7 +121,7 @@ func (a *Role) ParseMap(data map[string]interface{}) error {
 	if tm, ok := data["deleted_at"].(string); ok {
 		t, err := time.Parse(time.RFC3339Nano, tm)
 		if err != nil {
-			return NewRoleParseMapError(err)
+			return domainerrors.Wrap(ErrorCodeRoleParseMap, err)
 		}
 
 		data["deleted_at"] = t
@@ -129,7 +130,7 @@ func (a *Role) ParseMap(data map[string]interface{}) error {
 	err := mapstructure.Decode(data, &a)
 
 	if err != nil {
-		return NewRoleParseMapError(err)
+		return domainerrors.Wrap(ErrorCodeRoleParseMap, err)
 	}
 
 	return nil

@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
+	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
 	"github.com/program-world-labs/DDDGo/internal/infra/dto"
 	"github.com/program-world-labs/DDDGo/pkg/pwsql"
@@ -35,7 +36,7 @@ func (r *CRUDDatasourceImpl) GetByID(_ context.Context, model dto.IRepoEntity) (
 	err := r.DB.Table(model.TableName()).First(&model, "id = ?", model.GetID()).Error
 
 	if err != nil {
-		return nil, NewGetError(err)
+		return nil, domainerrors.Wrap(ErrorCodeSQLGet, err)
 	}
 
 	return model, nil
@@ -45,7 +46,7 @@ func (r *CRUDDatasourceImpl) GetByID(_ context.Context, model dto.IRepoEntity) (
 func (r *CRUDDatasourceImpl) Create(_ context.Context, model dto.IRepoEntity) (dto.IRepoEntity, error) {
 	err := r.DB.Create(model).Error
 	if err != nil {
-		return nil, NewCreateError(err)
+		return nil, domainerrors.Wrap(ErrorCodeSQLCreate, err)
 	}
 
 	return model, nil
@@ -55,7 +56,7 @@ func (r *CRUDDatasourceImpl) Create(_ context.Context, model dto.IRepoEntity) (d
 func (r *CRUDDatasourceImpl) Update(_ context.Context, model dto.IRepoEntity) (dto.IRepoEntity, error) {
 	err := r.DB.Save(model).Error
 	if err != nil {
-		return nil, NewUpdateError(err)
+		return nil, domainerrors.Wrap(ErrorCodeSQLUpdate, err)
 	}
 
 	return model, nil
@@ -65,7 +66,7 @@ func (r *CRUDDatasourceImpl) Update(_ context.Context, model dto.IRepoEntity) (d
 func (r *CRUDDatasourceImpl) UpdateWithFields(_ context.Context, model dto.IRepoEntity, fields []string) error {
 	err := r.DB.Model(model).Select(fields).Updates(model).Error
 	if err != nil {
-		return NewUpdateWithFieldsError(err)
+		return domainerrors.Wrap(ErrorCodeSQLUpdateWithFields, err)
 	}
 
 	return nil
@@ -75,7 +76,7 @@ func (r *CRUDDatasourceImpl) UpdateWithFields(_ context.Context, model dto.IRepo
 func (r *CRUDDatasourceImpl) Delete(_ context.Context, model dto.IRepoEntity) error {
 	err := r.DB.Delete(model, model.GetID()).Error
 	if err != nil {
-		return NewDeleteError(err)
+		return domainerrors.Wrap(ErrorCodeSQLDelete, err)
 	}
 
 	return nil
@@ -93,14 +94,14 @@ func (r *CRUDDatasourceImpl) GetAll(_ context.Context, sq *domain.SearchQuery, m
 	err := r.DB.Table(model.TableName()).Limit(sq.Page.Limit).Offset(sq.Page.Offset).Where(sq.GetWhere(), sq.GetArgs()...).Order(sq.GetOrder()).Find(&data).Error
 
 	if err != nil {
-		return nil, NewGetAllError(err)
+		return nil, domainerrors.Wrap(ErrorCodeSQLGetAll, err)
 	}
 
 	var count int64
 	err = r.DB.Table(model.TableName()).Where(sq.GetWhere(), sq.GetArgs()...).Count(&count).Error
 
 	if err != nil {
-		return nil, NewGetAllError(err)
+		return nil, domainerrors.Wrap(ErrorCodeSQLGetAll, err)
 	}
 
 	var result = map[string]interface{}{
@@ -117,12 +118,12 @@ func (r *CRUDDatasourceImpl) GetAll(_ context.Context, sq *domain.SearchQuery, m
 func (r *CRUDDatasourceImpl) CreateTx(_ context.Context, model dto.IRepoEntity, tx domain.ITransactionEvent) (dto.IRepoEntity, error) {
 	t, ok := tx.GetTx().(*gorm.DB)
 	if !ok {
-		return nil, NewCastError(ErrCastToEntityFailed)
+		return nil, domainerrors.Wrap(ErrorCodeSQLCast, ErrCastToEntityFailed)
 	}
 
 	err := t.Create(model).Error
 	if err != nil {
-		return nil, NewCreateError(err)
+		return nil, domainerrors.Wrap(ErrorCodeSQLCreate, err)
 	}
 
 	return model, nil
@@ -132,12 +133,12 @@ func (r *CRUDDatasourceImpl) CreateTx(_ context.Context, model dto.IRepoEntity, 
 func (r *CRUDDatasourceImpl) UpdateTx(_ context.Context, model dto.IRepoEntity, tx domain.ITransactionEvent) (dto.IRepoEntity, error) {
 	t, ok := tx.GetTx().(*gorm.DB)
 	if !ok {
-		return nil, NewCastError(ErrCastToEntityFailed)
+		return nil, domainerrors.Wrap(ErrorCodeSQLCast, ErrCastToEntityFailed)
 	}
 
 	err := t.Save(model).Error
 	if err != nil {
-		return nil, NewUpdateError(err)
+		return nil, domainerrors.Wrap(ErrorCodeSQLUpdate, err)
 	}
 
 	return model, nil
@@ -147,12 +148,12 @@ func (r *CRUDDatasourceImpl) UpdateTx(_ context.Context, model dto.IRepoEntity, 
 func (r *CRUDDatasourceImpl) UpdateWithFieldsTx(_ context.Context, model dto.IRepoEntity, fields []string, tx domain.ITransactionEvent) error {
 	t, ok := tx.GetTx().(*gorm.DB)
 	if !ok {
-		return NewCastError(ErrCastToEntityFailed)
+		return domainerrors.Wrap(ErrorCodeSQLCast, ErrCastToEntityFailed)
 	}
 
 	err := t.Model(model).Select(fields).Updates(model).Error
 	if err != nil {
-		return NewUpdateWithFieldsError(err)
+		return domainerrors.Wrap(ErrorCodeSQLUpdateWithFields, err)
 	}
 
 	return nil
@@ -162,12 +163,12 @@ func (r *CRUDDatasourceImpl) UpdateWithFieldsTx(_ context.Context, model dto.IRe
 func (r *CRUDDatasourceImpl) DeleteTx(_ context.Context, model dto.IRepoEntity, tx domain.ITransactionEvent) error {
 	t, ok := tx.GetTx().(*gorm.DB)
 	if !ok {
-		return NewCastError(ErrCastToEntityFailed)
+		return domainerrors.Wrap(ErrorCodeSQLCast, ErrCastToEntityFailed)
 	}
 
 	err := t.Delete(model, model.GetID()).Error
 	if err != nil {
-		return NewDeleteError(err)
+		return domainerrors.Wrap(ErrorCodeSQLDelete, err)
 	}
 
 	return nil
@@ -177,7 +178,7 @@ func (r *CRUDDatasourceImpl) DeleteTx(_ context.Context, model dto.IRepoEntity, 
 func (r *CRUDDatasourceImpl) AppendAssociation(_ context.Context, key string, model dto.IRepoEntity, appendModel []dto.IRepoEntity) error {
 	err := r.DB.Model(model).Association(key).Append(appendModel)
 	if err != nil {
-		return NewAppendAssociationError(err)
+		return domainerrors.Wrap(ErrorCodeSQLAppendAssociation, err)
 	}
 
 	return nil
@@ -187,7 +188,7 @@ func (r *CRUDDatasourceImpl) AppendAssociation(_ context.Context, key string, mo
 func (r *CRUDDatasourceImpl) ReplaceAssociation(_ context.Context, key string, model dto.IRepoEntity, replaceModel []dto.IRepoEntity) error {
 	err := r.DB.Model(model).Association(key).Replace(replaceModel)
 	if err != nil {
-		return NewReplaceAssociationError(err)
+		return domainerrors.Wrap(ErrorCodeSQLReplaceAssociation, err)
 	}
 
 	return nil
@@ -197,7 +198,7 @@ func (r *CRUDDatasourceImpl) ReplaceAssociation(_ context.Context, key string, m
 func (r *CRUDDatasourceImpl) RemoveAssociation(_ context.Context, key string, model dto.IRepoEntity, removeModel []dto.IRepoEntity) error {
 	err := r.DB.Model(model).Association(key).Delete(removeModel)
 	if err != nil {
-		return NewRemoveAssociationError(err)
+		return domainerrors.Wrap(ErrorCodeSQLRemoveAssociation, err)
 	}
 
 	return nil
@@ -214,12 +215,12 @@ func (r *CRUDDatasourceImpl) GetAssociationCount(_ context.Context, key string, 
 func (r *CRUDDatasourceImpl) AppendAssociationTx(_ context.Context, key string, model dto.IRepoEntity, appendModel []dto.IRepoEntity, tx domain.ITransactionEvent) error {
 	t, ok := tx.GetTx().(*gorm.DB)
 	if !ok {
-		return NewCastError(ErrCastToEntityFailed)
+		return domainerrors.Wrap(ErrorCodeSQLCast, ErrCastToEntityFailed)
 	}
 
 	err := t.Model(model).Association(key).Append(appendModel)
 	if err != nil {
-		return NewAppendAssociationError(err)
+		return domainerrors.Wrap(ErrorCodeSQLAppendAssociation, err)
 	}
 
 	return nil
@@ -229,12 +230,12 @@ func (r *CRUDDatasourceImpl) AppendAssociationTx(_ context.Context, key string, 
 func (r *CRUDDatasourceImpl) ReplaceAssociationTx(_ context.Context, key string, model dto.IRepoEntity, replaceModel []dto.IRepoEntity, tx domain.ITransactionEvent) error {
 	t, ok := tx.GetTx().(*gorm.DB)
 	if !ok {
-		return NewCastError(ErrCastToEntityFailed)
+		return domainerrors.Wrap(ErrorCodeSQLCast, ErrCastToEntityFailed)
 	}
 
 	err := t.Model(model).Association(key).Replace(replaceModel)
 	if err != nil {
-		return NewReplaceAssociationError(err)
+		return domainerrors.Wrap(ErrorCodeSQLReplaceAssociation, err)
 	}
 
 	return nil
@@ -244,12 +245,12 @@ func (r *CRUDDatasourceImpl) ReplaceAssociationTx(_ context.Context, key string,
 func (r *CRUDDatasourceImpl) RemoveAssociationTx(_ context.Context, key string, model dto.IRepoEntity, removeModel []dto.IRepoEntity, tx domain.ITransactionEvent) error {
 	t, ok := tx.GetTx().(*gorm.DB)
 	if !ok {
-		return NewCastError(ErrCastToEntityFailed)
+		return domainerrors.Wrap(ErrorCodeSQLCast, ErrCastToEntityFailed)
 	}
 
 	err := t.Model(model).Association(key).Delete(removeModel)
 	if err != nil {
-		return NewRemoveAssociationError(err)
+		return domainerrors.Wrap(ErrorCodeSQLRemoveAssociation, err)
 	}
 
 	return nil

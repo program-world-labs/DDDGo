@@ -102,28 +102,28 @@ var (
 	ErrRoleNameFormat                  = errors.New("validation failed: role Name invalid format")
 )
 
-func newRolseExistError() error {
-	return infra_repo.NewDatasourceError(infra_sql.NewCreateError(ErrRoleIsExist))
+func newRolseExistError() *domainerrors.ErrorInfo {
+	return domainerrors.Wrap(infra_repo.ErrorCodeDatasource, domainerrors.Wrap(infra_sql.ErrorCodeSQLCreate, ErrRoleIsExist))
 }
 
-func newRoleExistFullError() error {
-	return application_role.NewRepositoryError(infra_repo.NewDatasourceError(infra_sql.NewCreateError(ErrRoleIsExist)))
+func newRoleExistFullError() *domainerrors.ErrorInfo {
+	return domainerrors.Wrap(application_role.ErrorCodeRepository, domainerrors.Wrap(infra_repo.ErrorCodeDatasource, domainerrors.Wrap(infra_sql.ErrorCodeSQLCreate, ErrRoleIsExist)))
 }
 
-func newRolePermissionError() error {
-	return application_role.NewValidateInputError(ErrRolePermission)
+func newRolePermissionError() *domainerrors.ErrorInfo {
+	return domainerrors.Wrap(application_role.ErrorCodeValidateInput, ErrRolePermission)
 }
 
-func newRoleNameTooLongError() error {
-	return application_role.NewValidateInputError(ErrRoleNameExceedsMaxLength)
+func newRoleNameTooLongError() *domainerrors.ErrorInfo {
+	return domainerrors.Wrap(application_role.ErrorCodeValidateInput, ErrRoleNameExceedsMaxLength)
 }
 
-func newRoleDescriptionTooLongError() error {
-	return application_role.NewValidateInputError(ErrRoleDescriptionExceedsMaxLength)
+func newRoleDescriptionTooLongError() *domainerrors.ErrorInfo {
+	return domainerrors.Wrap(application_role.ErrorCodeValidateInput, ErrRoleDescriptionExceedsMaxLength)
 }
 
-func newRoleNameFormatError() error {
-	return application_role.NewValidateInputError(ErrRoleNameFormat)
+func newRoleNameFormatError() *domainerrors.ErrorInfo {
+	return domainerrors.Wrap(application_role.ErrorCodeValidateInput, ErrRoleNameFormat)
 }
 
 func (st *ServiceTest) reset() {
@@ -191,13 +191,14 @@ func (st *ServiceTest) thenErrorRoleAlreadyExists() error {
 
 	var e *domainerrors.ErrorInfo
 	if errors.As(err, &e) {
-		fullerr := newRoleExistFullError()
+		er := newRoleExistFullError()
 		if err != nil {
-			return tests.AssertExpectedAndActual(
-				assert.Equal,
-				fullerr,
-				e,
-				"Expected %d role already exists and equal, but there is %d", fullerr, e)
+			// return tests.AssertExpectedAndActual(
+			// 	assert.Equal,
+			// 	fullerr,
+			// 	e,
+			// 	"Expected %d role already exists and equal, but there is %d", fullerr, e)
+			return tests.CompareFields(*er, *e, []string{"Code", "Message"})
 		}
 	}
 
@@ -211,7 +212,8 @@ func (st *ServiceTest) thenErrorInvalidPermissionFormat() error {
 	if errors.As(err, &e) {
 		er := newRolePermissionError()
 		if err != nil {
-			return tests.AssertExpectedAndActual(assert.Equal, er, e, "Expected %d invalid permission format and equal, but there is %d", er, e)
+			// return tests.AssertExpectedAndActual(assert.Equal, er, e, "Expected %d invalid permission format and equal, but there is %d", er, e)
+			return tests.CompareFields(*er, *e, []string{"Code", "Message"})
 		}
 	}
 
@@ -225,7 +227,8 @@ func (st *ServiceTest) thenErrorInvalidNameFormat() error {
 	if errors.As(err, &e) {
 		er := newRoleNameFormatError()
 		if err != nil {
-			return tests.AssertExpectedAndActual(assert.Equal, er, e, "Expected %d invalid name format and equal, but there is %d", er, e)
+			// return tests.AssertExpectedAndActual(assert.Equal, er, e, "Expected %d invalid name format and equal, but there is %d", er, e)
+			return tests.CompareFields(*er, *e, []string{"Code", "Message"})
 		}
 	}
 
@@ -239,7 +242,8 @@ func (st *ServiceTest) thenErrorRoleNameExceedsMaxLength() error {
 	if errors.As(err, &e) {
 		er := newRoleNameTooLongError()
 		if err != nil {
-			return tests.AssertExpectedAndActual(assert.Equal, er, e, "Expected %d role name or description exceeds max length and equal, but there is %d", er, e)
+			// return tests.AssertExpectedAndActual(assert.Equal, er, e, "Expected %d role name or description exceeds max length and equal, but there is %d", er, e)
+			return tests.CompareFields(*er, *e, []string{"Code", "Message"})
 		}
 	}
 
@@ -253,7 +257,8 @@ func (st *ServiceTest) thenErrorRoleDescriptionExceedsMaxLength() error {
 	if errors.As(err, &e) {
 		er := newRoleDescriptionTooLongError()
 		if err != nil {
-			return tests.AssertExpectedAndActual(assert.Equal, er, e, "Expected %d role name or description exceeds max length and equal, but there is %d", er, e)
+			// return tests.AssertExpectedAndActual(assert.Equal, er, e, "Expected %d role name or description exceeds max length and equal, but there is %d", er, e)
+			return tests.CompareFields(*er, *e, []string{"Code", "Message"})
 		}
 	}
 
@@ -262,6 +267,7 @@ func (st *ServiceTest) thenErrorRoleDescriptionExceedsMaxLength() error {
 
 func TestCreate(t *testing.T) {
 	t.Parallel()
+
 	serviceTest := &ServiceTest{
 		t: t,
 	}

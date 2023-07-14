@@ -25,7 +25,7 @@ func HandleErrorResponse(c *gin.Context, err error) {
 	}
 
 	// If the error is not of type domain_errors.ErrorInfo, create a new ErrorInfo struct
-	info := NewAdapterError(err)
+	info := domain_errors.Wrap(domain_errors.ErrorCodeSystem, err)
 
 	c.JSON(http.StatusOK, info)
 }

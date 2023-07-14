@@ -10,6 +10,7 @@ import (
 
 	"github.com/program-world-labs/DDDGo/internal/adapter/http"
 	application_role "github.com/program-world-labs/DDDGo/internal/application/role"
+	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 )
 
 type roleRoutes struct {
@@ -57,7 +58,7 @@ func (r *roleRoutes) create(c *gin.Context) {
 	var req CreatedRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindJSON")
-		http.HandleErrorResponse(c, NewBindJSONError(err))
+		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleBindJSON, err))
 
 		return
 	}
@@ -68,7 +69,7 @@ func (r *roleRoutes) create(c *gin.Context) {
 
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, NewCopyError(err))
+		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleCopyToInput, err))
 
 		return
 	}
@@ -78,7 +79,7 @@ func (r *roleRoutes) create(c *gin.Context) {
 	roleEntity, err := r.u.CreateRole(ctx, &input)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - CreateRole")
-		http.HandleErrorResponse(c, NewUsecaseError(err))
+		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleUsecase, err))
 
 		return
 	}
@@ -116,7 +117,7 @@ func (r *roleRoutes) list(c *gin.Context) {
 	var req ListGotInput
 	if err := c.ShouldBindQuery(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindQuery")
-		http.HandleErrorResponse(c, NewBindQueryError(err))
+		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleBindQuery, err))
 
 		return
 	}
@@ -126,7 +127,7 @@ func (r *roleRoutes) list(c *gin.Context) {
 
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, NewCopyError(err))
+		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleCopyToInput, err))
 
 		return
 	}
@@ -135,7 +136,7 @@ func (r *roleRoutes) list(c *gin.Context) {
 	roleEntities, err := r.u.GetRoleList(ctx, &input)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - ListRole")
-		http.HandleErrorResponse(c, NewUsecaseError(err))
+		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleUsecase, err))
 
 		return
 	}
@@ -169,7 +170,7 @@ func (r *roleRoutes) detail(c *gin.Context) {
 	var req DetailGotInput
 	if err := c.ShouldBindUri(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindUri")
-		http.HandleErrorResponse(c, NewBindUriError(err))
+		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleBindQuery, err))
 
 		return
 	}
@@ -179,16 +180,16 @@ func (r *roleRoutes) detail(c *gin.Context) {
 
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, NewCopyError(err))
+		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleCopyToInput, err))
 
 		return
 	}
 
-	// // 執行UseCase
+	// 執行UseCase
 	roleEntity, err := r.u.GetRoleDetail(ctx, &input)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - DetailRole")
-		http.HandleErrorResponse(c, NewUsecaseError(err))
+		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleUsecase, err))
 
 		return
 	}

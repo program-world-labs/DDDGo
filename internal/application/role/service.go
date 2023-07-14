@@ -6,6 +6,7 @@ import (
 	"github.com/program-world-labs/pwlogger"
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
+	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 	"github.com/program-world-labs/DDDGo/internal/domain/user/repository"
 )
@@ -30,7 +31,7 @@ func (u *ServiceImpl) CreateRole(ctx context.Context, roleInfo *CreatedInput) (*
 	// Validate input.
 	err := roleInfo.Validate()
 	if err != nil {
-		return nil, NewValidateInputError(err)
+		return nil, domainerrors.Wrap(ErrorCodeValidateInput, err)
 	}
 
 	// Create role.
@@ -39,13 +40,13 @@ func (u *ServiceImpl) CreateRole(ctx context.Context, roleInfo *CreatedInput) (*
 	createdRole, err := u.RoleRepo.Create(ctx, e)
 
 	if err != nil {
-		return nil, NewRepositoryError(err)
+		return nil, domainerrors.Wrap(ErrorCodeRepository, err)
 	}
 
 	// Cast to entity.Role.
 	createdRoleEntity, ok := createdRole.(*entity.Role)
 	if !ok {
-		return nil, NewCastError(ErrCastToEntityFailed)
+		return nil, domainerrors.Wrap(ErrorCodeCast, err)
 	}
 
 	return NewOutput(createdRoleEntity), nil
@@ -56,7 +57,7 @@ func (u *ServiceImpl) GetRoleList(ctx context.Context, roleInfo *ListGotInput) (
 	// Validate input.
 	err := roleInfo.Validate()
 	if err != nil {
-		return nil, NewValidateInputError(err)
+		return nil, domainerrors.Wrap(ErrorCodeValidateInput, err)
 	}
 
 	sq := roleInfo.ToSearchQuery()
@@ -64,7 +65,7 @@ func (u *ServiceImpl) GetRoleList(ctx context.Context, roleInfo *ListGotInput) (
 	// Get role list.
 	list, err := u.RoleRepo.GetAll(ctx, sq, &entity.Role{})
 	if err != nil {
-		return nil, NewRepositoryError(err)
+		return nil, domainerrors.Wrap(ErrorCodeRepository, err)
 	}
 
 	return NewListOutput(list), nil
@@ -75,19 +76,19 @@ func (u *ServiceImpl) GetRoleDetail(ctx context.Context, roleInfo *DetailGotInpu
 	// Validate input.
 	err := roleInfo.Validate()
 	if err != nil {
-		return nil, NewValidateInputError(err)
+		return nil, domainerrors.Wrap(ErrorCodeValidateInput, err)
 	}
 
 	// Get role detail.
 	role, err := u.RoleRepo.GetByID(ctx, &entity.Role{ID: roleInfo.ID})
 	if err != nil {
-		return nil, NewRepositoryError(err)
+		return nil, domainerrors.Wrap(ErrorCodeRepository, err)
 	}
 
 	// Cast to entity.Role.
 	roleEntity, ok := role.(*entity.Role)
 	if !ok {
-		return nil, NewCastError(ErrCastToEntityFailed)
+		return nil, domainerrors.Wrap(ErrorCodeCast, err)
 	}
 
 	return NewOutput(roleEntity), nil

@@ -2,12 +2,13 @@ package domainerrors
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"github.com/pkg/errors"
 )
 
 const (
-	GruopID                          = "A"
+	GruopID                          = "LLM"
 	ErrorCodeAdapterRole             = 10000000
 	ErrorCodeAdapterUser             = 20000000
 	ErrorCodeApplicationRole         = 1000000
@@ -20,7 +21,7 @@ const (
 	ErrorCodeDatasourceGroupRepoDTO  = 5000
 	ErrorCodeDatasourceWalletRepoDTO = 6000
 	ErrorCodeDatasourceAmountRepoDTO = 7000
-	ErrorCodeSystem                  = "00000000"
+	ErrorCodeSystem                  = 90000000
 )
 
 type ErrorInfo struct {
@@ -47,6 +48,31 @@ func (e *ErrorInfo) MarshalJSON() ([]byte, error) {
 // New returns a new error with an error code and error message.
 func New(code string, msg string) *ErrorInfo {
 	return &ErrorInfo{Code: code, Message: msg}
+}
+
+// Wrap returns a new error with an error code and error message, wrapping an existing error.
+func Wrap(errorCode int, err error) *ErrorInfo {
+	// Check if error code is adapter error code
+	var group = ""
+	if errorCode >= ErrorCodeAdapterRole {
+		group = GruopID
+	}
+
+	// Check if err is already a ErrorInfo
+	var e *ErrorInfo
+	if errors.As(err, &e) {
+		code, atoiErr := strconv.Atoi(e.Code)
+		if atoiErr != nil {
+			code = 0
+		}
+
+		return &ErrorInfo{
+			Code:    group + strconv.Itoa(errorCode+code),
+			Message: e.Message,
+			Err:     errors.WithStack(err)}
+	}
+
+	return &ErrorInfo{Code: group + strconv.Itoa(errorCode), Message: err.Error(), Err: errors.WithStack(err)}
 }
 
 // Cause returns the underlying cause of an error, if available.
