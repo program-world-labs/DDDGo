@@ -17,3 +17,9 @@ type ListGotInput struct {
 type DetailGotInput struct {
 	ID string `json:"id" uri:"id" binding:"required"`
 }
+
+type UpdatedRequest struct {
+	Name        string   `json:"name" binding:"required" example:"admin"`
+	Description string   `json:"description" binding:"required" example:"this is for admin role"`
+	Permissions []string `json:"permissions" binding:"required" example:"read:all,write:all"`
+}

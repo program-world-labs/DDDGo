@@ -93,3 +93,28 @@ func (u *ServiceImpl) GetRoleDetail(ctx context.Context, roleInfo *DetailGotInpu
 
 	return NewOutput(roleEntity), nil
 }
+
+// UpdateRole updates role.
+func (u *ServiceImpl) UpdateRole(ctx context.Context, roleInfo *UpdatedInput) (*Output, error) {
+	// Validate input.
+	err := roleInfo.Validate()
+	if err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeValidateInput, err)
+	}
+
+	// Update role.
+	e := roleInfo.ToEntity()
+
+	updatedRole, err := u.RoleRepo.Update(ctx, e)
+	if err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeRepository, err)
+	}
+
+	// Cast to entity.Role.
+	updatedRoleEntity, ok := updatedRole.(*entity.Role)
+	if !ok {
+		return nil, domainerrors.Wrap(ErrorCodeCast, err)
+	}
+
+	return NewOutput(updatedRoleEntity), nil
+}

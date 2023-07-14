@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -67,7 +68,7 @@ func (r *BigCacheDataSourceImpl) Set(_ context.Context, model dto.IRepoEntity, _
 // Delete -.
 func (r *BigCacheDataSourceImpl) Delete(_ context.Context, model dto.IRepoEntity) error {
 	err := r.Cache.Delete(r.cacheKey(model))
-	if err != nil {
+	if err != nil && !errors.Is(err, bigcache.ErrEntryNotFound) {
 		return domainerrors.Wrap(ErrorCodeCacheDelete, err)
 	}
 
@@ -75,13 +76,13 @@ func (r *BigCacheDataSourceImpl) Delete(_ context.Context, model dto.IRepoEntity
 }
 
 // GetListItem -.
-func (r *BigCacheDataSourceImpl) GetListItem(_ context.Context, model dto.IRepoEntity, sq *domain.SearchQuery, _ ...time.Duration) (map[string]interface{}, error) {
+func (r *BigCacheDataSourceImpl) GetListItem(_ context.Context, model dto.IRepoEntity, sq *domain.SearchQuery, _ ...time.Duration) (*dto.List, error) {
 	data, err := r.Cache.Get(r.cacheKey(model, sq))
 	if err != nil {
 		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
 	}
 
-	var result map[string]interface{}
+	var result *dto.List
 	err = json.Unmarshal(data, &result)
 
 	if err != nil {

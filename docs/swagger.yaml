@@ -62,6 +62,26 @@ definitions:
       total:
         type: integer
     type: object
+  role.UpdatedRequest:
+    properties:
+      description:
+        example: this is for admin role
+        type: string
+      name:
+        example: admin
+        type: string
+      permissions:
+        example:
+        - read:all
+        - write:all
+        items:
+          type: string
+        type: array
+    required:
+    - description
+    - name
+    - permissions
+    type: object
   user.Response:
     properties:
       avatar:
@@ -203,6 +223,42 @@ paths:
           schema:
             $ref: '#/definitions/http.Response'
       summary: List role
+      tags:
+      - Role
+  /role/update/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Update role
+      operationId: UpdateRole
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Role Update Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/role.UpdatedRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: Update role
       tags:
       - Role
 swagger: "2.0"

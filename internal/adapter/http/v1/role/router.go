@@ -26,7 +26,7 @@ func NewRoleRoutes(handler *gin.RouterGroup, u application_role.IService, l pwlo
 		h.POST("/create", r.create)
 		h.GET("/list", r.list)
 		h.GET("/detail/:id", r.detail)
-		// h.PUT("/update/:id", r.update)
+		h.PUT("/update/:id", r.update)
 		// h.DELETE("/delete/:id", r.delete)
 		// h.PUT("/assign-role/:id", r.assignRole)
 	}
@@ -195,4 +195,64 @@ func (r *roleRoutes) detail(c *gin.Context) {
 	}
 
 	http.SuccessResponse(c, NewResponse(roleEntity))
+}
+
+// @Summary     Update role
+// @Description Update role
+// @ID          UpdateRole
+// @Tags  	    Role
+// @Accept      json
+// @Produce     json
+// @Param		id	path	string	true	"ID"
+// @Param		body	body		UpdatedRequest	true	"Role Update Request"
+// @Success		200		{object}	http.Response
+// @Failure		400		{object}	http.Response
+// @Failure		500		{object}	http.Response
+// @Router			/role/update/{id} [put].
+func (r *roleRoutes) update(c *gin.Context) {
+	// 開始追蹤
+	var tracer = otel.Tracer("")
+	ctx, span := tracer.Start(c.Request.Context(), "")
+	// // 設定追蹤屬性
+	// if kv, err := operations.TransformToAttribute("request/", req); err == nil {
+	// 	span.SetAttributes(kv...)
+	// }
+
+	defer span.End()
+
+	// 參數驗證
+	var req UpdatedRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindJSON")
+		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleBindJSON, err))
+
+		return
+	}
+
+	// 從path取得id
+	id := c.Param("id")
+
+	var input application_role.UpdatedInput
+	err := copier.Copy(&input, &req)
+
+	if err != nil {
+		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
+		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleCopyToInput, err))
+
+		return
+	}
+
+	input.Permissions = strings.Join(req.Permissions, ",")
+	input.ID = id
+
+	// // 執行UseCase
+	data, err := r.u.UpdateRole(ctx, &input)
+	if err != nil {
+		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - UpdateRole")
+		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleUsecase, err))
+
+		return
+	}
+
+	http.SuccessResponse(c, NewResponse(data))
 }

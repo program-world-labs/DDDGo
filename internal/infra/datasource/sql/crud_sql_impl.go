@@ -82,7 +82,7 @@ func (r *CRUDDatasourceImpl) Delete(_ context.Context, model dto.IRepoEntity) er
 	return nil
 }
 
-func (r *CRUDDatasourceImpl) GetAll(_ context.Context, sq *domain.SearchQuery, model dto.IRepoEntity) (map[string]interface{}, error) {
+func (r *CRUDDatasourceImpl) GetAll(_ context.Context, sq *domain.SearchQuery, model dto.IRepoEntity) (*dto.List, error) {
 	// 加入預載入
 	if len(model.GetPreloads()) > 0 {
 		for _, preload := range model.GetPreloads() {
@@ -90,7 +90,8 @@ func (r *CRUDDatasourceImpl) GetAll(_ context.Context, sq *domain.SearchQuery, m
 		}
 	}
 
-	var data []map[string]interface{}
+	var data = model.GetListType()
+
 	err := r.DB.Table(model.TableName()).Limit(sq.Page.Limit).Offset(sq.Page.Offset).Where(sq.GetWhere(), sq.GetArgs()...).Order(sq.GetOrder()).Find(&data).Error
 
 	if err != nil {
@@ -104,11 +105,17 @@ func (r *CRUDDatasourceImpl) GetAll(_ context.Context, sq *domain.SearchQuery, m
 		return nil, domainerrors.Wrap(ErrorCodeSQLGetAll, err)
 	}
 
-	var result = map[string]interface{}{
-		"data":   data,
-		"total":  count,
-		"limit":  sq.Page.Limit,
-		"offset": sq.Page.Offset,
+	// var list []dto.IRepoEntity
+
+	// for _, item := range data {
+	// 	list = append(list, item.(dto.IRepoEntity))
+	// }
+
+	var result = &dto.List{
+		Limit:  sq.Page.Limit,
+		Offset: sq.Page.Offset,
+		Total:  int(count),
+		Data:   data,
 	}
 
 	return result, nil
