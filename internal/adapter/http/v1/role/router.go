@@ -7,6 +7,7 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/program-world-labs/pwlogger"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
 
 	"github.com/program-world-labs/DDDGo/internal/adapter/http"
 	application_role "github.com/program-world-labs/DDDGo/internal/application/role"
@@ -45,12 +46,8 @@ func NewRoleRoutes(handler *gin.RouterGroup, u application_role.IService, l pwlo
 // @Router			/role/create [post].
 func (r *roleRoutes) create(c *gin.Context) {
 	// 開始追蹤
-	var tracer = otel.Tracer("")
-	ctx, span := tracer.Start(c.Request.Context(), "")
-	// // 設定追蹤屬性
-	// if kv, err := operations.TransformToAttribute("request/", req); err == nil {
-	// 	span.SetAttributes(kv...)
-	// }
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(c.Request.Context(), "adapter-create-role")
 
 	defer span.End()
 
@@ -58,7 +55,7 @@ func (r *roleRoutes) create(c *gin.Context) {
 	var req CreatedRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindJSON")
-		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleBindJSON, err))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeRoleBindJSON, err, span))
 
 		return
 	}
@@ -69,7 +66,7 @@ func (r *roleRoutes) create(c *gin.Context) {
 
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleCopyToInput, err))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeRoleCopyToInput, err, span))
 
 		return
 	}
@@ -79,11 +76,12 @@ func (r *roleRoutes) create(c *gin.Context) {
 	roleEntity, err := r.u.CreateRole(ctx, &input)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - CreateRole")
-		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleUsecase, err))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeRoleUsecase, err, span))
 
 		return
 	}
 
+	span.SetStatus(codes.Ok, "OK")
 	http.SuccessResponse(c, NewResponse(roleEntity))
 }
 
@@ -104,12 +102,8 @@ func (r *roleRoutes) create(c *gin.Context) {
 // @Router			/role/list [get].
 func (r *roleRoutes) list(c *gin.Context) {
 	// 開始追蹤
-	var tracer = otel.Tracer("")
-	ctx, span := tracer.Start(c.Request.Context(), "")
-	// // 設定追蹤屬性
-	// if kv, err := operations.TransformToAttribute("request/", req); err == nil {
-	// 	span.SetAttributes(kv...)
-	// }
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(c.Request.Context(), "adapter-list-role")
 
 	defer span.End()
 
@@ -117,7 +111,7 @@ func (r *roleRoutes) list(c *gin.Context) {
 	var req ListGotInput
 	if err := c.ShouldBindQuery(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindQuery")
-		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleBindQuery, err))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeRoleBindQuery, err, span))
 
 		return
 	}
@@ -127,7 +121,7 @@ func (r *roleRoutes) list(c *gin.Context) {
 
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleCopyToInput, err))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeRoleCopyToInput, err, span))
 
 		return
 	}
@@ -136,11 +130,12 @@ func (r *roleRoutes) list(c *gin.Context) {
 	roleEntities, err := r.u.GetRoleList(ctx, &input)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - ListRole")
-		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleUsecase, err))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeRoleUsecase, err, span))
 
 		return
 	}
 
+	span.SetStatus(codes.Ok, "OK")
 	http.SuccessResponse(c, NewResponseList(roleEntities))
 }
 
@@ -157,12 +152,8 @@ func (r *roleRoutes) list(c *gin.Context) {
 // @Router			/role/detail/{id} [get].
 func (r *roleRoutes) detail(c *gin.Context) {
 	// 開始追蹤
-	var tracer = otel.Tracer("")
-	ctx, span := tracer.Start(c.Request.Context(), "")
-	// // 設定追蹤屬性
-	// if kv, err := operations.TransformToAttribute("request/", req); err == nil {
-	// 	span.SetAttributes(kv...)
-	// }
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(c.Request.Context(), "adapter-detail-role")
 
 	defer span.End()
 
@@ -170,7 +161,7 @@ func (r *roleRoutes) detail(c *gin.Context) {
 	var req DetailGotInput
 	if err := c.ShouldBindUri(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindUri")
-		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleBindQuery, err))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeRoleBindQuery, err, span))
 
 		return
 	}
@@ -180,7 +171,7 @@ func (r *roleRoutes) detail(c *gin.Context) {
 
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleCopyToInput, err))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeRoleCopyToInput, err, span))
 
 		return
 	}
@@ -189,11 +180,12 @@ func (r *roleRoutes) detail(c *gin.Context) {
 	roleEntity, err := r.u.GetRoleDetail(ctx, &input)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - DetailRole")
-		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleUsecase, err))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeRoleUsecase, err, span))
 
 		return
 	}
 
+	span.SetStatus(codes.Ok, "OK")
 	http.SuccessResponse(c, NewResponse(roleEntity))
 }
 
@@ -211,12 +203,8 @@ func (r *roleRoutes) detail(c *gin.Context) {
 // @Router			/role/update/{id} [put].
 func (r *roleRoutes) update(c *gin.Context) {
 	// 開始追蹤
-	var tracer = otel.Tracer("")
-	ctx, span := tracer.Start(c.Request.Context(), "")
-	// // 設定追蹤屬性
-	// if kv, err := operations.TransformToAttribute("request/", req); err == nil {
-	// 	span.SetAttributes(kv...)
-	// }
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(c.Request.Context(), "adapter-update-role")
 
 	defer span.End()
 
@@ -224,7 +212,7 @@ func (r *roleRoutes) update(c *gin.Context) {
 	var req UpdatedRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindJSON")
-		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleBindJSON, err))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeRoleBindJSON, err, span))
 
 		return
 	}
@@ -237,7 +225,7 @@ func (r *roleRoutes) update(c *gin.Context) {
 
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleCopyToInput, err))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeRoleCopyToInput, err, span))
 
 		return
 	}
@@ -249,10 +237,11 @@ func (r *roleRoutes) update(c *gin.Context) {
 	data, err := r.u.UpdateRole(ctx, &input)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - UpdateRole")
-		http.HandleErrorResponse(c, domainerrors.Wrap(ErrorCodeRoleUsecase, err))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeRoleUsecase, err, span))
 
 		return
 	}
 
+	span.SetStatus(codes.Ok, "OK")
 	http.SuccessResponse(c, NewResponse(data))
 }

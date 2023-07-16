@@ -11,9 +11,8 @@
       "mode": "auto",
       "program": "${workspaceFolder}/cmd/app",
       "env": {
-        "APP_PG_URL": "postgres://user:pass@localhost:5432/postgres",
-        "APP_REDIS_URL": "redis://localhost:6379/0",
-        "APP_ENV": "dev"
+        "APP_ENV": "dev",
+        "APP_GCP_CREDENTIALS": "../../resources/gcp-credentials.json"
       }
     }
   ]

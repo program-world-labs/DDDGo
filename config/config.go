@@ -2,7 +2,9 @@ package config
 
 import (
 	"fmt"
+	"net/url"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -11,13 +13,14 @@ import (
 type (
 	// Config -.
 	Config struct {
-		App     `mapstructure:"app"`
-		Swagger `mapstructure:"swagger"`
-		GCP     `mapstructure:"gcp"`
-		PG      `mapstructure:"postgres"`
-		Redis   `mapstructure:"redis"`
-		HTTP    `mapstructure:"http"`
-		Log     `mapstructure:"logger"`
+		App       `mapstructure:"app"`
+		Swagger   `mapstructure:"swagger"`
+		SQL       `mapstructure:"sql"`
+		Redis     `mapstructure:"redis"`
+		Storage   `mapstructure:"storage"`
+		HTTP      `mapstructure:"http"`
+		Log       `mapstructure:"logger"`
+		Telemetry `mapstructure:"telemetry"`
 		Env
 	}
 
@@ -28,45 +31,54 @@ type (
 	}
 	// Swagger -.
 	Swagger struct {
-		BackendHost  string `mapstructure:"backend_host"`
-		FrontendHost string `mapstructure:"frontend_host"`
+		Host string `mapstructure:"host"`
 	}
 
-	// GCP -.
-	GCP struct {
-		Project     string `mapstructure:"project"`
-		Monitor     bool   `mapstructure:"monitor"`
-		Emulator    bool   `mapstructure:"emulator"`
-		Credentials string `mapstructure:"credentials"`
-		Firestore   string `mapstructure:"firestore"`
-		Storage     struct {
-			Bucket string `mapstructure:"bucket"`
-			URL    string `mapstructure:"url"`
-		} `mapstructure:"storage"`
-		Auth string `mapstructure:"auth"`
-	}
-
-	// PG -.
-	PG struct {
-		PoolMax int    `mapstructure:"pool_max"`
-		URL     string `mapstructure:"url"`
+	// SQL -.
+	SQL struct {
+		PoolMax  int    `mapstructure:"pool_max"`
+		Host     string `mapstructure:"host"`
+		Port     int    `mapstructure:"port"`
+		User     string `mapstructure:"user"`
+		Password string `mapstructure:"password"`
+		DB       string `mapstructure:"db"`
+		Type     string `mapstructure:"type" validate:"oneof=postgres"`
 	}
 
 	// Redis -.
 	Redis struct {
-		DSN string `mapstructure:"dsn"`
+		Host     string `mapstructure:"host"`
+		Port     int    `mapstructure:"port"`
+		Password string `mapstructure:"password"`
+		DB       int    `mapstructure:"db"`
+	}
+
+	// Storage -.
+	Storage struct {
+		Host   string `mapstructure:"host"`
+		Bucket string `mapstructure:"bucket"`
+		Type   string `mapstructure:"type" validate:"oneof=gcp"`
 	}
 
 	// HTTP -.
 	HTTP struct {
-		Port        string `mapstructure:"port"`
-		BackendPort string `mapstructure:"backend_port"`
+		Port string `mapstructure:"port"`
 	}
 
 	// Log -.
 	Log struct {
-		Level string `mapstructure:"log_level"`
-		LogID string `mapstructure:"log_id"`
+		Project string `mapstructure:"project"`
+		Level   string `mapstructure:"log_level"`
+		LogID   string `mapstructure:"log_id"`
+	}
+
+	// Telemetry -.
+	Telemetry struct {
+		Host       string  `mapstructure:"host"`
+		Port       int     `mapstructure:"port"`
+		Batcher    string  `mapstructure:"batcher" validate:"oneof=gcp"`
+		SampleRate float64 `mapstructure:"sample_rate"`
+		Enabled    bool    `mapstructure:"enabled"`
 	}
 
 	Env struct {
@@ -81,10 +93,31 @@ type (
 func NewConfig() (*Config, error) {
 	cfg := &Config{}
 
+	setViperEnv()
+	setConfigValues(cfg)
+
+	err := readAndParseConfig(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	err = applyEnvSetting(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	setGCPEnv(cfg)
+
+	return cfg, nil
+}
+
+func setViperEnv() {
 	viper.AutomaticEnv()
 	viper.SetEnvPrefix("app")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	// 取得環境變數
+}
+
+func setConfigValues(cfg *Config) {
 	cfg.Env.EnvName = viper.GetString("env")
 	cfg.Env.Service = viper.GetString("service")
 
@@ -100,47 +133,93 @@ func NewConfig() (*Config, error) {
 	}
 
 	viper.SetConfigName(configName)
+}
 
-	// 取得PG環境變數
-	cfg.PG.URL = viper.GetString("pg_url")
-	cfg.Redis.DSN = viper.GetString("redis_url")
+func readAndParseConfig(cfg *Config) error {
 	viper.SetConfigType("yml")
 	viper.AddConfigPath("../../config")
 	viper.AddConfigPath("./config")
 	err := viper.ReadInConfig()
 
 	if err != nil {
-		return nil, fmt.Errorf("config error: %w", err)
+		return fmt.Errorf("config error: %w", err)
 	}
 
 	err = viper.Unmarshal(cfg)
 	if err != nil {
-		return nil, fmt.Errorf("config error: %w", err)
+		return fmt.Errorf("config error: %w", err)
 	}
 
-	// 設定GCP環境變數
-	if cfg.GCP.Credentials != "" {
-		os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", cfg.GCP.Credentials)
+	return nil
+}
+
+func applyEnvSetting(cfg *Config) error {
+	sqlDSN := viper.GetString("sql_url")
+
+	if sqlDSN != "" {
+		// postgres://user:password@host:port/db 解析成 host:port:username:password:db
+		u, err := url.Parse(sqlDSN)
+		if err != nil {
+			return err
+		}
+
+		cfg.SQL.Host = u.Hostname()
+		cfg.SQL.Port, err = strconv.Atoi(u.Port())
+
+		if err != nil {
+			return err
+		}
+
+		cfg.SQL.User = u.User.Username()
+		cfg.SQL.Password, _ = u.User.Password()
+		cfg.SQL.DB = strings.TrimLeft(u.Path, "/")
 	}
 
-	if !cfg.GCP.Emulator {
-		return cfg, nil
+	redisDSN := viper.GetString("redis_url")
+
+	if redisDSN != "" {
+		// redis://user:password@host:port/db 解析成 host:port:username:password:db
+		u, err := url.Parse(redisDSN)
+		if err != nil {
+			return err
+		}
+
+		cfg.Redis.Host = u.Hostname()
+		cfg.Redis.Port, err = strconv.Atoi(u.Port())
+
+		if err != nil {
+			return err
+		}
+
+		cfg.Redis.Password, _ = u.User.Password()
+		cfg.Redis.DB, err = strconv.Atoi(strings.TrimLeft(u.Path, "/"))
+
+		if err != nil {
+			return err
+		}
 	}
 
-	// 設定Firestore環境變數
-	if cfg.GCP.Firestore != "" {
-		os.Setenv("FIRESTORE_EMULATOR_HOST", cfg.GCP.Firestore)
+	// Log
+
+	logProject := viper.GetString("log_project")
+	if logProject != "" {
+		cfg.Log.Project = logProject
 	}
 
-	// 設定Storage環境變數
-	if cfg.GCP.Storage.URL != "" {
-		os.Setenv("FIREBASE_STORAGE_EMULATOR_HOST", cfg.GCP.Storage.URL)
-		os.Setenv("STORAGE_EMULATOR_HOST", cfg.GCP.Storage.URL)
-	}
-	// 設定Auth環境變數
-	if cfg.GCP.Auth != "" {
-		os.Setenv("FIREBASE_AUTH_EMULATOR_HOST", cfg.GCP.Auth)
+	return nil
+}
+
+func setGCPEnv(cfg *Config) {
+	// Read GCP credentials from env
+	if viper.GetString("gcp_credentials") != "" {
+		os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", viper.GetString("gcp_credentials"))
 	}
 
-	return cfg, nil
+	// Set GCP emulator env
+	if cfg.Storage.Type == "gcp" {
+		if cfg.Storage.Host != "" {
+			os.Setenv("FIREBASE_STORAGE_EMULATOR_HOST", cfg.Storage.Host)
+			os.Setenv("STORAGE_EMULATOR_HOST", cfg.Storage.Host)
+		}
+	}
 }

@@ -25,7 +25,7 @@ services:
       container_name: app
       image: app
       environment:
-        APP_PG_URL: 'postgres://user:pass@postgres:5432/postgres'
+        APP_SQL_URL: 'postgres://user:pass@postgres:5432/postgres'
         APP_REDIS_URL: 'redis://redis:6379/0'
       ports:
         - 8080:8080
