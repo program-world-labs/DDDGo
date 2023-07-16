@@ -42,7 +42,7 @@ storage:
   type: "gcp"
 
 telemetry:
-  enabled: true
+  enabled: false
   host: ""
   port: 0
   batcher: "gcp"
