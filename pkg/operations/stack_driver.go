@@ -13,11 +13,7 @@ import (
 )
 
 // GoogleCloudOperationInit -.
-func GoogleCloudOperationInit(projectID string, enable bool) {
-	if !enable {
-		return
-	}
-
+func GoogleCloudOperationInit(projectID string, sampleRate float64) {
 	ctx := context.Background()
 	exporter, err := texporter.New(texporter.WithProjectID(projectID))
 
@@ -45,6 +41,7 @@ func GoogleCloudOperationInit(projectID string, enable bool) {
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithBatcher(exporter),
 		sdktrace.WithResource(res),
+		sdktrace.WithSampler(sdktrace.TraceIDRatioBased(sampleRate)),
 	)
 	defer tp.ForceFlush(ctx) // flushes any pending spans
 

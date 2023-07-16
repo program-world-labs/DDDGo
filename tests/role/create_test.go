@@ -147,18 +147,18 @@ func (st *ServiceTest) givenData(name, description, permission string) error {
 	return nil
 }
 
-func (st *ServiceTest) whenCreateNewRole(ctx context.Context) error {
+func (st *ServiceTest) whenCreateNewRole(_ context.Context) error {
 	e := st.input.ToEntity()
-	st.repoMock.EXPECT().Create(ctx, RoleEquals(e)).Return(e, nil)
+	st.repoMock.EXPECT().Create(gomock.Any(), RoleEquals(e)).Return(e, nil)
 	st.expect.CreatedAt = e.CreatedAt
 	st.expect.UpdatedAt = e.UpdatedAt
 
 	return nil
 }
 
-func (st *ServiceTest) whenCreateExistingRole(ctx context.Context) error {
+func (st *ServiceTest) whenCreateExistingRole(_ context.Context) error {
 	e := newRolseExistError()
-	st.repoMock.EXPECT().Create(ctx, RoleEquals(st.input.ToEntity())).Return(nil, e)
+	st.repoMock.EXPECT().Create(gomock.Any(), RoleEquals(st.input.ToEntity())).Return(nil, e)
 
 	return nil
 }

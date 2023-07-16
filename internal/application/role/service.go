@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/program-world-labs/pwlogger"
+	"go.opentelemetry.io/otel"
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
 	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
@@ -28,10 +29,15 @@ func NewServiceImpl(roleRepo repository.RoleRepository, transactionRepo domain.I
 
 // CreateRole creates a role.
 func (u *ServiceImpl) CreateRole(ctx context.Context, roleInfo *CreatedInput) (*Output, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(ctx, "usecase-createRole")
+
+	defer span.End()
 	// Validate input.
 	err := roleInfo.Validate()
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeValidateInput, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeValidateInput, err, span)
 	}
 
 	// Create role.
@@ -40,13 +46,13 @@ func (u *ServiceImpl) CreateRole(ctx context.Context, roleInfo *CreatedInput) (*
 	createdRole, err := u.RoleRepo.Create(ctx, e)
 
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepository, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepository, err, span)
 	}
 
 	// Cast to entity.Role.
 	createdRoleEntity, ok := createdRole.(*entity.Role)
 	if !ok {
-		return nil, domainerrors.Wrap(ErrorCodeCast, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeCast, err, span)
 	}
 
 	return NewOutput(createdRoleEntity), nil
@@ -54,10 +60,15 @@ func (u *ServiceImpl) CreateRole(ctx context.Context, roleInfo *CreatedInput) (*
 
 // GetRoleList gets role list.
 func (u *ServiceImpl) GetRoleList(ctx context.Context, roleInfo *ListGotInput) (*OutputList, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(ctx, "usecase-getRoleList")
+
+	defer span.End()
 	// Validate input.
 	err := roleInfo.Validate()
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeValidateInput, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeValidateInput, err, span)
 	}
 
 	sq := roleInfo.ToSearchQuery()
@@ -65,7 +76,7 @@ func (u *ServiceImpl) GetRoleList(ctx context.Context, roleInfo *ListGotInput) (
 	// Get role list.
 	list, err := u.RoleRepo.GetAll(ctx, sq, &entity.Role{})
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepository, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepository, err, span)
 	}
 
 	return NewListOutput(list), nil
@@ -73,22 +84,27 @@ func (u *ServiceImpl) GetRoleList(ctx context.Context, roleInfo *ListGotInput) (
 
 // GetRoleDetail gets role detail.
 func (u *ServiceImpl) GetRoleDetail(ctx context.Context, roleInfo *DetailGotInput) (*Output, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(ctx, "usecase-getRoleDetail")
+
+	defer span.End()
 	// Validate input.
 	err := roleInfo.Validate()
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeValidateInput, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeValidateInput, err, span)
 	}
 
 	// Get role detail.
 	role, err := u.RoleRepo.GetByID(ctx, &entity.Role{ID: roleInfo.ID})
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepository, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepository, err, span)
 	}
 
 	// Cast to entity.Role.
 	roleEntity, ok := role.(*entity.Role)
 	if !ok {
-		return nil, domainerrors.Wrap(ErrorCodeCast, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeCast, err, span)
 	}
 
 	return NewOutput(roleEntity), nil
@@ -96,10 +112,15 @@ func (u *ServiceImpl) GetRoleDetail(ctx context.Context, roleInfo *DetailGotInpu
 
 // UpdateRole updates role.
 func (u *ServiceImpl) UpdateRole(ctx context.Context, roleInfo *UpdatedInput) (*Output, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(ctx, "usecase-updateRole")
+
+	defer span.End()
 	// Validate input.
 	err := roleInfo.Validate()
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeValidateInput, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeValidateInput, err, span)
 	}
 
 	// Update role.
@@ -107,13 +128,13 @@ func (u *ServiceImpl) UpdateRole(ctx context.Context, roleInfo *UpdatedInput) (*
 
 	updatedRole, err := u.RoleRepo.Update(ctx, e)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepository, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepository, err, span)
 	}
 
 	// Cast to entity.Role.
 	updatedRoleEntity, ok := updatedRole.(*entity.Role)
 	if !ok {
-		return nil, domainerrors.Wrap(ErrorCodeCast, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeCast, err, span)
 	}
 
 	return NewOutput(updatedRoleEntity), nil

@@ -5,6 +5,8 @@ import (
 	"strconv"
 
 	"github.com/pkg/errors"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const (
@@ -73,6 +75,12 @@ func Wrap(errorCode int, err error) *ErrorInfo {
 	}
 
 	return &ErrorInfo{Code: group + strconv.Itoa(errorCode), Message: err.Error(), Err: errors.WithStack(err)}
+}
+
+func WrapWithSpan(errorCode int, err error, span trace.Span) *ErrorInfo {
+	span.SetStatus(codes.Error, err.Error())
+
+	return Wrap(errorCode, err)
 }
 
 // Cause returns the underlying cause of an error, if available.
