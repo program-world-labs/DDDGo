@@ -47,7 +47,8 @@ func New(dsn string, opts ...Option) (*Postgres, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
-	if err := db.Use(tracing.NewPlugin(tracing.WithoutMetrics())); err != nil {
+
+	if err = db.Use(tracing.NewPlugin(tracing.WithoutMetrics())); err != nil {
 		panic(err)
 	}
 

@@ -50,11 +50,41 @@ func (mr *MockIServiceMockRecorder) CreateRole(ctx, roleInfo interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRole", reflect.TypeOf((*MockIService)(nil).CreateRole), ctx, roleInfo)
 }
 
+// DeleteRole mocks base method.
+func (m *MockIService) DeleteRole(ctx context.Context, roleInfo *role.DeletedInput) (*role.Output, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteRole", ctx, roleInfo)
+	ret0, _ := ret[0].(*role.Output)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteRole indicates an expected call of DeleteRole.
+func (mr *MockIServiceMockRecorder) DeleteRole(ctx, roleInfo interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteRole", reflect.TypeOf((*MockIService)(nil).DeleteRole), ctx, roleInfo)
+}
+
+// GetRoleDetail mocks base method.
+func (m *MockIService) GetRoleDetail(ctx context.Context, roleInfo *role.DetailGotInput) (*role.Output, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRoleDetail", ctx, roleInfo)
+	ret0, _ := ret[0].(*role.Output)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRoleDetail indicates an expected call of GetRoleDetail.
+func (mr *MockIServiceMockRecorder) GetRoleDetail(ctx, roleInfo interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRoleDetail", reflect.TypeOf((*MockIService)(nil).GetRoleDetail), ctx, roleInfo)
+}
+
 // GetRoleList mocks base method.
-func (m *MockIService) GetRoleList(ctx context.Context, roleInfo *role.ListGotInput) ([]*role.Output, error) {
+func (m *MockIService) GetRoleList(ctx context.Context, roleInfo *role.ListGotInput) (*role.OutputList, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRoleList", ctx, roleInfo)
-	ret0, _ := ret[0].([]*role.Output)
+	ret0, _ := ret[0].(*role.OutputList)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -63,4 +93,19 @@ func (m *MockIService) GetRoleList(ctx context.Context, roleInfo *role.ListGotIn
 func (mr *MockIServiceMockRecorder) GetRoleList(ctx, roleInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRoleList", reflect.TypeOf((*MockIService)(nil).GetRoleList), ctx, roleInfo)
+}
+
+// UpdateRole mocks base method.
+func (m *MockIService) UpdateRole(ctx context.Context, roleInfo *role.UpdatedInput) (*role.Output, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateRole", ctx, roleInfo)
+	ret0, _ := ret[0].(*role.Output)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateRole indicates an expected call of UpdateRole.
+func (mr *MockIServiceMockRecorder) UpdateRole(ctx, roleInfo interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRole", reflect.TypeOf((*MockIService)(nil).UpdateRole), ctx, roleInfo)
 }

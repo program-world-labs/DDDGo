@@ -66,11 +66,12 @@ func (mr *MockUserRepositoryMockRecorder) CreateTx(arg0, arg1, arg2 interface{})
 }
 
 // Delete mocks base method.
-func (m *MockUserRepository) Delete(ctx context.Context, e domain.IEntity) error {
+func (m *MockUserRepository) Delete(ctx context.Context, e domain.IEntity) (domain.IEntity, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", ctx, e)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(domain.IEntity)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Delete indicates an expected call of Delete.
@@ -80,11 +81,12 @@ func (mr *MockUserRepositoryMockRecorder) Delete(ctx, e interface{}) *gomock.Cal
 }
 
 // DeleteTx mocks base method.
-func (m *MockUserRepository) DeleteTx(arg0 context.Context, arg1 domain.IEntity, arg2 domain.ITransactionEvent) error {
+func (m *MockUserRepository) DeleteTx(arg0 context.Context, arg1 domain.IEntity, arg2 domain.ITransactionEvent) (domain.IEntity, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteTx", arg0, arg1, arg2)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(domain.IEntity)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // DeleteTx indicates an expected call of DeleteTx.
@@ -169,11 +171,12 @@ func (mr *MockUserRepositoryMockRecorder) UpdateWithFields(ctx, e, keys interfac
 }
 
 // UpdateWithFieldsTx mocks base method.
-func (m *MockUserRepository) UpdateWithFieldsTx(arg0 context.Context, arg1 domain.IEntity, arg2 []string, arg3 domain.ITransactionEvent) error {
+func (m *MockUserRepository) UpdateWithFieldsTx(arg0 context.Context, arg1 domain.IEntity, arg2 []string, arg3 domain.ITransactionEvent) (domain.IEntity, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateWithFieldsTx", arg0, arg1, arg2, arg3)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(domain.IEntity)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // UpdateWithFieldsTx indicates an expected call of UpdateWithFieldsTx.

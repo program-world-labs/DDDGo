@@ -130,7 +130,22 @@ func (c *UpdatedInput) ToEntity() *entity.Role {
 }
 
 type DeletedInput struct {
-	ID string `json:"id"`
+	ID string `json:"id" validate:"required,alphanum,len=20"`
+}
+
+func (c *DeletedInput) ToEntity() *entity.Role {
+	return &entity.Role{
+		ID: c.ID,
+	}
+}
+
+func (i *DeletedInput) Validate() error {
+	err := validator.New().Struct(i)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 type DetailGotInput struct {

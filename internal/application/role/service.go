@@ -139,3 +139,31 @@ func (u *ServiceImpl) UpdateRole(ctx context.Context, roleInfo *UpdatedInput) (*
 
 	return NewOutput(updatedRoleEntity), nil
 }
+
+// DeleteRole deletes role.
+func (u *ServiceImpl) DeleteRole(ctx context.Context, roleInfo *DeletedInput) (*Output, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(ctx, "usecase-deleteRole")
+
+	defer span.End()
+	// Validate input.
+	err := roleInfo.Validate()
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeValidateInput, err, span)
+	}
+
+	// Delete role.
+	info, err := u.RoleRepo.Delete(ctx, &entity.Role{ID: roleInfo.ID})
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepository, err, span)
+	}
+
+	// Cast to entity.Role.
+	roleEntity, ok := info.(*entity.Role)
+	if !ok {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeCast, err, span)
+	}
+
+	return NewOutput(roleEntity), nil
+}

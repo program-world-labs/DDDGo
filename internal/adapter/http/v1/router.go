@@ -11,9 +11,8 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 
-	// Blank import removed as it is not justified
-	// _ "github.com/program-world-labs/DDDGo/docs".
-	_ "github.com/program-world-labs/DDDGo/docs"
+	"github.com/program-world-labs/DDDGo/config"
+	"github.com/program-world-labs/DDDGo/docs"
 	"github.com/program-world-labs/DDDGo/internal/adapter/http/v1/role"
 	"github.com/program-world-labs/DDDGo/internal/adapter/http/v1/user"
 	application_role "github.com/program-world-labs/DDDGo/internal/application/role"
@@ -27,21 +26,24 @@ type Services struct {
 
 // NewRouter -.
 // Swagger spec:
-// @title       Go Clean Template API
-// @description Using a translation service as an example
+// @title       AI Service API
+// @description Using AI to do something.
 // @version     1.0
 // @host        localhost:8080
 // @BasePath    /v1
 // Swagger base path.
-func NewRouter(l pwlogger.Interface, s Services) *gin.Engine {
+func NewRouter(l pwlogger.Interface, s Services, cfg *config.Config) *gin.Engine {
 	handler := gin.New()
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
-	handler.Use(otelgin.Middleware("my-service"))
+	handler.Use(otelgin.Middleware(cfg.App.Name))
 
 	// Swagger
-	swaggerHandler := ginSwagger.DisablingWrapHandler(swaggerFiles.Handler, "DISABLE_SWAGGER_HTTP_HANDLER")
+	docs.SwaggerInfo.Version = cfg.App.Version
+	docs.SwaggerInfo.Title = cfg.App.Name
+
+	swaggerHandler := ginSwagger.WrapHandler(swaggerFiles.Handler)
 	handler.GET("/swagger/*any", swaggerHandler)
 
 	// K8s probe
