@@ -17,15 +17,15 @@ import (
 var _ IRepoEntity = (*Group)(nil)
 
 type Group struct {
-	ID          string    `json:"id" gorm:"primary_key"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Users       []User    `json:"users" gorm:"foreignKey:GroupID"`
-	Owner       *User     `json:"owner"`
-	Metadata    string    `json:"metadata"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
-	DeletedAt   time.Time `json:"deletedAt" gorm:"index"`
+	ID          string          `json:"id" gorm:"primary_key"`
+	Name        string          `json:"name"`
+	Description string          `json:"description"`
+	Users       []User          `json:"users" gorm:"foreignKey:GroupID"`
+	Owner       *User           `json:"owner"`
+	Metadata    string          `json:"metadata"`
+	CreatedAt   time.Time       `json:"createdAt"`
+	UpdatedAt   time.Time       `json:"updatedAt"`
+	DeletedAt   *gorm.DeletedAt `json:"deletedAt" gorm:"index"`
 }
 
 func (a *Group) TableName() string {
@@ -58,6 +58,7 @@ func (a *Group) BeforeCreate(_ *gorm.DB) (err error) {
 	a.ID, err = generateID()
 	a.UpdatedAt = time.Now()
 	a.CreatedAt = time.Now()
+	a.DeletedAt = nil
 
 	return
 }

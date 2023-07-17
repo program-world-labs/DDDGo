@@ -64,23 +64,33 @@ func (r *CRUDDatasourceImpl) Update(ctx context.Context, model dto.IRepoEntity) 
 }
 
 // UpdateWithFields -.
-func (r *CRUDDatasourceImpl) UpdateWithFields(ctx context.Context, model dto.IRepoEntity, fields []string) error {
+func (r *CRUDDatasourceImpl) UpdateWithFields(ctx context.Context, model dto.IRepoEntity, fields []string) (dto.IRepoEntity, error) {
 	err := r.DB.WithContext(ctx).Model(model).Select(fields).Updates(model).Error
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeSQLUpdateWithFields, err)
+		return nil, domainerrors.Wrap(ErrorCodeSQLUpdateWithFields, err)
 	}
 
-	return nil
+	err = r.DB.WithContext(ctx).First(model, "id = ?", model.GetID()).Error
+	if err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeSQLUpdateWithFields, err)
+	}
+
+	return model, nil
 }
 
 // Delete -.
-func (r *CRUDDatasourceImpl) Delete(ctx context.Context, model dto.IRepoEntity) error {
-	err := r.DB.WithContext(ctx).Delete(model, model.GetID()).Error
+func (r *CRUDDatasourceImpl) Delete(ctx context.Context, model dto.IRepoEntity) (dto.IRepoEntity, error) {
+	err := r.DB.WithContext(ctx).Delete(model, "id = ?", model.GetID()).Error
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeSQLDelete, err)
+		return nil, domainerrors.Wrap(ErrorCodeSQLDelete, err)
 	}
 
-	return nil
+	err = r.DB.WithContext(ctx).Unscoped().First(model, "id = ?", model.GetID()).Error
+	if err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeSQLDelete, err)
+	}
+
+	return model, nil
 }
 
 func (r *CRUDDatasourceImpl) GetAll(ctx context.Context, sq *domain.SearchQuery, model dto.IRepoEntity) (*dto.List, error) {
@@ -153,33 +163,43 @@ func (r *CRUDDatasourceImpl) UpdateTx(ctx context.Context, model dto.IRepoEntity
 }
 
 // UpdateWithFields -.
-func (r *CRUDDatasourceImpl) UpdateWithFieldsTx(ctx context.Context, model dto.IRepoEntity, fields []string, tx domain.ITransactionEvent) error {
+func (r *CRUDDatasourceImpl) UpdateWithFieldsTx(ctx context.Context, model dto.IRepoEntity, fields []string, tx domain.ITransactionEvent) (dto.IRepoEntity, error) {
 	t, ok := tx.GetTx().(*gorm.DB)
 	if !ok {
-		return domainerrors.Wrap(ErrorCodeSQLCast, ErrCastToEntityFailed)
+		return nil, domainerrors.Wrap(ErrorCodeSQLCast, ErrCastToEntityFailed)
 	}
 
 	err := t.WithContext(ctx).Model(model).Select(fields).Updates(model).Error
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeSQLUpdateWithFields, err)
+		return nil, domainerrors.Wrap(ErrorCodeSQLUpdateWithFields, err)
 	}
 
-	return nil
+	err = r.DB.WithContext(ctx).First(model, "id = ?", model.GetID()).Error
+	if err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeSQLUpdateWithFields, err)
+	}
+
+	return model, nil
 }
 
 // Delete -.
-func (r *CRUDDatasourceImpl) DeleteTx(ctx context.Context, model dto.IRepoEntity, tx domain.ITransactionEvent) error {
+func (r *CRUDDatasourceImpl) DeleteTx(ctx context.Context, model dto.IRepoEntity, tx domain.ITransactionEvent) (dto.IRepoEntity, error) {
 	t, ok := tx.GetTx().(*gorm.DB)
 	if !ok {
-		return domainerrors.Wrap(ErrorCodeSQLCast, ErrCastToEntityFailed)
+		return nil, domainerrors.Wrap(ErrorCodeSQLCast, ErrCastToEntityFailed)
 	}
 
 	err := t.WithContext(ctx).Delete(model, model.GetID()).Error
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeSQLDelete, err)
+		return nil, domainerrors.Wrap(ErrorCodeSQLDelete, err)
 	}
 
-	return nil
+	err = r.DB.WithContext(ctx).First(model, "id = ?", model.GetID()).Error
+	if err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeSQLDelete, err)
+	}
+
+	return model, nil
 }
 
 // AppendAssociation -.

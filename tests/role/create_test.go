@@ -273,7 +273,7 @@ func TestCreate(t *testing.T) {
 	}
 
 	// Create the report directory
-	reportPath := filepath.Join("..", "report", "TestRoleUsecase.json")
+	reportPath := filepath.Join("..", "report", "TestRoleCreateUsecase.json")
 	// Create the directory if it does not exist
 	err := os.MkdirAll(filepath.Dir(reportPath), os.ModePerm)
 	if err != nil {
@@ -282,7 +282,7 @@ func TestCreate(t *testing.T) {
 
 	// Run the test suite
 	suite := godog.TestSuite{
-		Name:                "Register",
+		Name:                "Create",
 		ScenarioInitializer: serviceTest.InitializeScenario,
 		Options: &godog.Options{
 			Format:   "cucumber:" + reportPath,

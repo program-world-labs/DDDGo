@@ -17,15 +17,15 @@ import (
 var _ IRepoEntity = (*Amount)(nil)
 
 type Amount struct {
-	ID        string    `json:"id" gorm:"primary_key"`
-	Currency  string    `json:"currency"`
-	Icon      string    `json:"icon"`
-	Balance   uint      `json:"balance"`
-	Decimal   uint      `json:"decimal"`
-	WalletID  string    `json:"walletId" gorm:"index"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-	DeletedAt time.Time `json:"deletedAt" gorm:"index"`
+	ID        string          `json:"id" gorm:"primary_key"`
+	Currency  string          `json:"currency"`
+	Icon      string          `json:"icon"`
+	Balance   uint            `json:"balance"`
+	Decimal   uint            `json:"decimal"`
+	WalletID  string          `json:"walletId" gorm:"index"`
+	CreatedAt time.Time       `json:"createdAt"`
+	UpdatedAt time.Time       `json:"updatedAt"`
+	DeletedAt *gorm.DeletedAt `json:"deletedAt" gorm:"index"`
 }
 
 func (a *Amount) TableName() string {
@@ -59,6 +59,7 @@ func (a *Amount) BeforeCreate(_ *gorm.DB) (err error) {
 	a.ID, err = generateID()
 	a.UpdatedAt = time.Now()
 	a.CreatedAt = time.Now()
+	a.DeletedAt = nil
 
 	return
 }

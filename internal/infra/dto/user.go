@@ -17,20 +17,20 @@ import (
 var _ IRepoEntity = (*User)(nil)
 
 type User struct {
-	ID          string    `json:"id" gorm:"primary_key"`
-	Username    string    `json:"username"`
-	Password    string    `json:"password"`
-	EMail       string    `json:"email"`
-	DisplayName string    `json:"display_name"`
-	Avatar      string    `json:"avatar"`
-	Enabled     bool      `json:"enabled"`
-	Roles       []Role    `json:"roles" gorm:"many2many:user_roles;"`
-	Wallets     []Wallet  `json:"wallets" gorm:"foreignKey:UserID"`
-	Group       Group     `json:"group"`
-	GroupID     string    `json:"groupId"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
-	DeletedAt   time.Time `json:"deletedAt" gorm:"index"`
+	ID          string          `json:"id" gorm:"primary_key"`
+	Username    string          `json:"username"`
+	Password    string          `json:"password"`
+	EMail       string          `json:"email"`
+	DisplayName string          `json:"display_name"`
+	Avatar      string          `json:"avatar"`
+	Enabled     bool            `json:"enabled"`
+	Roles       []Role          `json:"roles" gorm:"many2many:user_roles;"`
+	Wallets     []Wallet        `json:"wallets" gorm:"foreignKey:UserID"`
+	Group       Group           `json:"group"`
+	GroupID     string          `json:"groupId"`
+	CreatedAt   time.Time       `json:"createdAt"`
+	UpdatedAt   time.Time       `json:"updatedAt"`
+	DeletedAt   *gorm.DeletedAt `json:"deletedAt" gorm:"index"`
 }
 
 func (a *User) TableName() string {
@@ -63,6 +63,7 @@ func (a *User) BeforeCreate(_ *gorm.DB) (err error) {
 	a.ID, err = generateID()
 	a.UpdatedAt = time.Now()
 	a.CreatedAt = time.Now()
+	a.DeletedAt = nil
 
 	return
 }

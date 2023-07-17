@@ -28,7 +28,7 @@ func NewRoleRoutes(handler *gin.RouterGroup, u application_role.IService, l pwlo
 		h.GET("/list", r.list)
 		h.GET("/detail/:id", r.detail)
 		h.PUT("/update/:id", r.update)
-		// h.DELETE("/delete/:id", r.delete)
+		h.DELETE("/delete/:id", r.delete)
 		// h.PUT("/assign-role/:id", r.assignRole)
 	}
 }
@@ -108,7 +108,7 @@ func (r *roleRoutes) list(c *gin.Context) {
 	defer span.End()
 
 	// 參數驗證
-	var req ListGotInput
+	var req ListGotRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindQuery")
 		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeRoleBindQuery, err, span))
@@ -158,7 +158,7 @@ func (r *roleRoutes) detail(c *gin.Context) {
 	defer span.End()
 
 	// 參數驗證
-	var req DetailGotInput
+	var req DetailGotRequest
 	if err := c.ShouldBindUri(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindUri")
 		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeRoleBindQuery, err, span))
@@ -197,7 +197,7 @@ func (r *roleRoutes) detail(c *gin.Context) {
 // @Produce     json
 // @Param		id	path	string	true	"ID"
 // @Param		body	body		UpdatedRequest	true	"Role Update Request"
-// @Success		200		{object}	http.Response
+// @Success		200		{object}	http.Response{data=Response}
 // @Failure		400		{object}	http.Response
 // @Failure		500		{object}	http.Response
 // @Router			/role/update/{id} [put].
@@ -244,4 +244,54 @@ func (r *roleRoutes) update(c *gin.Context) {
 
 	span.SetStatus(codes.Ok, "OK")
 	http.SuccessResponse(c, NewResponse(data))
+}
+
+// @Summary     Delete role
+// @Description Delete role
+// @ID          DeleteRole
+// @Tags  	    Role
+// @Accept      json
+// @Produce     json
+// @Param		id	path	string	true	"ID"
+// @Success		200		{object}	http.Response{data=Response}
+// @Failure		400		{object}	http.Response
+// @Failure		500		{object}	http.Response
+// @Router			/role/delete/{id} [delete].
+func (r *roleRoutes) delete(c *gin.Context) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(c.Request.Context(), "adapter-delete-role")
+
+	defer span.End()
+
+	// 參數驗證
+	var req DeletedRequest
+	if err := c.ShouldBindUri(&req); err != nil {
+		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindUri")
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeRoleBindQuery, err, span))
+
+		return
+	}
+
+	var input application_role.DeletedInput
+
+	err := copier.Copy(&input, &req)
+	if err != nil {
+		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeRoleCopyToInput, err, span))
+
+		return
+	}
+
+	// 執行UseCase
+	info, err := r.u.DeleteRole(ctx, &input)
+	if err != nil {
+		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - DeleteRole")
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeRoleUsecase, err, span))
+
+		return
+	}
+
+	span.SetStatus(codes.Ok, "OK")
+	http.SuccessResponse(c, NewResponse(info))
 }

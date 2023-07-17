@@ -10,16 +10,16 @@ import (
 
 type IDataSource interface {
 	Create(context.Context, dto.IRepoEntity) (dto.IRepoEntity, error)
-	Delete(context.Context, dto.IRepoEntity) error
+	Delete(context.Context, dto.IRepoEntity) (dto.IRepoEntity, error)
 	Update(context.Context, dto.IRepoEntity) (dto.IRepoEntity, error)
-	UpdateWithFields(context.Context, dto.IRepoEntity, []string) error
+	UpdateWithFields(context.Context, dto.IRepoEntity, []string) (dto.IRepoEntity, error)
 	GetByID(context.Context, dto.IRepoEntity) (dto.IRepoEntity, error)
 	GetAll(context.Context, *domain.SearchQuery, dto.IRepoEntity) (*dto.List, error)
 
 	CreateTx(context.Context, dto.IRepoEntity, domain.ITransactionEvent) (dto.IRepoEntity, error)
-	DeleteTx(context.Context, dto.IRepoEntity, domain.ITransactionEvent) error
+	DeleteTx(context.Context, dto.IRepoEntity, domain.ITransactionEvent) (dto.IRepoEntity, error)
 	UpdateTx(context.Context, dto.IRepoEntity, domain.ITransactionEvent) (dto.IRepoEntity, error)
-	UpdateWithFieldsTx(context.Context, dto.IRepoEntity, []string, domain.ITransactionEvent) error
+	UpdateWithFieldsTx(context.Context, dto.IRepoEntity, []string, domain.ITransactionEvent) (dto.IRepoEntity, error)
 }
 
 type IAssociationDataSource interface {

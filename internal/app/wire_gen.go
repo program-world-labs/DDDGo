@@ -55,7 +55,7 @@ func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server
 	transactionRunRepoImpl := provideTransactionRepo(transactionDataSourceImpl)
 	roleIService := provideRoleService(roleRepoImpl, transactionRunRepoImpl, l)
 	services := provideServices(iService, roleIService)
-	engine := v1.NewRouter(l, services)
+	engine := v1.NewRouter(l, services, cfg)
 	server := provideHTTPServer(engine, cfg)
 	return server, nil
 }

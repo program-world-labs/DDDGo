@@ -26,16 +26,16 @@ const (
 var _ IRepoEntity = (*Wallet)(nil)
 
 type Wallet struct {
-	ID          string    `json:"id" gorm:"primary_key"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Chain       Chain     `json:"chain"`
-	Address     string    `json:"address"`
-	UserID      string    `json:"userId"`
-	Amounts     []Amount  `json:"amounts" gorm:"foreignKey:WalletID"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
-	DeletedAt   time.Time `json:"deletedAt" gorm:"index"`
+	ID          string          `json:"id" gorm:"primary_key"`
+	Name        string          `json:"name"`
+	Description string          `json:"description"`
+	Chain       Chain           `json:"chain"`
+	Address     string          `json:"address"`
+	UserID      string          `json:"userId"`
+	Amounts     []Amount        `json:"amounts" gorm:"foreignKey:WalletID"`
+	CreatedAt   time.Time       `json:"createdAt"`
+	UpdatedAt   time.Time       `json:"updatedAt"`
+	DeletedAt   *gorm.DeletedAt `json:"deletedAt" gorm:"index"`
 }
 
 func (a *Wallet) TableName() string {
@@ -68,6 +68,7 @@ func (a *Wallet) BeforeCreate(_ *gorm.DB) (err error) {
 	a.ID, err = generateID()
 	a.UpdatedAt = time.Now()
 	a.CreatedAt = time.Now()
+	a.DeletedAt = nil
 
 	return
 }

@@ -6,7 +6,7 @@ type CreatedRequest struct {
 	Permissions []string `json:"permissions" binding:"required" example:"read:all,write:all"`
 }
 
-type ListGotInput struct {
+type ListGotRequest struct {
 	Limit      int      `json:"limit" form:"limit" binding:"required"`
 	Offset     int      `json:"offset" form:"offset"`
 	FilterName string   `json:"filterName" form:"filterName"`
@@ -14,7 +14,11 @@ type ListGotInput struct {
 	Dir        string   `json:"dir" form:"dir"`
 }
 
-type DetailGotInput struct {
+type DetailGotRequest struct {
+	ID string `json:"id" uri:"id" binding:"required"`
+}
+
+type DeletedRequest struct {
 	ID string `json:"id" uri:"id" binding:"required"`
 }
 
