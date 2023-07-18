@@ -15,14 +15,13 @@ import (
 	_ "github.com/program-world-labs/DDDGo/docs"
 	"github.com/program-world-labs/DDDGo/internal/adapter/http/v1/role"
 	"github.com/program-world-labs/DDDGo/internal/adapter/http/v1/user"
-	application_role "github.com/program-world-labs/DDDGo/internal/application/role"
-	application_user "github.com/program-world-labs/DDDGo/internal/application/user"
+	"github.com/program-world-labs/DDDGo/internal/application"
 )
 
-type Services struct {
-	User application_user.IService
-	Role application_role.IService
-}
+// type Services struct {
+// 	User application_user.IService
+// 	Role application_role.IService
+// }
 
 // NewRouter -.
 // Swagger spec:
@@ -32,7 +31,7 @@ type Services struct {
 // @host        localhost:8080
 // @BasePath    /v1
 // Swagger base path.
-func NewRouter(l pwlogger.Interface, s Services) *gin.Engine {
+func NewRouter(l pwlogger.Interface, s application.Services) *gin.Engine {
 	handler := gin.New()
 	// Options
 	handler.Use(gin.Logger())

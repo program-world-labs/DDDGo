@@ -7,8 +7,9 @@ import (
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
 	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
-	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
-	"github.com/program-world-labs/DDDGo/internal/domain/user/repository"
+	"github.com/program-world-labs/DDDGo/internal/domain/entity"
+	"github.com/program-world-labs/DDDGo/internal/domain/event"
+	"github.com/program-world-labs/DDDGo/internal/domain/repository"
 )
 
 var _ IService = (*ServiceImpl)(nil)
@@ -18,12 +19,13 @@ type ServiceImpl struct {
 	TransactionRepo domain.ITransactionRepo
 	RoleRepo        repository.RoleRepository
 	UserRepo        repository.UserRepository
+	EventProducer   event.EventProducer
 	log             pwlogger.Interface
 }
 
 // NewServiceImpl -.
-func NewServiceImpl(roleRepo repository.RoleRepository, transactionRepo domain.ITransactionRepo, l pwlogger.Interface) *ServiceImpl {
-	return &ServiceImpl{RoleRepo: roleRepo, TransactionRepo: transactionRepo, log: l}
+func NewServiceImpl(roleRepo repository.RoleRepository, transactionRepo domain.ITransactionRepo, eventProducer event.EventProducer, l pwlogger.Interface) *ServiceImpl {
+	return &ServiceImpl{RoleRepo: roleRepo, TransactionRepo: transactionRepo, EventProducer: eventProducer, log: l}
 }
 
 // CreateRole creates a role.
@@ -47,6 +49,26 @@ func (u *ServiceImpl) CreateRole(ctx context.Context, roleInfo *CreatedInput) (*
 	createdRoleEntity, ok := createdRole.(*entity.Role)
 	if !ok {
 		return nil, domainerrors.Wrap(ErrorCodeCast, err)
+	}
+
+	// Create domain event
+	permissions := make([]string, 0)
+	createdEvent := &event.RoleCreatedEvent{
+		Name:        roleInfo.Name,
+		Description: roleInfo.Description,
+		Permissions: append(permissions, createdRoleEntity.Permissions...),
+	}
+	_, et := createdRoleEntity.GetTypeName(createdRoleEntity)
+	domainEvent := event.NewDomainEvent(createdRoleEntity.GetID(), et, -1, createdEvent)
+
+	
+	// Apply event to entity
+	createdRoleEntity.ApplyEventHelper(createdRoleEntity, domainEvent, true)
+
+	// Publish event
+	err = u.EventProducer.PublishEvent(createdRoleEntity.Type, domainEvent)
+	if err != nil {
+		return nil, err
 	}
 
 	return NewOutput(createdRoleEntity), nil

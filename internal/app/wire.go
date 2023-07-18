@@ -10,9 +10,12 @@ import (
 	"github.com/google/wire"
 	"github.com/program-world-labs/pwlogger"
 	"github.com/redis/go-redis/v9"
+	"github.com/ThreeDotsLabs/watermill/message"
 
 	"github.com/program-world-labs/DDDGo/config"
 	v1 "github.com/program-world-labs/DDDGo/internal/adapter/http/v1"
+	adapter_message "github.com/program-world-labs/DDDGo/internal/adapter/message"
+	"github.com/program-world-labs/DDDGo/internal/application"
 	application_role "github.com/program-world-labs/DDDGo/internal/application/role"
 	application_user "github.com/program-world-labs/DDDGo/internal/application/user"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource/cache"
@@ -25,6 +28,8 @@ import (
 	redisCache "github.com/program-world-labs/DDDGo/pkg/cache/redis"
 	"github.com/program-world-labs/DDDGo/pkg/httpserver"
 	"github.com/program-world-labs/DDDGo/pkg/pwsql"
+	pkg_message "github.com/program-world-labs/DDDGo/pkg/message"
+	"github.com/program-world-labs/DDDGo/internal/domain/event"
 )
 
 func providePostgres(cfg *config.Config) (pwsql.ISQLGorm, error) {
@@ -66,23 +71,35 @@ func provideRoleRepo(sqlDatasource *sql.CRUDDatasourceImpl, bigCacheDatasource *
 	return role.NewRepoImpl(sqlDatasource, roleCache, bigCacheDatasource)
 }
 
-func provideServices(user application_user.IService, role application_role.IService) v1.Services {
-	return v1.Services{
+func provideServices(user application_user.IService, role application_role.IService) application.Services {
+	return application.Services{
 		User: user,
 		Role: role,
 	}
 }
 
-func provideUserService(userRepo *user.RepoImpl, l pwlogger.Interface) application_user.IService {
-	return application_user.NewServiceImpl(userRepo, l)
+func provideUserService(userRepo *user.RepoImpl, eventProducer *pkg_message.KafkaMessage, l pwlogger.Interface) application_user.IService {
+	return application_user.NewServiceImpl(userRepo, eventProducer, l)
 }
 
-func provideRoleService(roleRepo *role.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, l pwlogger.Interface) application_role.IService {
-	return application_role.NewServiceImpl(roleRepo, transactionRepo, l)
+func provideRoleService(roleRepo *role.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *pkg_message.KafkaMessage, l pwlogger.Interface) application_role.IService {
+	return application_role.NewServiceImpl(roleRepo, transactionRepo, eventProducer, l)
 }
 
 func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Server {
 	return httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
+}
+
+func provideKafkaMessage(cfg *config.Config) (*pkg_message.KafkaMessage, error) {
+	return pkg_message.NewKafkaMessage(cfg.Kafka.Brokers, cfg.Kafka.GroupID)
+}
+
+func provideMessageRouter(handler *pkg_message.KafkaMessage, mapper *event.EventTypeMapper, s application.Services, l pwlogger.Interface) (*message.Router, error) {
+	return adapter_message.NewRouter(handler, mapper, s, l)
+}
+
+func provideEventTypeMapper() *event.EventTypeMapper {
+	return event.NewEventTypeMapper()
 }
 
 var appSet = wire.NewSet(
@@ -96,6 +113,9 @@ var appSet = wire.NewSet(
 	provideTransactionRepo,
 	provideUserRepo,
 	provideRoleRepo,
+	provideKafkaMessage,
+	provideMessageRouter,
+	provideEventTypeMapper,
 	provideUserService,
 	provideRoleService,
 	provideServices,
@@ -107,4 +127,16 @@ func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server
 	wire.Build(appSet)
 
 	return &httpserver.Server{}, nil
+}
+
+// func NewMessageServer(cfg *config.Config, l pwlogger.Interface) (*pkg_message.KafkaMessage, error) {
+// 	wire.Build(appSet)
+
+// 	return &pkg_message.KafkaMessage{}, nil
+// }
+
+func NewMessageRouter(cfg *config.Config, l pwlogger.Interface) (*message.Router, error) {
+	wire.Build(appSet)
+
+	return &message.Router{}, nil
 }

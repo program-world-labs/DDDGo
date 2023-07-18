@@ -24,10 +24,14 @@ func Run(cfg *config.Config) {
 		l = pwlogger.NewDevelopmentLogger(cfg.GCP.Project)
 	}
 
+	// Http Server
 	httpServer, err := NewHTTPServer(cfg, l)
 	if err != nil {
 		l.Err(err).Str("app", "Run").Msg("InitializeHTTPServer error")
 	}
+
+	// Message Router
+	router, err := NewMessageRouter(cfg, l)
 
 	// Waiting signal
 	interrupt := make(chan os.Signal, 1)
@@ -45,4 +49,7 @@ func Run(cfg *config.Config) {
 	if err != nil {
 		l.Err(err).Str("app", "Run").Msg("httpServer.Shutdown error")
 	}
+
+	// Close message server
+	router.Close()
 }

@@ -11,7 +11,7 @@ import (
 
 	application_user "github.com/program-world-labs/DDDGo/internal/application/user"
 	"github.com/program-world-labs/DDDGo/internal/domain"
-	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
+	"github.com/program-world-labs/DDDGo/internal/domain/entity"
 )
 
 type CreatedInput struct {

@@ -13,6 +13,7 @@ const (
 	ErrorCodeAdapterUser             = 20000000
 	ErrorCodeApplicationRole         = 1000000
 	ErrorCodeDomainRole              = 100000
+	ErrorCodeDomainUser              = 200000
 	ErrorCodeRepo                    = 10000
 	ErrorCodeDatasourceSQL           = 1000
 	ErrorCodeDatasourceCache         = 2000

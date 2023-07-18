@@ -50,11 +50,26 @@ func (mr *MockIServiceMockRecorder) CreateRole(ctx, roleInfo interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRole", reflect.TypeOf((*MockIService)(nil).CreateRole), ctx, roleInfo)
 }
 
+// GetRoleDetail mocks base method.
+func (m *MockIService) GetRoleDetail(ctx context.Context, roleInfo *role.DetailGotInput) (*role.Output, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRoleDetail", ctx, roleInfo)
+	ret0, _ := ret[0].(*role.Output)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRoleDetail indicates an expected call of GetRoleDetail.
+func (mr *MockIServiceMockRecorder) GetRoleDetail(ctx, roleInfo interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRoleDetail", reflect.TypeOf((*MockIService)(nil).GetRoleDetail), ctx, roleInfo)
+}
+
 // GetRoleList mocks base method.
-func (m *MockIService) GetRoleList(ctx context.Context, roleInfo *role.ListGotInput) ([]*role.Output, error) {
+func (m *MockIService) GetRoleList(ctx context.Context, roleInfo *role.ListGotInput) (*role.OutputList, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRoleList", ctx, roleInfo)
-	ret0, _ := ret[0].([]*role.Output)
+	ret0, _ := ret[0].(*role.OutputList)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

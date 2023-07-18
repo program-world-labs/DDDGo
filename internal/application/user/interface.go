@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 
-	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
+	"github.com/program-world-labs/DDDGo/internal/domain/entity"
 )
 
 type IService interface {

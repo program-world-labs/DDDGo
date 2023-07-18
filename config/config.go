@@ -18,6 +18,7 @@ type (
 		Redis   `mapstructure:"redis"`
 		HTTP    `mapstructure:"http"`
 		Log     `mapstructure:"logger"`
+		Kafka   `mapstructure:"kafka"`
 		Env
 	}
 
@@ -67,6 +68,12 @@ type (
 	Log struct {
 		Level string `mapstructure:"log_level"`
 		LogID string `mapstructure:"log_id"`
+	}
+
+	// Kafka -.
+	Kafka struct {
+		Brokers []string `mapstructure:"brokers"`
+		GroupID string   `mapstructure:"group_id"`
 	}
 
 	Env struct {

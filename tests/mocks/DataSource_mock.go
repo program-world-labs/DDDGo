@@ -111,10 +111,10 @@ func (mr *MockIDataSourceMockRecorder) GetAll(arg0, arg1, arg2 interface{}) *gom
 }
 
 // GetByID mocks base method.
-func (m *MockIDataSource) GetByID(arg0 context.Context, arg1 dto.IRepoEntity) (map[string]interface{}, error) {
+func (m *MockIDataSource) GetByID(arg0 context.Context, arg1 dto.IRepoEntity) (dto.IRepoEntity, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByID", arg0, arg1)
-	ret0, _ := ret[0].(map[string]interface{})
+	ret0, _ := ret[0].(dto.IRepoEntity)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -181,6 +181,396 @@ func (m *MockIDataSource) UpdateWithFieldsTx(arg0 context.Context, arg1 dto.IRep
 func (mr *MockIDataSourceMockRecorder) UpdateWithFieldsTx(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateWithFieldsTx", reflect.TypeOf((*MockIDataSource)(nil).UpdateWithFieldsTx), arg0, arg1, arg2, arg3)
+}
+
+// MockIAssociationDataSource is a mock of IAssociationDataSource interface.
+type MockIAssociationDataSource struct {
+	ctrl     *gomock.Controller
+	recorder *MockIAssociationDataSourceMockRecorder
+}
+
+// MockIAssociationDataSourceMockRecorder is the mock recorder for MockIAssociationDataSource.
+type MockIAssociationDataSourceMockRecorder struct {
+	mock *MockIAssociationDataSource
+}
+
+// NewMockIAssociationDataSource creates a new mock instance.
+func NewMockIAssociationDataSource(ctrl *gomock.Controller) *MockIAssociationDataSource {
+	mock := &MockIAssociationDataSource{ctrl: ctrl}
+	mock.recorder = &MockIAssociationDataSourceMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockIAssociationDataSource) EXPECT() *MockIAssociationDataSourceMockRecorder {
+	return m.recorder
+}
+
+// AppendAssociation mocks base method.
+func (m *MockIAssociationDataSource) AppendAssociation(arg0 context.Context, arg1 string, arg2 dto.IRepoEntity, arg3 []dto.IRepoEntity) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AppendAssociation", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AppendAssociation indicates an expected call of AppendAssociation.
+func (mr *MockIAssociationDataSourceMockRecorder) AppendAssociation(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AppendAssociation", reflect.TypeOf((*MockIAssociationDataSource)(nil).AppendAssociation), arg0, arg1, arg2, arg3)
+}
+
+// AppendAssociationTx mocks base method.
+func (m *MockIAssociationDataSource) AppendAssociationTx(arg0 context.Context, arg1 string, arg2 dto.IRepoEntity, arg3 []dto.IRepoEntity, arg4 domain.ITransactionEvent) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AppendAssociationTx", arg0, arg1, arg2, arg3, arg4)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AppendAssociationTx indicates an expected call of AppendAssociationTx.
+func (mr *MockIAssociationDataSourceMockRecorder) AppendAssociationTx(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AppendAssociationTx", reflect.TypeOf((*MockIAssociationDataSource)(nil).AppendAssociationTx), arg0, arg1, arg2, arg3, arg4)
+}
+
+// GetAssociationCount mocks base method.
+func (m *MockIAssociationDataSource) GetAssociationCount(arg0 context.Context, arg1 string, arg2 dto.IRepoEntity) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAssociationCount", arg0, arg1, arg2)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAssociationCount indicates an expected call of GetAssociationCount.
+func (mr *MockIAssociationDataSourceMockRecorder) GetAssociationCount(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAssociationCount", reflect.TypeOf((*MockIAssociationDataSource)(nil).GetAssociationCount), arg0, arg1, arg2)
+}
+
+// RemoveAssociation mocks base method.
+func (m *MockIAssociationDataSource) RemoveAssociation(arg0 context.Context, arg1 string, arg2 dto.IRepoEntity, arg3 []dto.IRepoEntity) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveAssociation", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveAssociation indicates an expected call of RemoveAssociation.
+func (mr *MockIAssociationDataSourceMockRecorder) RemoveAssociation(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveAssociation", reflect.TypeOf((*MockIAssociationDataSource)(nil).RemoveAssociation), arg0, arg1, arg2, arg3)
+}
+
+// RemoveAssociationTx mocks base method.
+func (m *MockIAssociationDataSource) RemoveAssociationTx(arg0 context.Context, arg1 string, arg2 dto.IRepoEntity, arg3 []dto.IRepoEntity, arg4 domain.ITransactionEvent) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveAssociationTx", arg0, arg1, arg2, arg3, arg4)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveAssociationTx indicates an expected call of RemoveAssociationTx.
+func (mr *MockIAssociationDataSourceMockRecorder) RemoveAssociationTx(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveAssociationTx", reflect.TypeOf((*MockIAssociationDataSource)(nil).RemoveAssociationTx), arg0, arg1, arg2, arg3, arg4)
+}
+
+// ReplaceAssociation mocks base method.
+func (m *MockIAssociationDataSource) ReplaceAssociation(arg0 context.Context, arg1 string, arg2 dto.IRepoEntity, arg3 []dto.IRepoEntity) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ReplaceAssociation", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ReplaceAssociation indicates an expected call of ReplaceAssociation.
+func (mr *MockIAssociationDataSourceMockRecorder) ReplaceAssociation(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReplaceAssociation", reflect.TypeOf((*MockIAssociationDataSource)(nil).ReplaceAssociation), arg0, arg1, arg2, arg3)
+}
+
+// ReplaceAssociationTx mocks base method.
+func (m *MockIAssociationDataSource) ReplaceAssociationTx(arg0 context.Context, arg1 string, arg2 dto.IRepoEntity, arg3 []dto.IRepoEntity, arg4 domain.ITransactionEvent) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ReplaceAssociationTx", arg0, arg1, arg2, arg3, arg4)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ReplaceAssociationTx indicates an expected call of ReplaceAssociationTx.
+func (mr *MockIAssociationDataSourceMockRecorder) ReplaceAssociationTx(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReplaceAssociationTx", reflect.TypeOf((*MockIAssociationDataSource)(nil).ReplaceAssociationTx), arg0, arg1, arg2, arg3, arg4)
+}
+
+// MockIRelationDataSource is a mock of IRelationDataSource interface.
+type MockIRelationDataSource struct {
+	ctrl     *gomock.Controller
+	recorder *MockIRelationDataSourceMockRecorder
+}
+
+// MockIRelationDataSourceMockRecorder is the mock recorder for MockIRelationDataSource.
+type MockIRelationDataSourceMockRecorder struct {
+	mock *MockIRelationDataSource
+}
+
+// NewMockIRelationDataSource creates a new mock instance.
+func NewMockIRelationDataSource(ctrl *gomock.Controller) *MockIRelationDataSource {
+	mock := &MockIRelationDataSource{ctrl: ctrl}
+	mock.recorder = &MockIRelationDataSourceMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockIRelationDataSource) EXPECT() *MockIRelationDataSourceMockRecorder {
+	return m.recorder
+}
+
+// AppendAssociation mocks base method.
+func (m *MockIRelationDataSource) AppendAssociation(arg0 context.Context, arg1 string, arg2 dto.IRepoEntity, arg3 []dto.IRepoEntity) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AppendAssociation", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AppendAssociation indicates an expected call of AppendAssociation.
+func (mr *MockIRelationDataSourceMockRecorder) AppendAssociation(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AppendAssociation", reflect.TypeOf((*MockIRelationDataSource)(nil).AppendAssociation), arg0, arg1, arg2, arg3)
+}
+
+// AppendAssociationTx mocks base method.
+func (m *MockIRelationDataSource) AppendAssociationTx(arg0 context.Context, arg1 string, arg2 dto.IRepoEntity, arg3 []dto.IRepoEntity, arg4 domain.ITransactionEvent) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AppendAssociationTx", arg0, arg1, arg2, arg3, arg4)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AppendAssociationTx indicates an expected call of AppendAssociationTx.
+func (mr *MockIRelationDataSourceMockRecorder) AppendAssociationTx(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AppendAssociationTx", reflect.TypeOf((*MockIRelationDataSource)(nil).AppendAssociationTx), arg0, arg1, arg2, arg3, arg4)
+}
+
+// Create mocks base method.
+func (m *MockIRelationDataSource) Create(arg0 context.Context, arg1 dto.IRepoEntity) (dto.IRepoEntity, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", arg0, arg1)
+	ret0, _ := ret[0].(dto.IRepoEntity)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockIRelationDataSourceMockRecorder) Create(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockIRelationDataSource)(nil).Create), arg0, arg1)
+}
+
+// CreateTx mocks base method.
+func (m *MockIRelationDataSource) CreateTx(arg0 context.Context, arg1 dto.IRepoEntity, arg2 domain.ITransactionEvent) (dto.IRepoEntity, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateTx", arg0, arg1, arg2)
+	ret0, _ := ret[0].(dto.IRepoEntity)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateTx indicates an expected call of CreateTx.
+func (mr *MockIRelationDataSourceMockRecorder) CreateTx(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTx", reflect.TypeOf((*MockIRelationDataSource)(nil).CreateTx), arg0, arg1, arg2)
+}
+
+// Delete mocks base method.
+func (m *MockIRelationDataSource) Delete(arg0 context.Context, arg1 dto.IRepoEntity) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockIRelationDataSourceMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockIRelationDataSource)(nil).Delete), arg0, arg1)
+}
+
+// DeleteTx mocks base method.
+func (m *MockIRelationDataSource) DeleteTx(arg0 context.Context, arg1 dto.IRepoEntity, arg2 domain.ITransactionEvent) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteTx", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteTx indicates an expected call of DeleteTx.
+func (mr *MockIRelationDataSourceMockRecorder) DeleteTx(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteTx", reflect.TypeOf((*MockIRelationDataSource)(nil).DeleteTx), arg0, arg1, arg2)
+}
+
+// GetAll mocks base method.
+func (m *MockIRelationDataSource) GetAll(arg0 context.Context, arg1 *domain.SearchQuery, arg2 dto.IRepoEntity) (map[string]interface{}, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAll", arg0, arg1, arg2)
+	ret0, _ := ret[0].(map[string]interface{})
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAll indicates an expected call of GetAll.
+func (mr *MockIRelationDataSourceMockRecorder) GetAll(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockIRelationDataSource)(nil).GetAll), arg0, arg1, arg2)
+}
+
+// GetAssociationCount mocks base method.
+func (m *MockIRelationDataSource) GetAssociationCount(arg0 context.Context, arg1 string, arg2 dto.IRepoEntity) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAssociationCount", arg0, arg1, arg2)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAssociationCount indicates an expected call of GetAssociationCount.
+func (mr *MockIRelationDataSourceMockRecorder) GetAssociationCount(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAssociationCount", reflect.TypeOf((*MockIRelationDataSource)(nil).GetAssociationCount), arg0, arg1, arg2)
+}
+
+// GetByID mocks base method.
+func (m *MockIRelationDataSource) GetByID(arg0 context.Context, arg1 dto.IRepoEntity) (dto.IRepoEntity, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByID", arg0, arg1)
+	ret0, _ := ret[0].(dto.IRepoEntity)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByID indicates an expected call of GetByID.
+func (mr *MockIRelationDataSourceMockRecorder) GetByID(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockIRelationDataSource)(nil).GetByID), arg0, arg1)
+}
+
+// RemoveAssociation mocks base method.
+func (m *MockIRelationDataSource) RemoveAssociation(arg0 context.Context, arg1 string, arg2 dto.IRepoEntity, arg3 []dto.IRepoEntity) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveAssociation", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveAssociation indicates an expected call of RemoveAssociation.
+func (mr *MockIRelationDataSourceMockRecorder) RemoveAssociation(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveAssociation", reflect.TypeOf((*MockIRelationDataSource)(nil).RemoveAssociation), arg0, arg1, arg2, arg3)
+}
+
+// RemoveAssociationTx mocks base method.
+func (m *MockIRelationDataSource) RemoveAssociationTx(arg0 context.Context, arg1 string, arg2 dto.IRepoEntity, arg3 []dto.IRepoEntity, arg4 domain.ITransactionEvent) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveAssociationTx", arg0, arg1, arg2, arg3, arg4)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveAssociationTx indicates an expected call of RemoveAssociationTx.
+func (mr *MockIRelationDataSourceMockRecorder) RemoveAssociationTx(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveAssociationTx", reflect.TypeOf((*MockIRelationDataSource)(nil).RemoveAssociationTx), arg0, arg1, arg2, arg3, arg4)
+}
+
+// ReplaceAssociation mocks base method.
+func (m *MockIRelationDataSource) ReplaceAssociation(arg0 context.Context, arg1 string, arg2 dto.IRepoEntity, arg3 []dto.IRepoEntity) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ReplaceAssociation", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ReplaceAssociation indicates an expected call of ReplaceAssociation.
+func (mr *MockIRelationDataSourceMockRecorder) ReplaceAssociation(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReplaceAssociation", reflect.TypeOf((*MockIRelationDataSource)(nil).ReplaceAssociation), arg0, arg1, arg2, arg3)
+}
+
+// ReplaceAssociationTx mocks base method.
+func (m *MockIRelationDataSource) ReplaceAssociationTx(arg0 context.Context, arg1 string, arg2 dto.IRepoEntity, arg3 []dto.IRepoEntity, arg4 domain.ITransactionEvent) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ReplaceAssociationTx", arg0, arg1, arg2, arg3, arg4)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ReplaceAssociationTx indicates an expected call of ReplaceAssociationTx.
+func (mr *MockIRelationDataSourceMockRecorder) ReplaceAssociationTx(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReplaceAssociationTx", reflect.TypeOf((*MockIRelationDataSource)(nil).ReplaceAssociationTx), arg0, arg1, arg2, arg3, arg4)
+}
+
+// Update mocks base method.
+func (m *MockIRelationDataSource) Update(arg0 context.Context, arg1 dto.IRepoEntity) (dto.IRepoEntity, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", arg0, arg1)
+	ret0, _ := ret[0].(dto.IRepoEntity)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Update indicates an expected call of Update.
+func (mr *MockIRelationDataSourceMockRecorder) Update(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockIRelationDataSource)(nil).Update), arg0, arg1)
+}
+
+// UpdateTx mocks base method.
+func (m *MockIRelationDataSource) UpdateTx(arg0 context.Context, arg1 dto.IRepoEntity, arg2 domain.ITransactionEvent) (dto.IRepoEntity, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateTx", arg0, arg1, arg2)
+	ret0, _ := ret[0].(dto.IRepoEntity)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateTx indicates an expected call of UpdateTx.
+func (mr *MockIRelationDataSourceMockRecorder) UpdateTx(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTx", reflect.TypeOf((*MockIRelationDataSource)(nil).UpdateTx), arg0, arg1, arg2)
+}
+
+// UpdateWithFields mocks base method.
+func (m *MockIRelationDataSource) UpdateWithFields(arg0 context.Context, arg1 dto.IRepoEntity, arg2 []string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateWithFields", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateWithFields indicates an expected call of UpdateWithFields.
+func (mr *MockIRelationDataSourceMockRecorder) UpdateWithFields(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateWithFields", reflect.TypeOf((*MockIRelationDataSource)(nil).UpdateWithFields), arg0, arg1, arg2)
+}
+
+// UpdateWithFieldsTx mocks base method.
+func (m *MockIRelationDataSource) UpdateWithFieldsTx(arg0 context.Context, arg1 dto.IRepoEntity, arg2 []string, arg3 domain.ITransactionEvent) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateWithFieldsTx", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateWithFieldsTx indicates an expected call of UpdateWithFieldsTx.
+func (mr *MockIRelationDataSourceMockRecorder) UpdateWithFieldsTx(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateWithFieldsTx", reflect.TypeOf((*MockIRelationDataSource)(nil).UpdateWithFieldsTx), arg0, arg1, arg2, arg3)
 }
 
 // MockICacheDataSource is a mock of ICacheDataSource interface.
