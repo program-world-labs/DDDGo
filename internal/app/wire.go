@@ -6,13 +6,13 @@ package app
 import (
 	"fmt"
 
+	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/allegro/bigcache/v3"
 	"github.com/dtm-labs/rockscache"
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 	"github.com/program-world-labs/pwlogger"
 	"github.com/redis/go-redis/v9"
-	"github.com/ThreeDotsLabs/watermill/message"
 
 	"github.com/program-world-labs/DDDGo/config"
 	v1 "github.com/program-world-labs/DDDGo/internal/adapter/http/v1"
@@ -20,6 +20,7 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/application"
 	application_role "github.com/program-world-labs/DDDGo/internal/application/role"
 	application_user "github.com/program-world-labs/DDDGo/internal/application/user"
+	"github.com/program-world-labs/DDDGo/internal/domain/event"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource/cache"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource/sql"
 	"github.com/program-world-labs/DDDGo/internal/infra/dto"
@@ -29,9 +30,8 @@ import (
 	"github.com/program-world-labs/DDDGo/pkg/cache/local"
 	redisCache "github.com/program-world-labs/DDDGo/pkg/cache/redis"
 	"github.com/program-world-labs/DDDGo/pkg/httpserver"
-	"github.com/program-world-labs/DDDGo/pkg/pwsql"
 	pkg_message "github.com/program-world-labs/DDDGo/pkg/message"
-	"github.com/program-world-labs/DDDGo/internal/domain/event"
+	"github.com/program-world-labs/DDDGo/pkg/pwsql"
 )
 
 func providePostgres(cfg *config.Config) (pwsql.ISQLGorm, error) {
@@ -87,12 +87,12 @@ func provideServices(user application_user.IService, role application_role.IServ
 	}
 }
 
-func provideUserService(userRepo *user.RepoImpl, eventProducer *pkg_message.KafkaMessage, l pwlogger.Interface) application_user.IService {
-	return application_user.NewServiceImpl(userRepo, eventProducer, l)
+func provideUserService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *pkg_message.KafkaMessage, l pwlogger.Interface) application_user.IService {
+	return application_user.NewServiceImpl(roleRepo, userRepo, transactionRepo, eventProducer, l)
 }
 
-func provideRoleService(roleRepo *role.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *pkg_message.KafkaMessage, l pwlogger.Interface) application_role.IService {
-	return application_role.NewServiceImpl(roleRepo, transactionRepo, eventProducer, l)
+func provideRoleService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *pkg_message.KafkaMessage, l pwlogger.Interface) application_role.IService {
+	return application_role.NewServiceImpl(roleRepo, userRepo, transactionRepo, eventProducer, l)
 }
 
 func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Server {

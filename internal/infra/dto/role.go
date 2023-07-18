@@ -23,9 +23,9 @@ type Role struct {
 	Description string          `json:"description"`
 	Permissions pq.StringArray  `json:"permissions" gorm:"type:varchar(100)[]"`
 	Users       []User          `json:"users" gorm:"many2many:user_roles;"`
-	CreatedAt   time.Time       `json:"created_at" mapstructure:"created_at"`
-	UpdatedAt   time.Time       `json:"updated_at" mapstructure:"updated_at"`
-	DeletedAt   *gorm.DeletedAt `json:"deleted_at" mapstructure:"deleted_at" gorm:"index"`
+	CreatedAt   time.Time       `json:"created_at" mapstructure:"created_at" gorm:"column:created_at"`
+	UpdatedAt   time.Time       `json:"updated_at" mapstructure:"updated_at" gorm:"column:updated_at"`
+	DeletedAt   *gorm.DeletedAt `json:"deleted_at" mapstructure:"deleted_at" gorm:"index;column:deleted_at"`
 }
 
 func (a *Role) TableName() string {
@@ -45,7 +45,10 @@ func (a *Role) BackToDomain() (domain.IEntity, error) {
 	if err := copier.Copy(i, a); err != nil {
 		return nil, domainerrors.Wrap(ErrorCodeRoleBackToDomain, err)
 	}
-	i.DeletedAt = a.DeletedAt.Time
+
+	if a.DeletedAt != nil {
+		i.DeletedAt = a.DeletedAt.Time
+	}
 
 	return i, nil
 }

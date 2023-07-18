@@ -7,8 +7,8 @@
 package app
 
 import (
-	"github.com/ThreeDotsLabs/watermill/message"
 	"fmt"
+	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/allegro/bigcache/v3"
 	"github.com/dtm-labs/rockscache"
 	"github.com/gin-gonic/gin"
@@ -53,16 +53,16 @@ func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server
 		return nil, err
 	}
 	rockscacheClient := provideRocksCache(client)
-	repoImpl := provideUserRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
+	repoImpl := provideRoleRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
+	userRepoImpl := provideUserRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
+	transactionDataSourceImpl := sql.NewTransactionRunDataSourceImpl(isqlGorm)
+	transactionRunRepoImpl := provideTransactionRepo(transactionDataSourceImpl)
 	kafkaMessage, err := provideKafkaMessage(cfg)
 	if err != nil {
 		return nil, err
 	}
-	iService := provideUserService(repoImpl, kafkaMessage, l)
-	roleRepoImpl := provideRoleRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
-	transactionDataSourceImpl := sql.NewTransactionRunDataSourceImpl(isqlGorm)
-	transactionRunRepoImpl := provideTransactionRepo(transactionDataSourceImpl)
-	roleIService := provideRoleService(roleRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
+	iService := provideUserService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
+	roleIService := provideRoleService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
 	services := provideServices(iService, roleIService)
 	engine := v1.NewRouter(l, services, cfg)
 	server := provideHTTPServer(engine, cfg)
@@ -90,12 +90,12 @@ func NewMessageRouter(cfg *config.Config, l pwlogger.Interface) (*message.Router
 		return nil, err
 	}
 	rockscacheClient := provideRocksCache(client)
-	repoImpl := provideUserRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
-	iService := provideUserService(repoImpl, kafkaMessage, l)
-	roleRepoImpl := provideRoleRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
+	repoImpl := provideRoleRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
+	userRepoImpl := provideUserRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
 	transactionDataSourceImpl := sql.NewTransactionRunDataSourceImpl(isqlGorm)
 	transactionRunRepoImpl := provideTransactionRepo(transactionDataSourceImpl)
-	roleIService := provideRoleService(roleRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
+	iService := provideUserService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
+	roleIService := provideRoleService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
 	services := provideServices(iService, roleIService)
 	router, err := provideMessageRouter(kafkaMessage, eventTypeMapper, services, l)
 	if err != nil {
@@ -159,12 +159,12 @@ func provideServices(user3 user2.IService, role3 role2.IService) application.Ser
 	}
 }
 
-func provideUserService(userRepo *user.RepoImpl, eventProducer *message2.KafkaMessage, l pwlogger.Interface) user2.IService {
-	return user2.NewServiceImpl(userRepo, eventProducer, l)
+func provideUserService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *message2.KafkaMessage, l pwlogger.Interface) user2.IService {
+	return user2.NewServiceImpl(roleRepo, userRepo, transactionRepo, eventProducer, l)
 }
 
-func provideRoleService(roleRepo *role.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *message2.KafkaMessage, l pwlogger.Interface) role2.IService {
-	return role2.NewServiceImpl(roleRepo, transactionRepo, eventProducer, l)
+func provideRoleService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *message2.KafkaMessage, l pwlogger.Interface) role2.IService {
+	return role2.NewServiceImpl(roleRepo, userRepo, transactionRepo, eventProducer, l)
 }
 
 func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Server {

@@ -24,13 +24,13 @@ type User struct {
 	DisplayName string          `json:"display_name"`
 	Avatar      string          `json:"avatar"`
 	Enabled     bool            `json:"enabled"`
-	Roles       []Role          `json:"roles" gorm:"many2many:user_roles;"`
-	Wallets     []Wallet        `json:"wallets" gorm:"foreignKey:UserID"`
-	Group       Group           `json:"group"`
+	Roles       []*Role         `json:"roles" gorm:"many2many:user_roles;"`
+	Wallets     []*Wallet       `json:"wallets" gorm:"foreignKey:UserID"`
+	Group       *Group          `json:"group"`
 	GroupID     string          `json:"groupId"`
-	CreatedAt   time.Time       `json:"createdAt"`
-	UpdatedAt   time.Time       `json:"updatedAt"`
-	DeletedAt   *gorm.DeletedAt `json:"deletedAt" gorm:"index"`
+	CreatedAt   time.Time       `json:"created_at" mapstructure:"created_at" gorm:"column:created_at"`
+	UpdatedAt   time.Time       `json:"updated_at" mapstructure:"updated_at" gorm:"column:updated_at"`
+	DeletedAt   *gorm.DeletedAt `json:"deleted_at" mapstructure:"deleted_at" gorm:"index;column:deleted_at"`
 }
 
 func (a *User) TableName() string {
@@ -46,9 +46,37 @@ func (a *User) Transform(i domain.IEntity) (IRepoEntity, error) {
 }
 
 func (a *User) BackToDomain() (domain.IEntity, error) {
-	i := &entity.User{}
-	if err := copier.Copy(&i, a); err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeUserBackToDomain, err)
+	var groupDelete time.Time
+	if a.Group.DeletedAt != nil {
+		groupDelete = a.Group.DeletedAt.Time
+	}
+
+	group := &entity.Group{
+		ID:          a.GroupID,
+		Name:        a.Group.Name,
+		Description: a.Group.Description,
+		Metadata:    a.Group.Metadata,
+		CreatedAt:   a.Group.CreatedAt,
+		UpdatedAt:   a.Group.UpdatedAt,
+		DeletedAt:   groupDelete,
+	}
+
+	var deleteTime time.Time
+	if a.DeletedAt != nil {
+		deleteTime = a.DeletedAt.Time
+	}
+
+	i := &entity.User{
+		ID:          a.ID,
+		Username:    a.Username,
+		Password:    a.Password,
+		EMail:       a.EMail,
+		DisplayName: a.DisplayName,
+		Avatar:      a.Avatar,
+		Group:       group,
+		CreatedAt:   a.CreatedAt,
+		UpdatedAt:   a.UpdatedAt,
+		DeletedAt:   deleteTime,
 	}
 
 	return i, nil

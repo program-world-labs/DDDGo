@@ -19,9 +19,9 @@ type Role struct {
 	Description string    `json:"description"`
 	Permissions []string  `json:"permissions"`
 	Users       []User    `json:"users"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
-	DeletedAt   time.Time `json:"deletedAt"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	DeletedAt   time.Time `json:"deleted_at"`
 }
 
 func NewRole(name, description string, permissions []string) *Role {

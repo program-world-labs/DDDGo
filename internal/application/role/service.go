@@ -25,8 +25,8 @@ type ServiceImpl struct {
 }
 
 // NewServiceImpl -.
-func NewServiceImpl(roleRepo repository.RoleRepository, transactionRepo domain.ITransactionRepo, eventProducer event.EventProducer, l pwlogger.Interface) *ServiceImpl {
-	return &ServiceImpl{RoleRepo: roleRepo, TransactionRepo: transactionRepo, EventProducer: eventProducer, log: l}
+func NewServiceImpl(roleRepo repository.RoleRepository, userRepo repository.UserRepository, transactionRepo domain.ITransactionRepo, eventProducer event.EventProducer, l pwlogger.Interface) *ServiceImpl {
+	return &ServiceImpl{RoleRepo: roleRepo, UserRepo: userRepo, TransactionRepo: transactionRepo, EventProducer: eventProducer, log: l}
 }
 
 // CreateRole creates a role.
@@ -67,7 +67,6 @@ func (u *ServiceImpl) CreateRole(ctx context.Context, roleInfo *CreatedInput) (*
 	_, et := createdRoleEntity.GetTypeName(createdRoleEntity)
 	domainEvent := event.NewDomainEvent(createdRoleEntity.GetID(), et, -1, createdEvent)
 
-	
 	// Apply event to entity
 	createdRoleEntity.ApplyEventHelper(createdRoleEntity, domainEvent, true)
 

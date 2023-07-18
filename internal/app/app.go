@@ -30,7 +30,7 @@ func Run(cfg *config.Config) {
 	// Http Server
 	httpServer, err := NewHTTPServer(cfg, l)
 	if err != nil {
-		l.Err(err).Str("app", "Run").Msg("InitializeHTTPServer error")
+		l.Panic().Err(err).Str("app", "Run").Msg("InitializeHTTPServer error")
 	}
 
 	// Message Router

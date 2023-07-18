@@ -25,6 +25,7 @@ import (
 	"github.com/program-world-labs/DDDGo/tests"
 	mock_repo "github.com/program-world-labs/DDDGo/tests/mocks"
 	mocks "github.com/program-world-labs/DDDGo/tests/mocks/role"
+	mocks_user "github.com/program-world-labs/DDDGo/tests/mocks/user"
 )
 
 type roleMatcher struct {
@@ -64,6 +65,7 @@ type ServiceTest struct {
 	input         *application_role.CreatedInput
 	expect        *application_role.Output
 	repoMock      *mocks.MockRoleRepository
+	userRepoMock  *mocks_user.MockUserRepository
 	transRepoMock *mock_repo.MockITransactionRepo
 	service       *application_role.ServiceImpl
 	producer      *mock_repo.MockEventProducer
@@ -133,9 +135,10 @@ func (st *ServiceTest) reset() {
 	st.input = nil
 	st.expect = nil
 	st.repoMock = mocks.NewMockRoleRepository(st.mockCtrl)
+	st.userRepoMock = mocks_user.NewMockUserRepository(st.mockCtrl)
 	st.transRepoMock = mock_repo.NewMockITransactionRepo(st.mockCtrl)
 	st.producer = mock_repo.NewMockEventProducer(st.mockCtrl)
-	st.service = application_role.NewServiceImpl(st.repoMock, st.transRepoMock, st.producer, logger)
+	st.service = application_role.NewServiceImpl(st.repoMock, st.userRepoMock, st.transRepoMock, st.producer, logger)
 }
 
 func (st *ServiceTest) givenData(name, description, permission string) error {

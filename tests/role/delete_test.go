@@ -10,6 +10,7 @@ import (
 	application_role "github.com/program-world-labs/DDDGo/internal/application/role"
 	mock_repo "github.com/program-world-labs/DDDGo/tests/mocks"
 	mocks "github.com/program-world-labs/DDDGo/tests/mocks/role"
+	mocks_user "github.com/program-world-labs/DDDGo/tests/mocks/user"
 )
 
 type ServiceDeleteTest struct {
@@ -19,6 +20,7 @@ type ServiceDeleteTest struct {
 	input         *application_role.DeletedInput
 	expect        *application_role.Output
 	repoMock      *mocks.MockRoleRepository
+	userRepoMock  *mocks_user.MockUserRepository
 	transRepoMock *mock_repo.MockITransactionRepo
 	service       *application_role.ServiceImpl
 }
@@ -29,6 +31,7 @@ func (st *ServiceDeleteTest) reset() {
 	st.input = nil
 	st.expect = nil
 	st.repoMock = mocks.NewMockRoleRepository(st.mockCtrl)
+	st.userRepoMock = mocks_user.NewMockUserRepository(st.mockCtrl)
 	st.transRepoMock = mock_repo.NewMockITransactionRepo(st.mockCtrl)
 	// st.service = application_role.NewServiceImpl(st.repoMock, st.transRepoMock, logger)
 }
