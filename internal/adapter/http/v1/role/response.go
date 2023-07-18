@@ -43,8 +43,10 @@ func NewResponse(model *application_role.Output) Response {
 
 func NewResponseList(modelList *application_role.OutputList) ResponseList {
 	responseList := make([]Response, len(modelList.Items))
+
 	for i, v := range modelList.Items {
-		responseList[i] = NewResponse(&v)
+		value := v
+		responseList[i] = NewResponse(&value)
 	}
 
 	return ResponseList{
