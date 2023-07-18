@@ -3,10 +3,12 @@ package cache
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/allegro/bigcache/v3"
+	"go.opentelemetry.io/otel"
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
 	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
@@ -35,74 +37,104 @@ func (r *BigCacheDataSourceImpl) cacheKey(model dto.IRepoEntity, sq ...*domain.S
 }
 
 // Get -.
-func (r *BigCacheDataSourceImpl) Get(_ context.Context, model dto.IRepoEntity, _ ...time.Duration) (dto.IRepoEntity, error) {
+func (r *BigCacheDataSourceImpl) Get(ctx context.Context, model dto.IRepoEntity, _ ...time.Duration) (dto.IRepoEntity, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	_, span := tracer.Start(ctx, "datasource-get-local")
+
+	defer span.End()
+
 	data, err := r.Cache.Get(r.cacheKey(model))
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeCacheGet, err, span)
 	}
 
 	err = json.Unmarshal(data, &model)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeCacheGet, err, span)
 	}
 
 	return model, nil
 }
 
 // Set -.
-func (r *BigCacheDataSourceImpl) Set(_ context.Context, model dto.IRepoEntity, _ ...time.Duration) (dto.IRepoEntity, error) {
+func (r *BigCacheDataSourceImpl) Set(ctx context.Context, model dto.IRepoEntity, _ ...time.Duration) (dto.IRepoEntity, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	_, span := tracer.Start(ctx, "datasource-set-local")
+
+	defer span.End()
+
 	data, err := json.Marshal(model)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeCacheSet, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeCacheSet, err, span)
 	}
 
 	err = r.Cache.Set(r.cacheKey(model), data)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeCacheSet, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeCacheSet, err, span)
 	}
 
 	return model, nil
 }
 
 // Delete -.
-func (r *BigCacheDataSourceImpl) Delete(_ context.Context, model dto.IRepoEntity) error {
+func (r *BigCacheDataSourceImpl) Delete(ctx context.Context, model dto.IRepoEntity) error {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	_, span := tracer.Start(ctx, "datasource-delete-local")
+
+	defer span.End()
+
 	err := r.Cache.Delete(r.cacheKey(model))
-	if err != nil {
-		return domainerrors.Wrap(ErrorCodeCacheDelete, err)
+	if err != nil && !errors.Is(err, bigcache.ErrEntryNotFound) {
+		return domainerrors.WrapWithSpan(ErrorCodeCacheDelete, err, span)
 	}
 
 	return nil
 }
 
 // GetListItem -.
-func (r *BigCacheDataSourceImpl) GetListItem(_ context.Context, model dto.IRepoEntity, sq *domain.SearchQuery, _ ...time.Duration) (map[string]interface{}, error) {
+func (r *BigCacheDataSourceImpl) GetListItem(ctx context.Context, model dto.IRepoEntity, sq *domain.SearchQuery, _ ...time.Duration) (*dto.List, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	_, span := tracer.Start(ctx, "datasource-getListItem-local")
+
+	defer span.End()
+
 	data, err := r.Cache.Get(r.cacheKey(model, sq))
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeCacheGet, err, span)
 	}
 
-	var result map[string]interface{}
+	var result *dto.List
 	err = json.Unmarshal(data, &result)
 
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeCacheGet, err, span)
 	}
 
 	return result, nil
 }
 
 // SetListItem -.
-func (r *BigCacheDataSourceImpl) SetListItem(_ context.Context, model []dto.IRepoEntity, sq *domain.SearchQuery, count int64, _ ...time.Duration) error {
+func (r *BigCacheDataSourceImpl) SetListItem(ctx context.Context, model []dto.IRepoEntity, sq *domain.SearchQuery, count int64, _ ...time.Duration) error {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	_, span := tracer.Start(ctx, "datasource-setListItem-local")
+
+	defer span.End()
+
 	data, err := json.Marshal(model)
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeCacheSet, err)
+		return domainerrors.WrapWithSpan(ErrorCodeCacheSet, err, span)
 	}
 
 	var info []map[string]interface{}
 	err = json.Unmarshal(data, &info)
 
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeCacheSet, err)
+		return domainerrors.WrapWithSpan(ErrorCodeCacheSet, err, span)
 	}
 
 	var domainList = map[string]interface{}{
@@ -114,22 +146,28 @@ func (r *BigCacheDataSourceImpl) SetListItem(_ context.Context, model []dto.IRep
 
 	result, err := json.Marshal(domainList)
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeCacheSet, err)
+		return domainerrors.WrapWithSpan(ErrorCodeCacheSet, err, span)
 	}
 
 	err = r.Cache.Set(r.cacheKey(model[0], sq), result)
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeCacheSet, err)
+		return domainerrors.WrapWithSpan(ErrorCodeCacheSet, err, span)
 	}
 
 	return nil
 }
 
 // DeleteListItem -.
-func (r *BigCacheDataSourceImpl) DeleteListItem(_ context.Context, model dto.IRepoEntity, sq *domain.SearchQuery) error {
+func (r *BigCacheDataSourceImpl) DeleteListItem(ctx context.Context, model dto.IRepoEntity, sq *domain.SearchQuery) error {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	_, span := tracer.Start(ctx, "datasource-deleteListItem-local")
+
+	defer span.End()
+
 	err := r.Cache.Delete(r.cacheKey(model, sq))
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeCacheDelete, err)
+		return domainerrors.WrapWithSpan(ErrorCodeCacheDelete, err, span)
 	}
 
 	return nil

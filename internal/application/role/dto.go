@@ -92,14 +92,60 @@ type AssignedInput struct {
 }
 
 type UpdatedInput struct {
-	ID          string   `json:"id"`
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	Permissions []string `json:"permissions"`
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Permissions string `json:"permissions"`
+}
+
+func (c *UpdatedInput) Validate() error {
+	validate := validator.New()
+	err := validate.RegisterValidation("custom_permission", CustomPermission)
+
+	if err != nil {
+		return err
+	}
+
+	// 提取錯誤訊息
+	err = validate.Struct(c)
+	if err != nil {
+		var e validator.ValidationErrors
+		if errors.As(err, &e) {
+			return handleValidationError(e)
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+func (c *UpdatedInput) ToEntity() *entity.Role {
+	return &entity.Role{
+		ID:          c.ID,
+		Name:        c.Name,
+		Description: c.Description,
+		Permissions: strings.Split(c.Permissions, ","),
+	}
 }
 
 type DeletedInput struct {
-	ID string `json:"id"`
+	ID string `json:"id" validate:"required,alphanum,len=20"`
+}
+
+func (c *DeletedInput) ToEntity() *entity.Role {
+	return &entity.Role{
+		ID: c.ID,
+	}
+}
+
+func (i *DeletedInput) Validate() error {
+	err := validator.New().Struct(i)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 type DetailGotInput struct {

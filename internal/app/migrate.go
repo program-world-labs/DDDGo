@@ -20,9 +20,9 @@ const (
 )
 
 func init() {
-	databaseURL, ok := os.LookupEnv("APP_PG_URL")
+	databaseURL, ok := os.LookupEnv("APP_SQL_URL")
 	if !ok || len(databaseURL) == 0 {
-		log.Fatalf("migrate: environment variable not declared: APP_PG_URL")
+		log.Fatalf("migrate: environment variable not declared: APP_SQL_URL")
 	}
 
 	databaseURL += "?sslmode=disable"

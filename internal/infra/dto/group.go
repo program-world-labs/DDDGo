@@ -2,6 +2,7 @@ package dto
 
 import (
 	"encoding/json"
+	"reflect"
 	"time"
 
 	"github.com/jinzhu/copier"
@@ -16,15 +17,15 @@ import (
 var _ IRepoEntity = (*Group)(nil)
 
 type Group struct {
-	ID          string    `json:"id" gorm:"primary_key"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Users       []User    `json:"users" gorm:"foreignKey:GroupID"`
-	Owner       *User     `json:"owner"`
-	Metadata    string    `json:"metadata"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
-	DeletedAt   time.Time `json:"deletedAt" gorm:"index"`
+	ID          string          `json:"id" gorm:"primary_key"`
+	Name        string          `json:"name"`
+	Description string          `json:"description"`
+	Users       []User          `json:"users" gorm:"foreignKey:GroupID"`
+	Owner       *User           `json:"owner"`
+	Metadata    string          `json:"metadata"`
+	CreatedAt   time.Time       `json:"createdAt"`
+	UpdatedAt   time.Time       `json:"updatedAt"`
+	DeletedAt   *gorm.DeletedAt `json:"deletedAt" gorm:"index"`
 }
 
 func (a *Group) TableName() string {
@@ -57,6 +58,7 @@ func (a *Group) BeforeCreate(_ *gorm.DB) (err error) {
 	a.ID, err = generateID()
 	a.UpdatedAt = time.Now()
 	a.CreatedAt = time.Now()
+	a.DeletedAt = nil
 
 	return
 }
@@ -78,22 +80,37 @@ func (a *Group) ToJSON() (string, error) {
 	return string(jsonData), nil
 }
 
-func (a *Group) DecodeJSON(data string) error {
-	err := json.Unmarshal([]byte(data), &a)
-	if err != nil {
+func (a *Group) UnmarshalJSON(data []byte) error {
+	type Alias Group
+
+	aux := &struct {
+		*Alias
+	}{
+		Alias: (*Alias)(a),
+	}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
 		return domainerrors.Wrap(ErrorCodeGroupDecodeJSON, err)
 	}
 
 	return nil
 }
 
-func (a *Group) ParseMap(data map[string]interface{}) error {
-	err := mapstructure.Decode(data, &a)
+func (a *Group) ParseMap(data map[string]interface{}) (IRepoEntity, error) {
+	err := ParseDateString(data)
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeGroupParseMap, err)
+		return nil, domainerrors.Wrap(ErrorCodeGroupParseMap, err)
 	}
 
-	return nil
+	var info *Group
+
+	err = mapstructure.Decode(data, &info)
+
+	if err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeGroupParseMap, err)
+	}
+
+	return info, nil
 }
 
 func (a *Group) GetPreloads() []string {
@@ -101,4 +118,12 @@ func (a *Group) GetPreloads() []string {
 		"Users",
 		"Owner",
 	}
+}
+
+func (a *Group) GetListType() interface{} {
+	entityType := reflect.TypeOf(Role{})
+	sliceType := reflect.SliceOf(entityType)
+	sliceValue := reflect.MakeSlice(sliceType, 0, 0)
+
+	return sliceValue.Interface()
 }

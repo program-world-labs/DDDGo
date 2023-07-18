@@ -15,6 +15,7 @@ type Response struct {
 	Users       []user.Response `json:"users"`
 	CreatedAt   time.Time       `json:"createdAt"`
 	UpdatedAt   time.Time       `json:"updatedAt"`
+	DeletedAt   time.Time       `json:"deletedAt"`
 }
 
 type ResponseList struct {
@@ -38,6 +39,7 @@ func NewResponse(model *application_role.Output) Response {
 		Users:       userList,
 		CreatedAt:   model.CreatedAt,
 		UpdatedAt:   model.UpdatedAt,
+		DeletedAt:   model.DeletedAt,
 	}
 }
 

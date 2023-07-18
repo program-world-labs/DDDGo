@@ -4,6 +4,8 @@
 package app
 
 import (
+	"fmt"
+
 	"github.com/allegro/bigcache/v3"
 	"github.com/dtm-labs/rockscache"
 	"github.com/gin-gonic/gin"
@@ -33,14 +35,21 @@ import (
 )
 
 func providePostgres(cfg *config.Config) (pwsql.ISQLGorm, error) {
-	client, err := pwsql.New(cfg.PG.URL, pwsql.MaxPoolSize(cfg.PG.PoolMax))
+	// postgres://user:password@localhost:5432/postgres
+	port := fmt.Sprint(cfg.SQL.Port)
+	dsn := cfg.SQL.Type + "://" + cfg.SQL.User + ":" + cfg.SQL.Password + "@" + cfg.SQL.Host + ":" + port + "/" + cfg.SQL.DB
+	client, err := pwsql.New(dsn, pwsql.MaxPoolSize(cfg.SQL.PoolMax))
 	client.GetDB().AutoMigrate(&dto.User{}, &dto.Role{})
 
 	return client, err
 }
 
 func provideRedisCache(cfg *config.Config) (*redis.Client, error) {
-	c, err := redisCache.New(cfg.Redis.DSN)
+	// redis://localhost:6379/0
+	port := fmt.Sprint(cfg.Redis.Port)
+	db := fmt.Sprint(cfg.Redis.DB)
+	dsn := "redis://" + cfg.Redis.Host + ":" + port + "/" + db
+	c, err := redisCache.New(dsn)
 
 	return c.Client, err
 }

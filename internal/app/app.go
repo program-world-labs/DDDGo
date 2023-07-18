@@ -13,15 +13,18 @@ import (
 
 // Run creates objects via constructors.
 func Run(cfg *config.Config) {
-	// Tracer
-	operations.GoogleCloudOperationInit(cfg.GCP.Project, cfg.GCP.Monitor)
-
 	var l pwlogger.Interface
 	// Logger
 	if cfg.Env.EnvName != "dev" {
-		l = pwlogger.NewProductionLogger(cfg.GCP.Project)
+		l = pwlogger.NewProductionLogger(cfg.Log.Project)
 	} else {
-		l = pwlogger.NewDevelopmentLogger(cfg.GCP.Project)
+		l = pwlogger.NewDevelopmentLogger(cfg.Log.Project)
+	}
+
+	// Tracer
+	err := operations.InitNewTracer(cfg.Telemetry.Host, cfg.Telemetry.Port, cfg.Telemetry.Batcher, cfg.Telemetry.SampleRate, cfg.Telemetry.Enabled)
+	if err != nil {
+		l.Err(err).Str("Tracer", "Run").Msg("InitNewTracer error")
 	}
 
 	// Http Server

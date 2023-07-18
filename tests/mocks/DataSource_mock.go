@@ -68,11 +68,12 @@ func (mr *MockIDataSourceMockRecorder) CreateTx(arg0, arg1, arg2 interface{}) *g
 }
 
 // Delete mocks base method.
-func (m *MockIDataSource) Delete(arg0 context.Context, arg1 dto.IRepoEntity) error {
+func (m *MockIDataSource) Delete(arg0 context.Context, arg1 dto.IRepoEntity) (dto.IRepoEntity, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(dto.IRepoEntity)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Delete indicates an expected call of Delete.
@@ -82,11 +83,12 @@ func (mr *MockIDataSourceMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Ca
 }
 
 // DeleteTx mocks base method.
-func (m *MockIDataSource) DeleteTx(arg0 context.Context, arg1 dto.IRepoEntity, arg2 domain.ITransactionEvent) error {
+func (m *MockIDataSource) DeleteTx(arg0 context.Context, arg1 dto.IRepoEntity, arg2 domain.ITransactionEvent) (dto.IRepoEntity, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteTx", arg0, arg1, arg2)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(dto.IRepoEntity)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // DeleteTx indicates an expected call of DeleteTx.
@@ -96,10 +98,10 @@ func (mr *MockIDataSourceMockRecorder) DeleteTx(arg0, arg1, arg2 interface{}) *g
 }
 
 // GetAll mocks base method.
-func (m *MockIDataSource) GetAll(arg0 context.Context, arg1 *domain.SearchQuery, arg2 dto.IRepoEntity) (map[string]interface{}, error) {
+func (m *MockIDataSource) GetAll(arg0 context.Context, arg1 *domain.SearchQuery, arg2 dto.IRepoEntity) (*dto.List, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAll", arg0, arg1, arg2)
-	ret0, _ := ret[0].(map[string]interface{})
+	ret0, _ := ret[0].(*dto.List)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -156,11 +158,12 @@ func (mr *MockIDataSourceMockRecorder) UpdateTx(arg0, arg1, arg2 interface{}) *g
 }
 
 // UpdateWithFields mocks base method.
-func (m *MockIDataSource) UpdateWithFields(arg0 context.Context, arg1 dto.IRepoEntity, arg2 []string) error {
+func (m *MockIDataSource) UpdateWithFields(arg0 context.Context, arg1 dto.IRepoEntity, arg2 []string) (dto.IRepoEntity, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateWithFields", arg0, arg1, arg2)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(dto.IRepoEntity)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // UpdateWithFields indicates an expected call of UpdateWithFields.
@@ -170,11 +173,12 @@ func (mr *MockIDataSourceMockRecorder) UpdateWithFields(arg0, arg1, arg2 interfa
 }
 
 // UpdateWithFieldsTx mocks base method.
-func (m *MockIDataSource) UpdateWithFieldsTx(arg0 context.Context, arg1 dto.IRepoEntity, arg2 []string, arg3 domain.ITransactionEvent) error {
+func (m *MockIDataSource) UpdateWithFieldsTx(arg0 context.Context, arg1 dto.IRepoEntity, arg2 []string, arg3 domain.ITransactionEvent) (dto.IRepoEntity, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateWithFieldsTx", arg0, arg1, arg2, arg3)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(dto.IRepoEntity)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // UpdateWithFieldsTx indicates an expected call of UpdateWithFieldsTx.
@@ -387,11 +391,12 @@ func (mr *MockIRelationDataSourceMockRecorder) CreateTx(arg0, arg1, arg2 interfa
 }
 
 // Delete mocks base method.
-func (m *MockIRelationDataSource) Delete(arg0 context.Context, arg1 dto.IRepoEntity) error {
+func (m *MockIRelationDataSource) Delete(arg0 context.Context, arg1 dto.IRepoEntity) (dto.IRepoEntity, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(dto.IRepoEntity)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Delete indicates an expected call of Delete.
@@ -401,11 +406,12 @@ func (mr *MockIRelationDataSourceMockRecorder) Delete(arg0, arg1 interface{}) *g
 }
 
 // DeleteTx mocks base method.
-func (m *MockIRelationDataSource) DeleteTx(arg0 context.Context, arg1 dto.IRepoEntity, arg2 domain.ITransactionEvent) error {
+func (m *MockIRelationDataSource) DeleteTx(arg0 context.Context, arg1 dto.IRepoEntity, arg2 domain.ITransactionEvent) (dto.IRepoEntity, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteTx", arg0, arg1, arg2)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(dto.IRepoEntity)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // DeleteTx indicates an expected call of DeleteTx.
@@ -415,10 +421,10 @@ func (mr *MockIRelationDataSourceMockRecorder) DeleteTx(arg0, arg1, arg2 interfa
 }
 
 // GetAll mocks base method.
-func (m *MockIRelationDataSource) GetAll(arg0 context.Context, arg1 *domain.SearchQuery, arg2 dto.IRepoEntity) (map[string]interface{}, error) {
+func (m *MockIRelationDataSource) GetAll(arg0 context.Context, arg1 *domain.SearchQuery, arg2 dto.IRepoEntity) (*dto.List, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAll", arg0, arg1, arg2)
-	ret0, _ := ret[0].(map[string]interface{})
+	ret0, _ := ret[0].(*dto.List)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -546,11 +552,12 @@ func (mr *MockIRelationDataSourceMockRecorder) UpdateTx(arg0, arg1, arg2 interfa
 }
 
 // UpdateWithFields mocks base method.
-func (m *MockIRelationDataSource) UpdateWithFields(arg0 context.Context, arg1 dto.IRepoEntity, arg2 []string) error {
+func (m *MockIRelationDataSource) UpdateWithFields(arg0 context.Context, arg1 dto.IRepoEntity, arg2 []string) (dto.IRepoEntity, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateWithFields", arg0, arg1, arg2)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(dto.IRepoEntity)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // UpdateWithFields indicates an expected call of UpdateWithFields.
@@ -560,11 +567,12 @@ func (mr *MockIRelationDataSourceMockRecorder) UpdateWithFields(arg0, arg1, arg2
 }
 
 // UpdateWithFieldsTx mocks base method.
-func (m *MockIRelationDataSource) UpdateWithFieldsTx(arg0 context.Context, arg1 dto.IRepoEntity, arg2 []string, arg3 domain.ITransactionEvent) error {
+func (m *MockIRelationDataSource) UpdateWithFieldsTx(arg0 context.Context, arg1 dto.IRepoEntity, arg2 []string, arg3 domain.ITransactionEvent) (dto.IRepoEntity, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateWithFieldsTx", arg0, arg1, arg2, arg3)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(dto.IRepoEntity)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // UpdateWithFieldsTx indicates an expected call of UpdateWithFieldsTx.
@@ -645,14 +653,14 @@ func (mr *MockICacheDataSourceMockRecorder) Get(ctx, e interface{}, ttl ...inter
 }
 
 // GetListItem mocks base method.
-func (m *MockICacheDataSource) GetListItem(ctx context.Context, e dto.IRepoEntity, sq *domain.SearchQuery, ttl ...time.Duration) (map[string]interface{}, error) {
+func (m *MockICacheDataSource) GetListItem(ctx context.Context, e dto.IRepoEntity, sq *domain.SearchQuery, ttl ...time.Duration) (*dto.List, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, e, sq}
 	for _, a := range ttl {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetListItem", varargs...)
-	ret0, _ := ret[0].(map[string]interface{})
+	ret0, _ := ret[0].(*dto.List)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
