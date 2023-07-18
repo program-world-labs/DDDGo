@@ -84,6 +84,19 @@ definitions:
     - name
     - permissions
     type: object
+  user.CreatedRequest:
+    properties:
+      avatar:
+        type: string
+      displayName:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
   user.Response:
     properties:
       avatar:
@@ -97,6 +110,26 @@ definitions:
       last_name:
         type: string
       username:
+        type: string
+    type: object
+  user.ResponseList:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/user.Response'
+        type: array
+      limit:
+        type: integer
+      offset:
+        type: integer
+      total:
+        type: integer
+    type: object
+  user.UpdateRequest:
+    properties:
+      avatar:
+        type: string
+      displayName:
         type: string
     type: object
 host: localhost:8080
@@ -303,4 +336,181 @@ paths:
       summary: Update role
       tags:
       - Role
+  /user/create:
+    post:
+      consumes:
+      - application/json
+      description: Create user
+      operationId: CreateUser
+      parameters:
+      - description: User Create Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/user.CreatedRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: Create user
+      tags:
+      - User
+  /user/delete/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete user
+      operationId: DeleteUser
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: Delete user
+      tags:
+      - User
+  /user/detail/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Detail user
+      operationId: DetailUser
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: Detail user
+      tags:
+      - User
+  /user/list:
+    get:
+      consumes:
+      - application/json
+      description: List user
+      operationId: ListUser
+      parameters:
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      - description: FilterName
+        in: query
+        name: filterName
+        type: string
+      - description: SortFields
+        in: query
+        name: sortFields
+        type: string
+      - description: Dir
+        in: query
+        name: dir
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/user.ResponseList'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: List user
+      tags:
+      - User
+  /user/update/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Update user
+      operationId: UpdateUser
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User Update Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: Update user
+      tags:
+      - User
 swagger: "2.0"

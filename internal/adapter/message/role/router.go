@@ -59,15 +59,15 @@ func (u *Routes) Handler(msg *message.Message) error {
 		panic(err)
 	}
 
-	switch domainEvent.EventType {
-	case "RoleCreatedEvent":
-		err = u.create(eventType.(*event.RoleCreatedEvent))
-		if err != nil {
-			return err
-		}
-	default:
-		return domainerrors.Wrap(ErrorCodeHandleMessage, err)
-	}
+	// switch domainEvent.EventType {
+	// case "RoleCreatedEvent":
+	// 	err = u.create(eventType.(*event.RoleCreatedEvent))
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// default:
+	// 	return domainerrors.Wrap(ErrorCodeHandleMessage, err)
+	// }
 
 	return nil
 }

@@ -23,9 +23,9 @@ type Amount struct {
 	Balance   uint            `json:"balance"`
 	Decimal   uint            `json:"decimal"`
 	WalletID  string          `json:"walletId" gorm:"index"`
-	CreatedAt time.Time       `json:"createdAt"`
-	UpdatedAt time.Time       `json:"updatedAt"`
-	DeletedAt *gorm.DeletedAt `json:"deletedAt" gorm:"index"`
+	CreatedAt time.Time       `json:"created_at" mapstructure:"created_at" gorm:"column:created_at"`
+	UpdatedAt time.Time       `json:"updated_at" mapstructure:"updated_at" gorm:"column:updated_at"`
+	DeletedAt *gorm.DeletedAt `json:"deleted_at" mapstructure:"deleted_at" gorm:"index;column:deleted_at"`
 }
 
 func (a *Amount) TableName() string {
@@ -42,8 +42,12 @@ func (a *Amount) Transform(i domain.IEntity) (IRepoEntity, error) {
 
 func (a *Amount) BackToDomain() (domain.IEntity, error) {
 	i := &entity.Amount{}
-	if err := copier.Copy(&i, a); err != nil {
+	if err := copier.Copy(i, a); err != nil {
 		return nil, domainerrors.Wrap(ErrorCodeAmountBackToDomain, err)
+	}
+
+	if a.DeletedAt != nil {
+		i.DeletedAt = a.DeletedAt.Time
 	}
 
 	return i, nil

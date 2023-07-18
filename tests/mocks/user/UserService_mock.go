@@ -10,7 +10,6 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	user "github.com/program-world-labs/DDDGo/internal/application/user"
-	entity "github.com/program-world-labs/DDDGo/internal/domain/entity"
 )
 
 // MockIService is a mock of IService interface.
@@ -36,32 +35,77 @@ func (m *MockIService) EXPECT() *MockIServiceMockRecorder {
 	return m.recorder
 }
 
-// GetByIDUseCase mocks base method.
-func (m *MockIService) GetByIDUseCase(ctx context.Context, id string) (*user.Output, error) {
+// CreateUser mocks base method.
+func (m *MockIService) CreateUser(ctx context.Context, UserInfo *user.CreatedInput) (*user.Output, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByIDUseCase", ctx, id)
+	ret := m.ctrl.Call(m, "CreateUser", ctx, UserInfo)
 	ret0, _ := ret[0].(*user.Output)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetByIDUseCase indicates an expected call of GetByIDUseCase.
-func (mr *MockIServiceMockRecorder) GetByIDUseCase(ctx, id interface{}) *gomock.Call {
+// CreateUser indicates an expected call of CreateUser.
+func (mr *MockIServiceMockRecorder) CreateUser(ctx, UserInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByIDUseCase", reflect.TypeOf((*MockIService)(nil).GetByIDUseCase), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockIService)(nil).CreateUser), ctx, UserInfo)
 }
 
-// RegisterUseCase mocks base method.
-func (m *MockIService) RegisterUseCase(ctx context.Context, userInfo *entity.User) (*user.Output, error) {
+// DeleteUser mocks base method.
+func (m *MockIService) DeleteUser(ctx context.Context, UserInfo *user.DeletedInput) (*user.Output, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RegisterUseCase", ctx, userInfo)
+	ret := m.ctrl.Call(m, "DeleteUser", ctx, UserInfo)
 	ret0, _ := ret[0].(*user.Output)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// RegisterUseCase indicates an expected call of RegisterUseCase.
-func (mr *MockIServiceMockRecorder) RegisterUseCase(ctx, userInfo interface{}) *gomock.Call {
+// DeleteUser indicates an expected call of DeleteUser.
+func (mr *MockIServiceMockRecorder) DeleteUser(ctx, UserInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterUseCase", reflect.TypeOf((*MockIService)(nil).RegisterUseCase), ctx, userInfo)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUser", reflect.TypeOf((*MockIService)(nil).DeleteUser), ctx, UserInfo)
+}
+
+// GetUserDetail mocks base method.
+func (m *MockIService) GetUserDetail(ctx context.Context, UserInfo *user.DetailGotInput) (*user.Output, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserDetail", ctx, UserInfo)
+	ret0, _ := ret[0].(*user.Output)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserDetail indicates an expected call of GetUserDetail.
+func (mr *MockIServiceMockRecorder) GetUserDetail(ctx, UserInfo interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserDetail", reflect.TypeOf((*MockIService)(nil).GetUserDetail), ctx, UserInfo)
+}
+
+// GetUserList mocks base method.
+func (m *MockIService) GetUserList(ctx context.Context, UserInfo *user.ListGotInput) (*user.OutputList, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserList", ctx, UserInfo)
+	ret0, _ := ret[0].(*user.OutputList)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserList indicates an expected call of GetUserList.
+func (mr *MockIServiceMockRecorder) GetUserList(ctx, UserInfo interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserList", reflect.TypeOf((*MockIService)(nil).GetUserList), ctx, UserInfo)
+}
+
+// UpdateUser mocks base method.
+func (m *MockIService) UpdateUser(ctx context.Context, UserInfo *user.UpdatedInput) (*user.Output, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUser", ctx, UserInfo)
+	ret0, _ := ret[0].(*user.Output)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateUser indicates an expected call of UpdateUser.
+func (mr *MockIServiceMockRecorder) UpdateUser(ctx, UserInfo interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockIService)(nil).UpdateUser), ctx, UserInfo)
 }

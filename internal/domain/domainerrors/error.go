@@ -16,6 +16,7 @@ const (
 	ErrorCodeAdapterMessageRole      = 210000000
 	ErrorCodeAdapterMessageUser      = 220000000
 	ErrorCodeApplicationRole         = 1000000
+	ErrorCodeApplicationUser         = 2000000
 	ErrorCodeDomainRole              = 100000
 	ErrorCodeDomainUser              = 200000
 	ErrorCodeRepo                    = 10000
