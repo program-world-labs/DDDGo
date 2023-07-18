@@ -8,6 +8,10 @@ http:
 swagger:
   host: "localhost:8080"
 
+kafka:
+  brokers: "192.168.130.96:29092"
+  group_id: "ai-dev"
+
 logger:
   project: ""
   log_level: "debug"

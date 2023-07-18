@@ -1,6 +1,6 @@
 package user
 
-import "github.com/program-world-labs/DDDGo/internal/domain/user/entity"
+import "github.com/program-world-labs/DDDGo/internal/domain/entity"
 
 type Output struct {
 	ID          string `gorm:"primary_key;"`

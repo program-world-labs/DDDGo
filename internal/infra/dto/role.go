@@ -12,7 +12,7 @@ import (
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
 	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
-	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
+	"github.com/program-world-labs/DDDGo/internal/domain/entity"
 )
 
 var _ IRepoEntity = (*Role)(nil)

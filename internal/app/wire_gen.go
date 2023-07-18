@@ -7,6 +7,7 @@
 package app
 
 import (
+	"github.com/ThreeDotsLabs/watermill/message"
 	"fmt"
 	"github.com/allegro/bigcache/v3"
 	"github.com/dtm-labs/rockscache"
@@ -14,8 +15,11 @@ import (
 	"github.com/google/wire"
 	"github.com/program-world-labs/DDDGo/config"
 	"github.com/program-world-labs/DDDGo/internal/adapter/http/v1"
+	message3 "github.com/program-world-labs/DDDGo/internal/adapter/message"
+	"github.com/program-world-labs/DDDGo/internal/application"
 	role2 "github.com/program-world-labs/DDDGo/internal/application/role"
 	user2 "github.com/program-world-labs/DDDGo/internal/application/user"
+	"github.com/program-world-labs/DDDGo/internal/domain/event"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource/cache"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource/sql"
 	"github.com/program-world-labs/DDDGo/internal/infra/dto"
@@ -25,6 +29,7 @@ import (
 	"github.com/program-world-labs/DDDGo/pkg/cache/local"
 	redis2 "github.com/program-world-labs/DDDGo/pkg/cache/redis"
 	"github.com/program-world-labs/DDDGo/pkg/httpserver"
+	message2 "github.com/program-world-labs/DDDGo/pkg/message"
 	"github.com/program-world-labs/DDDGo/pkg/pwsql"
 	"github.com/program-world-labs/pwlogger"
 	"github.com/redis/go-redis/v9"
@@ -49,15 +54,54 @@ func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server
 	}
 	rockscacheClient := provideRocksCache(client)
 	repoImpl := provideUserRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
-	iService := provideUserService(repoImpl, l)
+	kafkaMessage, err := provideKafkaMessage(cfg)
+	if err != nil {
+		return nil, err
+	}
+	iService := provideUserService(repoImpl, kafkaMessage, l)
 	roleRepoImpl := provideRoleRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
 	transactionDataSourceImpl := sql.NewTransactionRunDataSourceImpl(isqlGorm)
 	transactionRunRepoImpl := provideTransactionRepo(transactionDataSourceImpl)
-	roleIService := provideRoleService(roleRepoImpl, transactionRunRepoImpl, l)
+	roleIService := provideRoleService(roleRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
 	services := provideServices(iService, roleIService)
 	engine := v1.NewRouter(l, services, cfg)
 	server := provideHTTPServer(engine, cfg)
 	return server, nil
+}
+
+func NewMessageRouter(cfg *config.Config, l pwlogger.Interface) (*message.Router, error) {
+	kafkaMessage, err := provideKafkaMessage(cfg)
+	if err != nil {
+		return nil, err
+	}
+	eventTypeMapper := provideEventTypeMapper()
+	isqlGorm, err := providePostgres(cfg)
+	if err != nil {
+		return nil, err
+	}
+	crudDatasourceImpl := sql.NewCRUDDatasourceImpl(isqlGorm)
+	bigCache, err := provideLocalCache()
+	if err != nil {
+		return nil, err
+	}
+	bigCacheDataSourceImpl := cache.NewBigCacheDataSourceImp(bigCache)
+	client, err := provideRedisCache(cfg)
+	if err != nil {
+		return nil, err
+	}
+	rockscacheClient := provideRocksCache(client)
+	repoImpl := provideUserRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
+	iService := provideUserService(repoImpl, kafkaMessage, l)
+	roleRepoImpl := provideRoleRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
+	transactionDataSourceImpl := sql.NewTransactionRunDataSourceImpl(isqlGorm)
+	transactionRunRepoImpl := provideTransactionRepo(transactionDataSourceImpl)
+	roleIService := provideRoleService(roleRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
+	services := provideServices(iService, roleIService)
+	router, err := provideMessageRouter(kafkaMessage, eventTypeMapper, services, l)
+	if err != nil {
+		return nil, err
+	}
+	return router, nil
 }
 
 // wire.go:
@@ -108,23 +152,35 @@ func provideRoleRepo(sqlDatasource *sql.CRUDDatasourceImpl, bigCacheDatasource *
 	return role.NewRepoImpl(sqlDatasource, roleCache, bigCacheDatasource)
 }
 
-func provideServices(user3 user2.IService, role3 role2.IService) v1.Services {
-	return v1.Services{
+func provideServices(user3 user2.IService, role3 role2.IService) application.Services {
+	return application.Services{
 		User: user3,
 		Role: role3,
 	}
 }
 
-func provideUserService(userRepo *user.RepoImpl, l pwlogger.Interface) user2.IService {
-	return user2.NewServiceImpl(userRepo, l)
+func provideUserService(userRepo *user.RepoImpl, eventProducer *message2.KafkaMessage, l pwlogger.Interface) user2.IService {
+	return user2.NewServiceImpl(userRepo, eventProducer, l)
 }
 
-func provideRoleService(roleRepo *role.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, l pwlogger.Interface) role2.IService {
-	return role2.NewServiceImpl(roleRepo, transactionRepo, l)
+func provideRoleService(roleRepo *role.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *message2.KafkaMessage, l pwlogger.Interface) role2.IService {
+	return role2.NewServiceImpl(roleRepo, transactionRepo, eventProducer, l)
 }
 
 func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Server {
 	return httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
+}
+
+func provideKafkaMessage(cfg *config.Config) (*message2.KafkaMessage, error) {
+	return message2.NewKafkaMessage(cfg.Kafka.Brokers, cfg.Kafka.GroupID)
+}
+
+func provideMessageRouter(handler *message2.KafkaMessage, mapper *event.EventTypeMapper, s application.Services, l pwlogger.Interface) (*message.Router, error) {
+	return message3.NewRouter(handler, mapper, s, l)
+}
+
+func provideEventTypeMapper() *event.EventTypeMapper {
+	return event.NewEventTypeMapper()
 }
 
 var appSet = wire.NewSet(
@@ -134,6 +190,9 @@ var appSet = wire.NewSet(
 	provideRocksCache, sql.NewTransactionRunDataSourceImpl, sql.NewCRUDDatasourceImpl, cache.NewBigCacheDataSourceImp, provideTransactionRepo,
 	provideUserRepo,
 	provideRoleRepo,
+	provideKafkaMessage,
+	provideMessageRouter,
+	provideEventTypeMapper,
 	provideUserService,
 	provideRoleService,
 	provideServices, v1.NewRouter, provideHTTPServer,

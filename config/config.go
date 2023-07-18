@@ -20,6 +20,7 @@ type (
 		Storage   `mapstructure:"storage"`
 		HTTP      `mapstructure:"http"`
 		Log       `mapstructure:"logger"`
+    Kafka     `mapstructure:"kafka"`
 		Telemetry `mapstructure:"telemetry"`
 		Env
 	}
@@ -79,6 +80,12 @@ type (
 		Batcher    string  `mapstructure:"batcher" validate:"oneof=gcp"`
 		SampleRate float64 `mapstructure:"sample_rate"`
 		Enabled    bool    `mapstructure:"enabled"`
+	}
+
+	// Kafka -.
+	Kafka struct {
+		Brokers []string `mapstructure:"brokers"`
+		GroupID string   `mapstructure:"group_id"`
 	}
 
 	Env struct {

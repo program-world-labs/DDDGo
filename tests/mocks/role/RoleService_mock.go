@@ -65,6 +65,7 @@ func (mr *MockIServiceMockRecorder) DeleteRole(ctx, roleInfo interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteRole", reflect.TypeOf((*MockIService)(nil).DeleteRole), ctx, roleInfo)
 }
 
+
 // GetRoleDetail mocks base method.
 func (m *MockIService) GetRoleDetail(ctx context.Context, roleInfo *role.DetailGotInput) (*role.Output, error) {
 	m.ctrl.T.Helper()

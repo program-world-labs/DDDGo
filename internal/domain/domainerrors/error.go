@@ -11,10 +11,13 @@ import (
 
 const (
 	GruopID                          = "LLM"
-	ErrorCodeAdapterRole             = 10000000
-	ErrorCodeAdapterUser             = 20000000
+	ErrorCodeAdapterHTTPRole         = 110000000
+	ErrorCodeAdapterHTTPUser         = 120000000
+	ErrorCodeAdapterMessageRole      = 210000000
+	ErrorCodeAdapterMessageUser      = 220000000
 	ErrorCodeApplicationRole         = 1000000
 	ErrorCodeDomainRole              = 100000
+	ErrorCodeDomainUser              = 200000
 	ErrorCodeRepo                    = 10000
 	ErrorCodeDatasourceSQL           = 1000
 	ErrorCodeDatasourceCache         = 2000
@@ -23,7 +26,7 @@ const (
 	ErrorCodeDatasourceGroupRepoDTO  = 5000
 	ErrorCodeDatasourceWalletRepoDTO = 6000
 	ErrorCodeDatasourceAmountRepoDTO = 7000
-	ErrorCodeSystem                  = 90000000
+	ErrorCodeSystem                  = 900000000
 )
 
 type ErrorInfo struct {
@@ -56,7 +59,7 @@ func New(code string, msg string) *ErrorInfo {
 func Wrap(errorCode int, err error) *ErrorInfo {
 	// Check if error code is adapter error code
 	var group = ""
-	if errorCode >= ErrorCodeAdapterRole {
+	if errorCode >= ErrorCodeSystem {
 		group = GruopID
 	}
 

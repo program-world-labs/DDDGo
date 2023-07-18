@@ -5,28 +5,37 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/program-world-labs/pwlogger"
 
-	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
-	"github.com/program-world-labs/DDDGo/internal/domain/user/repository"
+	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
+	"github.com/program-world-labs/DDDGo/internal/domain/entity"
+	"github.com/program-world-labs/DDDGo/internal/domain/event"
+	"github.com/program-world-labs/DDDGo/internal/domain/repository"
 )
 
 var _ IService = (*ServiceImpl)(nil)
 
 // ServiceImpl -.
 type ServiceImpl struct {
-	UserRepo repository.UserRepository
-	log      pwlogger.Interface
+	UserRepo      repository.UserRepository
+	EventProducer event.EventProducer
+	log           pwlogger.Interface
 }
 
 // NewServiceImpl -.
-func NewServiceImpl(userRepo repository.UserRepository, l pwlogger.Interface) *ServiceImpl {
-	return &ServiceImpl{UserRepo: userRepo, log: l}
+func NewServiceImpl(userRepo repository.UserRepository, eventProducer event.EventProducer, l pwlogger.Interface) *ServiceImpl {
+	return &ServiceImpl{UserRepo: userRepo, EventProducer: eventProducer, log: l}
 }
 
 var ErrUserAlreadyExists = errors.New("user already exists")
 
 func (u *ServiceImpl) RegisterUseCase(ctx context.Context, userInfo *entity.User) (*Output, error) {
+	// Check Input Format
+	if err := validator.New().Struct(userInfo); err != nil {
+		return nil, domainerrors.New(fmt.Sprint(ErrorCodeValidateInput), err.Error())
+	}
+
 	// Check if user already exists
 	existingUser, err := u.UserRepo.GetByID(ctx, userInfo)
 	if err != nil {
@@ -47,6 +56,24 @@ func (u *ServiceImpl) RegisterUseCase(ctx context.Context, userInfo *entity.User
 	createdUserEntity, ok := createdUser.(*entity.User)
 	if !ok {
 		return nil, fmt.Errorf("ServiceImpl - RegisterUseCase - u.UserRepo.Create: %w", err)
+	}
+
+	// Create domain event
+	createdEvent := &event.UserCreatedEvent{
+		UserName: userInfo.Username,
+		Password: userInfo.Password,
+		EMail:    userInfo.EMail,
+	}
+	_, et := createdUserEntity.GetTypeName(createdEvent)
+	e := event.NewDomainEvent(createdUserEntity.GetID(), et, -1, createdEvent)
+
+	// Apply event to entity
+	createdUserEntity.ApplyEventHelper(createdUserEntity, e, true)
+
+	// Publish event
+	err = u.EventProducer.PublishEvent(createdUserEntity.Type, e)
+	if err != nil {
+		return nil, err
 	}
 
 	return NewOutput(createdUserEntity), nil

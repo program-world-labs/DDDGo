@@ -19,7 +19,7 @@ import (
 
 	application_role "github.com/program-world-labs/DDDGo/internal/application/role"
 	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
-	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
+	"github.com/program-world-labs/DDDGo/internal/domain/entity"
 	infra_sql "github.com/program-world-labs/DDDGo/internal/infra/datasource/sql"
 	infra_repo "github.com/program-world-labs/DDDGo/internal/infra/repository"
 	"github.com/program-world-labs/DDDGo/tests"
@@ -66,6 +66,7 @@ type ServiceTest struct {
 	repoMock      *mocks.MockRoleRepository
 	transRepoMock *mock_repo.MockITransactionRepo
 	service       *application_role.ServiceImpl
+	producer      *mock_repo.MockEventProducer
 }
 
 func (st *ServiceTest) InitializeScenario(ctx *godog.ScenarioContext) {
@@ -133,7 +134,8 @@ func (st *ServiceTest) reset() {
 	st.expect = nil
 	st.repoMock = mocks.NewMockRoleRepository(st.mockCtrl)
 	st.transRepoMock = mock_repo.NewMockITransactionRepo(st.mockCtrl)
-	st.service = application_role.NewServiceImpl(st.repoMock, st.transRepoMock, logger)
+	st.producer = mock_repo.NewMockEventProducer(st.mockCtrl)
+	st.service = application_role.NewServiceImpl(st.repoMock, st.transRepoMock, st.producer, logger)
 }
 
 func (st *ServiceTest) givenData(name, description, permission string) error {
@@ -150,6 +152,7 @@ func (st *ServiceTest) givenData(name, description, permission string) error {
 func (st *ServiceTest) whenCreateNewRole(_ context.Context) error {
 	e := st.input.ToEntity()
 	st.repoMock.EXPECT().Create(gomock.Any(), RoleEquals(e)).Return(e, nil)
+	st.producer.EXPECT().PublishEvent(gomock.Any(), gomock.Any()).Return(nil)
 	st.expect.CreatedAt = e.CreatedAt
 	st.expect.UpdatedAt = e.UpdatedAt
 
@@ -159,6 +162,7 @@ func (st *ServiceTest) whenCreateNewRole(_ context.Context) error {
 func (st *ServiceTest) whenCreateExistingRole(_ context.Context) error {
 	e := newRolseExistError()
 	st.repoMock.EXPECT().Create(gomock.Any(), RoleEquals(st.input.ToEntity())).Return(nil, e)
+	// st.producer.EXPECT().PublishEvent(gomock.Any(), gomock.Any()).Return(nil)
 
 	return nil
 }

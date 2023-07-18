@@ -6,7 +6,6 @@ import (
 
 	"github.com/cucumber/godog"
 	gomock "github.com/golang/mock/gomock"
-	"github.com/program-world-labs/pwlogger"
 
 	application_role "github.com/program-world-labs/DDDGo/internal/application/role"
 	mock_repo "github.com/program-world-labs/DDDGo/tests/mocks"
@@ -25,13 +24,13 @@ type ServiceDeleteTest struct {
 }
 
 func (st *ServiceDeleteTest) reset() {
-	logger := pwlogger.NewDevelopmentLogger("")
+	// logger := pwlogger.NewDevelopmentLogger("")
 
 	st.input = nil
 	st.expect = nil
 	st.repoMock = mocks.NewMockRoleRepository(st.mockCtrl)
 	st.transRepoMock = mock_repo.NewMockITransactionRepo(st.mockCtrl)
-	st.service = application_role.NewServiceImpl(st.repoMock, st.transRepoMock, logger)
+	// st.service = application_role.NewServiceImpl(st.repoMock, st.transRepoMock, logger)
 }
 
 func (st *ServiceDeleteTest) givenData(id string) error {

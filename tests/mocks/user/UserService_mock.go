@@ -10,7 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	user "github.com/program-world-labs/DDDGo/internal/application/user"
-	entity "github.com/program-world-labs/DDDGo/internal/domain/user/entity"
+	entity "github.com/program-world-labs/DDDGo/internal/domain/entity"
 )
 
 // MockIService is a mock of IService interface.
