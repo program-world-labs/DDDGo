@@ -2,6 +2,7 @@ package dto
 
 import (
 	"encoding/json"
+	"reflect"
 	"time"
 
 	"github.com/jinzhu/copier"
@@ -16,20 +17,20 @@ import (
 var _ IRepoEntity = (*User)(nil)
 
 type User struct {
-	ID          string    `json:"id" gorm:"primary_key"`
-	Username    string    `json:"username"`
-	Password    string    `json:"password"`
-	EMail       string    `json:"email"`
-	DisplayName string    `json:"display_name"`
-	Avatar      string    `json:"avatar"`
-	Enabled     bool      `json:"enabled"`
-	Roles       []Role    `json:"roles" gorm:"many2many:user_roles;"`
-	Wallets     []Wallet  `json:"wallets" gorm:"foreignKey:UserID"`
-	Group       Group     `json:"group"`
-	GroupID     string    `json:"groupId"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
-	DeletedAt   time.Time `json:"deletedAt" gorm:"index"`
+	ID          string          `json:"id" gorm:"primary_key"`
+	Username    string          `json:"username"`
+	Password    string          `json:"password"`
+	EMail       string          `json:"email"`
+	DisplayName string          `json:"display_name"`
+	Avatar      string          `json:"avatar"`
+	Enabled     bool            `json:"enabled"`
+	Roles       []Role          `json:"roles" gorm:"many2many:user_roles;"`
+	Wallets     []Wallet        `json:"wallets" gorm:"foreignKey:UserID"`
+	Group       Group           `json:"group"`
+	GroupID     string          `json:"groupId"`
+	CreatedAt   time.Time       `json:"createdAt"`
+	UpdatedAt   time.Time       `json:"updatedAt"`
+	DeletedAt   *gorm.DeletedAt `json:"deletedAt" gorm:"index"`
 }
 
 func (a *User) TableName() string {
@@ -62,6 +63,7 @@ func (a *User) BeforeCreate(_ *gorm.DB) (err error) {
 	a.ID, err = generateID()
 	a.UpdatedAt = time.Now()
 	a.CreatedAt = time.Now()
+	a.DeletedAt = nil
 
 	return
 }
@@ -83,23 +85,46 @@ func (a *User) ToJSON() (string, error) {
 	return string(jsonData), nil
 }
 
-func (a *User) DecodeJSON(data string) error {
-	err := json.Unmarshal([]byte(data), &a)
-	if err != nil {
+func (a *User) UnmarshalJSON(data []byte) error {
+	type Alias User
+
+	aux := &struct {
+		*Alias
+	}{
+		Alias: (*Alias)(a),
+	}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
 		return domainerrors.Wrap(ErrorCodeUserDecodeJSON, err)
 	}
 
 	return nil
 }
 
-func (a *User) ParseMap(data map[string]interface{}) error {
-	if err := mapstructure.Decode(data, &a); err != nil {
-		return domainerrors.Wrap(ErrorCodeUserParseMap, err)
+func (a *User) ParseMap(data map[string]interface{}) (IRepoEntity, error) {
+	err := ParseDateString(data)
+	if err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeUserParseMap, err)
 	}
 
-	return nil
+	var info *User
+	err = mapstructure.Decode(data, &info)
+
+	if err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeUserDecodeJSON, err)
+	}
+
+	return info, nil
 }
 
 func (a *User) GetPreloads() []string {
 	return []string{"Roles", "Wallets", "Group"}
+}
+
+func (a *User) GetListType() interface{} {
+	entityType := reflect.TypeOf(Role{})
+	sliceType := reflect.SliceOf(entityType)
+	sliceValue := reflect.MakeSlice(sliceType, 0, 0)
+
+	return sliceValue.Interface()
 }

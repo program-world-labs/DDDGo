@@ -3,6 +3,9 @@ package repository
 import (
 	"context"
 
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/program-world-labs/DDDGo/internal/domain"
 	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource"
@@ -26,9 +29,15 @@ func NewCRUDImpl(db datasource.IDataSource, redis datasource.ICacheDataSource, c
 
 // GetByID -.
 func (r *CRUDImpl) GetByID(ctx context.Context, e domain.IEntity) (domain.IEntity, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(ctx, "repo-getByID")
+
+	defer span.End()
+
 	info, err := r.DTOEntity.Transform(e)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoTransform, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepoTransform, err, span)
 	}
 
 	// 先從Local Cache取得資料
@@ -36,7 +45,7 @@ func (r *CRUDImpl) GetByID(ctx context.Context, e domain.IEntity) (domain.IEntit
 	if err == nil {
 		d, derr := data.BackToDomain()
 		if derr != nil {
-			return nil, domainerrors.Wrap(ErrorCodeRepoBackToDomain, err)
+			return nil, domainerrors.WrapWithSpan(ErrorCodeRepoBackToDomain, err, span)
 		}
 
 		return d, nil
@@ -45,18 +54,18 @@ func (r *CRUDImpl) GetByID(ctx context.Context, e domain.IEntity) (domain.IEntit
 	// 從Redis取得資料, 取不到資料會自動從db取得資料
 	data, err = r.Redis.Get(ctx, info)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoGet, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
 	}
 
 	// 將資料存入Local Cache
 	_, err = r.Cache.Set(ctx, data)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoSet, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
 	}
 
 	d, err := data.BackToDomain()
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoBackToDomain, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepoBackToDomain, err, span)
 	}
 
 	return d, nil
@@ -64,101 +73,79 @@ func (r *CRUDImpl) GetByID(ctx context.Context, e domain.IEntity) (domain.IEntit
 
 // GetAll -.
 func (r *CRUDImpl) GetAll(ctx context.Context, sq *domain.SearchQuery, e domain.IEntity) (*domain.List, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(ctx, "repo-getAll")
+
+	defer span.End()
+
 	info, err := r.DTOEntity.Transform(e)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoTransform, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepoTransform, err, span)
 	}
 
 	// Define a helper function to handle data
-	handleData := func(data map[string]interface{}) (*domain.List, error) {
-		var list []domain.IEntity
-
-		for _, v := range data["data"].([]interface{}) {
-			// cast to map[string]interface{}
-			v, ok := v.(map[string]interface{})
-			if !ok {
-				return nil, domainerrors.Wrap(ErrorCodeRepoCast, err)
-			}
-
-			err = info.ParseMap(v)
-			if err != nil {
-				return nil, domainerrors.Wrap(ErrorCodeRepoParseMap, err)
-			}
-
-			var et domain.IEntity
-			et, err = info.BackToDomain()
-
-			if err != nil {
-				return nil, domainerrors.Wrap(ErrorCodeRepoBackToDomain, err)
-			}
-
-			list = append(list, et)
-		}
-
-		result := &domain.List{
-			Total:  int64(data["total"].(float64)),
-			Limit:  int64(data["limit"].(float64)),
-			Offset: int64(data["offset"].(float64)),
-			Data:   list,
-		}
-
-		return result, nil
-	}
 
 	// Try to get data from local cache
 	data, err := r.Cache.GetListItem(ctx, info, sq)
 	if err == nil {
-		return handleData(data)
+		return data.BackToDomain(info)
 	}
 
 	// If not in local cache, try to get data from Redis
 	data, err = r.Redis.GetListItem(ctx, info, sq)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoGetAll, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
 	}
 
-	return handleData(data)
+	return data.BackToDomain(info)
 }
 
 // Create -.
 func (r *CRUDImpl) Create(ctx context.Context, e domain.IEntity) (domain.IEntity, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(ctx, "repo-create")
+
+	defer span.End()
+
 	info, err := r.DTOEntity.Transform(e)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoTransform, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepoTransform, err, span)
 	}
 
 	_, err = r.DB.Create(ctx, info)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoCreate, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepoCreate, err, span)
 	}
 
 	d, err := info.BackToDomain()
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoBackToDomain, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepoBackToDomain, err, span)
 	}
 
 	return d, nil
 }
 
-func (r *CRUDImpl) performUpdate(ctx context.Context, e domain.IEntity, action func(ctx context.Context, info dto.IRepoEntity) (dto.IRepoEntity, error)) (domain.IEntity, error) {
+func (r *CRUDImpl) performUpdate(ctx context.Context, e domain.IEntity, span trace.Span, action func(ctx context.Context, info dto.IRepoEntity) (dto.IRepoEntity, error)) (domain.IEntity, error) {
 	info, err := r.DTOEntity.Transform(e)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoTransform, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepoTransform, err, span)
 	}
 
 	data, err := action(ctx, info)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoUpdate, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
 	}
 
 	err = r.Cache.Delete(ctx, info)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoDelete, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
 	}
 
 	err = r.Redis.Delete(ctx, info)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoDelete, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
 	}
 
 	if data == nil {
@@ -167,7 +154,7 @@ func (r *CRUDImpl) performUpdate(ctx context.Context, e domain.IEntity, action f
 
 	d, err := data.BackToDomain()
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoBackToDomain, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepoBackToDomain, err, span)
 	}
 
 	return d, nil
@@ -175,95 +162,141 @@ func (r *CRUDImpl) performUpdate(ctx context.Context, e domain.IEntity, action f
 
 // Update -.
 func (r *CRUDImpl) Update(ctx context.Context, e domain.IEntity) (domain.IEntity, error) {
-	return r.performUpdate(ctx, e, r.DB.Update)
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(ctx, "repo-update")
+
+	defer span.End()
+
+	return r.performUpdate(ctx, e, span, r.DB.Update)
 }
 
 func (r *CRUDImpl) UpdateWithFields(ctx context.Context, e domain.IEntity, keys []string) (domain.IEntity, error) {
-	return r.performUpdate(ctx, e, func(ctx context.Context, info dto.IRepoEntity) (dto.IRepoEntity, error) {
-		return nil, r.DB.UpdateWithFields(ctx, info, keys)
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(ctx, "repo-updateWithFields")
+
+	defer span.End()
+
+	return r.performUpdate(ctx, e, span, func(ctx context.Context, info dto.IRepoEntity) (dto.IRepoEntity, error) {
+		return r.DB.UpdateWithFields(ctx, info, keys)
 	})
 }
 
 // Delete -.
-func (r *CRUDImpl) Delete(ctx context.Context, e domain.IEntity) error {
+func (r *CRUDImpl) Delete(ctx context.Context, e domain.IEntity) (domain.IEntity, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(ctx, "repo-delete")
+
+	defer span.End()
+
 	info, err := r.DTOEntity.Transform(e)
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeRepoTransform, err)
-	}
-
-	err = r.DB.Delete(ctx, info)
-	if err != nil {
-		return domainerrors.Wrap(ErrorCodeRepoDelete, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepoTransform, err, span)
 	}
 
 	err = r.Cache.Delete(ctx, info)
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeRepoDelete, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
 	}
 
 	err = r.Redis.Delete(ctx, info)
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeRepoDelete, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
 	}
 
-	return nil
+	model, err := r.DB.Delete(ctx, info)
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+	}
+
+	d, err := model.BackToDomain()
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepoBackToDomain, err, span)
+	}
+
+	return d, nil
 }
 
 // CreateTx -.
 func (r *CRUDImpl) CreateTx(ctx context.Context, e domain.IEntity, tx domain.ITransactionEvent) (domain.IEntity, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(ctx, "repo-createTx")
+
+	defer span.End()
+
 	info, err := r.DTOEntity.Transform(e)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoTransform, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepoTransform, err, span)
 	}
 
 	_, err = r.DB.CreateTx(ctx, info, tx)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoCreateTx, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepoCreateTx, err, span)
 	}
 
 	d, err := info.BackToDomain()
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRepoBackToDomain, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepoBackToDomain, err, span)
 	}
 
 	return d, nil
 }
 
 func (r *CRUDImpl) UpdateTx(ctx context.Context, e domain.IEntity, tx domain.ITransactionEvent) (domain.IEntity, error) {
-	return r.performUpdate(ctx, e, func(ctx context.Context, info dto.IRepoEntity) (dto.IRepoEntity, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(ctx, "repo-updateTx")
+
+	defer span.End()
+
+	return r.performUpdate(ctx, e, span, func(ctx context.Context, info dto.IRepoEntity) (dto.IRepoEntity, error) {
 		return r.DB.UpdateTx(ctx, info, tx)
 	})
 }
 
-func (r *CRUDImpl) UpdateWithFieldsTx(ctx context.Context, e domain.IEntity, keys []string, tx domain.ITransactionEvent) error {
-	_, err := r.performUpdate(ctx, e, func(ctx context.Context, info dto.IRepoEntity) (dto.IRepoEntity, error) {
-		return nil, r.DB.UpdateWithFieldsTx(ctx, info, keys, tx)
+func (r *CRUDImpl) UpdateWithFieldsTx(ctx context.Context, e domain.IEntity, keys []string, tx domain.ITransactionEvent) (domain.IEntity, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(ctx, "repo-updateWithFieldsTx")
+
+	defer span.End()
+
+	return r.performUpdate(ctx, e, span, func(ctx context.Context, info dto.IRepoEntity) (dto.IRepoEntity, error) {
+		return r.DB.UpdateWithFieldsTx(ctx, info, keys, tx)
 	})
 
-	return err
 }
 
 // DeleteTx -.
-func (r *CRUDImpl) DeleteTx(ctx context.Context, e domain.IEntity, tx domain.ITransactionEvent) error {
+func (r *CRUDImpl) DeleteTx(ctx context.Context, e domain.IEntity, tx domain.ITransactionEvent) (domain.IEntity, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(ctx, "repo-deleteTx")
+
+	defer span.End()
+
 	info, err := r.DTOEntity.Transform(e)
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeRepoTransform, err)
-	}
-
-	err = r.DB.DeleteTx(ctx, info, tx)
-	if err != nil {
-		return domainerrors.Wrap(ErrorCodeRepoDeleteTx, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepoTransform, err, span)
 	}
 
 	err = r.Cache.Delete(ctx, info)
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeRepoDelete, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
 	}
 
 	err = r.Redis.Delete(ctx, info)
 	if err != nil {
-		return domainerrors.Wrap(ErrorCodeRepoDelete, err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
 	}
 
-	return nil
+	model, err := r.DB.DeleteTx(ctx, info, tx)
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+	}
+
+	return model, nil
 }

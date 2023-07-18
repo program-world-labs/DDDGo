@@ -12,7 +12,7 @@ const (
 	ErrorCodeRoleCopyToInput                                              // 1000002
 	ErrorCodeRoleBindQuery                                                // 1000003
 	ErrorCodeRoleValidateInput                                            // 1000004
-	ErrorCodeRoleBindUri                                                  // 1000005
+	ErrorCodeRoleBindURI                                                  // 1000005
 )
 
 type ErrorEvent struct {

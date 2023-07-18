@@ -7,9 +7,10 @@ type IRepoEntity interface {
 	TableName() string
 	Transform(domain.IEntity) (IRepoEntity, error)
 	BackToDomain() (domain.IEntity, error)
-	ParseMap(map[string]interface{}) error
+	ParseMap(map[string]interface{}) (IRepoEntity, error)
 	ToJSON() (string, error)
-	DecodeJSON(string) error
+	UnmarshalJSON([]byte) error
+	GetListType() interface{}
 	GetPreloads() []string
 
 	GetID() string

@@ -64,7 +64,7 @@ func (r *RedisCacheDataSourceImpl) Get(ctx context.Context, model dto.IRepoEntit
 		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
 	}
 
-	err = model.DecodeJSON(v)
+	err = json.Unmarshal([]byte(v), &model)
 	if err != nil {
 		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
 	}
@@ -98,7 +98,7 @@ func (r *RedisCacheDataSourceImpl) Delete(ctx context.Context, model dto.IRepoEn
 }
 
 // GetListItem -.
-func (r *RedisCacheDataSourceImpl) GetListItem(ctx context.Context, model dto.IRepoEntity, sq *domain.SearchQuery, ttl ...time.Duration) (map[string]interface{}, error) {
+func (r *RedisCacheDataSourceImpl) GetListItem(ctx context.Context, model dto.IRepoEntity, sq *domain.SearchQuery, ttl ...time.Duration) (*dto.List, error) {
 	const defaultTTL = 60 * time.Second
 
 	var t time.Duration
@@ -126,7 +126,7 @@ func (r *RedisCacheDataSourceImpl) GetListItem(ctx context.Context, model dto.IR
 		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
 	}
 
-	var value map[string]interface{}
+	var value *dto.List
 	err = json.Unmarshal([]byte(v), &value)
 
 	if err != nil {

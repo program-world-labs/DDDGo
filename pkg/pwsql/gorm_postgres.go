@@ -8,6 +8,7 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/plugin/opentelemetry/tracing"
 )
 
 var _ ISQLGorm = (*Postgres)(nil)
@@ -45,6 +46,10 @@ func New(dsn string, opts ...Option) (*Postgres, error) {
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
+	}
+
+	if err = db.Use(tracing.NewPlugin(tracing.WithoutMetrics())); err != nil {
+		panic(err)
 	}
 
 	sqlDB, err := db.DB()

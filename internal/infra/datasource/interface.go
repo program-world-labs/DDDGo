@@ -10,16 +10,16 @@ import (
 
 type IDataSource interface {
 	Create(context.Context, dto.IRepoEntity) (dto.IRepoEntity, error)
-	Delete(context.Context, dto.IRepoEntity) error
+	Delete(context.Context, dto.IRepoEntity) (dto.IRepoEntity, error)
 	Update(context.Context, dto.IRepoEntity) (dto.IRepoEntity, error)
-	UpdateWithFields(context.Context, dto.IRepoEntity, []string) error
+	UpdateWithFields(context.Context, dto.IRepoEntity, []string) (dto.IRepoEntity, error)
 	GetByID(context.Context, dto.IRepoEntity) (dto.IRepoEntity, error)
-	GetAll(context.Context, *domain.SearchQuery, dto.IRepoEntity) (map[string]interface{}, error)
+	GetAll(context.Context, *domain.SearchQuery, dto.IRepoEntity) (*dto.List, error)
 
 	CreateTx(context.Context, dto.IRepoEntity, domain.ITransactionEvent) (dto.IRepoEntity, error)
-	DeleteTx(context.Context, dto.IRepoEntity, domain.ITransactionEvent) error
+	DeleteTx(context.Context, dto.IRepoEntity, domain.ITransactionEvent) (dto.IRepoEntity, error)
 	UpdateTx(context.Context, dto.IRepoEntity, domain.ITransactionEvent) (dto.IRepoEntity, error)
-	UpdateWithFieldsTx(context.Context, dto.IRepoEntity, []string, domain.ITransactionEvent) error
+	UpdateWithFieldsTx(context.Context, dto.IRepoEntity, []string, domain.ITransactionEvent) (dto.IRepoEntity, error)
 }
 
 type IAssociationDataSource interface {
@@ -42,7 +42,7 @@ type ICacheDataSource interface {
 	Get(ctx context.Context, e dto.IRepoEntity, ttl ...time.Duration) (dto.IRepoEntity, error)
 	Set(ctx context.Context, e dto.IRepoEntity, ttl ...time.Duration) (dto.IRepoEntity, error)
 	Delete(ctx context.Context, e dto.IRepoEntity) error
-	GetListItem(ctx context.Context, e dto.IRepoEntity, sq *domain.SearchQuery, ttl ...time.Duration) (map[string]interface{}, error)
+	GetListItem(ctx context.Context, e dto.IRepoEntity, sq *domain.SearchQuery, ttl ...time.Duration) (*dto.List, error)
 	SetListItem(ctx context.Context, e []dto.IRepoEntity, sq *domain.SearchQuery, count int64, ttl ...time.Duration) error
 	DeleteListItem(ctx context.Context, e dto.IRepoEntity, sq *domain.SearchQuery) error
 }

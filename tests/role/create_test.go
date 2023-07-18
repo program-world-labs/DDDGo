@@ -149,7 +149,7 @@ func (st *ServiceTest) givenData(name, description, permission string) error {
 	return nil
 }
 
-func (st *ServiceTest) whenCreateNewRole(ctx context.Context) error {
+func (st *ServiceTest) whenCreateNewRole(_ context.Context) error {
 	e := st.input.ToEntity()
 	st.repoMock.EXPECT().Create(ctx, RoleEquals(e)).Return(e, nil)
 	st.producer.EXPECT().PublishEvent(gomock.Any(), gomock.Any()).Return(nil)
@@ -159,7 +159,7 @@ func (st *ServiceTest) whenCreateNewRole(ctx context.Context) error {
 	return nil
 }
 
-func (st *ServiceTest) whenCreateExistingRole(ctx context.Context) error {
+func (st *ServiceTest) whenCreateExistingRole(_ context.Context) error {
 	e := newRolseExistError()
 	st.repoMock.EXPECT().Create(ctx, RoleEquals(st.input.ToEntity())).Return(nil, e)
 	// st.producer.EXPECT().PublishEvent(gomock.Any(), gomock.Any()).Return(nil)
@@ -277,7 +277,7 @@ func TestCreate(t *testing.T) {
 	}
 
 	// Create the report directory
-	reportPath := filepath.Join("..", "report", "TestRoleUsecase.json")
+	reportPath := filepath.Join("..", "report", "TestRoleCreateUsecase.json")
 	// Create the directory if it does not exist
 	err := os.MkdirAll(filepath.Dir(reportPath), os.ModePerm)
 	if err != nil {
@@ -286,7 +286,7 @@ func TestCreate(t *testing.T) {
 
 	// Run the test suite
 	suite := godog.TestSuite{
-		Name:                "Register",
+		Name:                "Create",
 		ScenarioInitializer: serviceTest.InitializeScenario,
 		Options: &godog.Options{
 			Format:   "cucumber:" + reportPath,
