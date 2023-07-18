@@ -2,11 +2,12 @@ package user
 
 import (
 	"context"
-	"errors"
-	"fmt"
 
 	"github.com/program-world-labs/pwlogger"
+	"go.opentelemetry.io/otel"
 
+	"github.com/program-world-labs/DDDGo/internal/domain"
+	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 	"github.com/program-world-labs/DDDGo/internal/domain/user/entity"
 	"github.com/program-world-labs/DDDGo/internal/domain/user/repository"
 )
@@ -15,65 +16,159 @@ var _ IService = (*ServiceImpl)(nil)
 
 // ServiceImpl -.
 type ServiceImpl struct {
-	UserRepo repository.UserRepository
-	log      pwlogger.Interface
+	TransactionRepo domain.ITransactionRepo
+	RoleRepo        repository.RoleRepository
+	UserRepo        repository.UserRepository
+	log             pwlogger.Interface
 }
 
 // NewServiceImpl -.
-func NewServiceImpl(userRepo repository.UserRepository, l pwlogger.Interface) *ServiceImpl {
-	return &ServiceImpl{UserRepo: userRepo, log: l}
+func NewServiceImpl(roleRepo repository.RoleRepository, userRepo repository.UserRepository, transactionRepo domain.ITransactionRepo, l pwlogger.Interface) *ServiceImpl {
+	return &ServiceImpl{RoleRepo: roleRepo, UserRepo: userRepo, TransactionRepo: transactionRepo, log: l}
 }
 
-var ErrUserAlreadyExists = errors.New("user already exists")
+// CreateUser creates a user.
+func (u *ServiceImpl) CreateUser(ctx context.Context, userInfo *CreatedInput) (*Output, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(ctx, "usecase-createUser")
 
-func (u *ServiceImpl) RegisterUseCase(ctx context.Context, userInfo *entity.User) (*Output, error) {
-	// Check if user already exists
-	existingUser, err := u.UserRepo.GetByID(ctx, userInfo)
+	defer span.End()
+	// Validate input.
+	err := userInfo.Validate()
 	if err != nil {
-		return nil, err
+		return nil, domainerrors.WrapWithSpan(ErrorCodeValidateInput, err, span)
 	}
 
-	if existingUser != nil {
-		return nil, fmt.Errorf("%w", ErrUserAlreadyExists)
-	}
+	// Create user.
+	e := userInfo.ToEntity()
 
-	// Create user
-	createdUser, err := u.UserRepo.Create(ctx, userInfo)
+	createdUser, err := u.UserRepo.Create(ctx, e)
+
 	if err != nil {
-		return nil, err
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepository, err, span)
 	}
 
-	// Cast to entity.User
+	// Cast to entity.User.
 	createdUserEntity, ok := createdUser.(*entity.User)
 	if !ok {
-		return nil, fmt.Errorf("ServiceImpl - RegisterUseCase - u.UserRepo.Create: %w", err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeCast, err, span)
 	}
 
 	return NewOutput(createdUserEntity), nil
 }
 
-var ErrUserNotFound = errors.New("user not found")
+// GetUser gets a user.
+func (u *ServiceImpl) GetUserDetail(ctx context.Context, userInfo *DetailGotInput) (*Output, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(ctx, "usecase-getUser")
 
-func (u *ServiceImpl) GetByIDUseCase(ctx context.Context, id string) (*Output, error) {
-	user, err := entity.NewUser(id)
+	defer span.End()
+
+	// Validate input.
+	err := userInfo.Validate()
 	if err != nil {
-		return nil, err
+		return nil, domainerrors.WrapWithSpan(ErrorCodeValidateInput, err, span)
 	}
 
-	foundUser, err := u.UserRepo.GetByID(ctx, user)
+	// Get user.
+	user, err := u.UserRepo.GetByID(ctx, &entity.User{ID: userInfo.ID})
 	if err != nil {
-		return nil, err
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepository, err, span)
 	}
 
-	if foundUser == nil {
-		return nil, fmt.Errorf("%w", ErrUserNotFound)
-	}
-
-	// cast to entity.User
-	foundUserEntity, ok := foundUser.(*entity.User)
+	// Cast to entity.User.
+	userEntity, ok := user.(*entity.User)
 	if !ok {
-		return nil, fmt.Errorf("ServiceImpl - GetByIDUseCase - u.UserRepo.GetByID: %w", err)
+		return nil, domainerrors.WrapWithSpan(ErrorCodeCast, err, span)
 	}
 
-	return NewOutput(foundUserEntity), nil
+	return NewOutput(userEntity), nil
+}
+
+// UpdateUser updates a user.
+func (u *ServiceImpl) UpdateUser(ctx context.Context, userInfo *UpdatedInput) (*Output, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(ctx, "usecase-updateUser")
+
+	defer span.End()
+
+	// Validate input.
+	err := userInfo.Validate()
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeValidateInput, err, span)
+	}
+
+	// Update user.
+	e := userInfo.ToEntity()
+
+	// Update user.
+	user, err := u.UserRepo.Update(ctx, e)
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepository, err, span)
+	}
+
+	// Cast to entity.User.
+	userEntity, ok := user.(*entity.User)
+	if !ok {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeCast, err, span)
+	}
+
+	return NewOutput(userEntity), nil
+}
+
+// DeleteUser deletes a user.
+func (u *ServiceImpl) DeleteUser(ctx context.Context, userInfo *DeletedInput) (*Output, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(ctx, "usecase-deleteUser")
+
+	defer span.End()
+
+	// Validate input.
+	err := userInfo.Validate()
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeValidateInput, err, span)
+	}
+
+	// Delete user.
+	info, err := u.UserRepo.Delete(ctx, &entity.User{ID: userInfo.ID})
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepository, err, span)
+	}
+
+	// Cast to entity.User.
+	userEntity, ok := info.(*entity.User)
+	if !ok {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeCast, err, span)
+	}
+
+	return NewOutput(userEntity), nil
+}
+
+// GetUserList lists users.
+func (u *ServiceImpl) GetUserList(ctx context.Context, userInfo *ListGotInput) (*OutputList, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	ctx, span := tracer.Start(ctx, "usecase-listUsers")
+
+	defer span.End()
+
+	// Validate input.
+	err := userInfo.Validate()
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeValidateInput, err, span)
+	}
+
+	sq := userInfo.ToSearchQuery()
+
+	// Get role list.
+	list, err := u.UserRepo.GetAll(ctx, sq, &entity.Role{})
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeRepository, err, span)
+	}
+
+	return NewListOutput(list), nil
 }

@@ -23,8 +23,8 @@ type ServiceImpl struct {
 }
 
 // NewServiceImpl -.
-func NewServiceImpl(roleRepo repository.RoleRepository, transactionRepo domain.ITransactionRepo, l pwlogger.Interface) *ServiceImpl {
-	return &ServiceImpl{RoleRepo: roleRepo, TransactionRepo: transactionRepo, log: l}
+func NewServiceImpl(roleRepo repository.RoleRepository, userRepo repository.UserRepository, transactionRepo domain.ITransactionRepo, l pwlogger.Interface) *ServiceImpl {
+	return &ServiceImpl{RoleRepo: roleRepo, UserRepo: userRepo, TransactionRepo: transactionRepo, log: l}
 }
 
 // CreateRole creates a role.

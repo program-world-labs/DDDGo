@@ -48,12 +48,12 @@ func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server
 		return nil, err
 	}
 	rockscacheClient := provideRocksCache(client)
-	repoImpl := provideUserRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
-	iService := provideUserService(repoImpl, l)
-	roleRepoImpl := provideRoleRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
+	repoImpl := provideRoleRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
+	userRepoImpl := provideUserRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
 	transactionDataSourceImpl := sql.NewTransactionRunDataSourceImpl(isqlGorm)
 	transactionRunRepoImpl := provideTransactionRepo(transactionDataSourceImpl)
-	roleIService := provideRoleService(roleRepoImpl, transactionRunRepoImpl, l)
+	iService := provideUserService(repoImpl, userRepoImpl, transactionRunRepoImpl, l)
+	roleIService := provideRoleService(repoImpl, userRepoImpl, transactionRunRepoImpl, l)
 	services := provideServices(iService, roleIService)
 	engine := v1.NewRouter(l, services, cfg)
 	server := provideHTTPServer(engine, cfg)
@@ -115,12 +115,12 @@ func provideServices(user3 user2.IService, role3 role2.IService) v1.Services {
 	}
 }
 
-func provideUserService(userRepo *user.RepoImpl, l pwlogger.Interface) user2.IService {
-	return user2.NewServiceImpl(userRepo, l)
+func provideUserService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, l pwlogger.Interface) user2.IService {
+	return user2.NewServiceImpl(roleRepo, userRepo, transactionRepo, l)
 }
 
-func provideRoleService(roleRepo *role.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, l pwlogger.Interface) role2.IService {
-	return role2.NewServiceImpl(roleRepo, transactionRepo, l)
+func provideRoleService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, l pwlogger.Interface) role2.IService {
+	return role2.NewServiceImpl(roleRepo, userRepo, transactionRepo, l)
 }
 
 func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Server {

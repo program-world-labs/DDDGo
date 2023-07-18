@@ -14,6 +14,7 @@ const (
 	ErrorCodeAdapterRole             = 10000000
 	ErrorCodeAdapterUser             = 20000000
 	ErrorCodeApplicationRole         = 1000000
+	ErrorCodeApplicationUser         = 2000000
 	ErrorCodeDomainRole              = 100000
 	ErrorCodeRepo                    = 10000
 	ErrorCodeDatasourceSQL           = 1000

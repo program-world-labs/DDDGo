@@ -33,9 +33,9 @@ type Wallet struct {
 	Address     string          `json:"address"`
 	UserID      string          `json:"userId"`
 	Amounts     []Amount        `json:"amounts" gorm:"foreignKey:WalletID"`
-	CreatedAt   time.Time       `json:"createdAt"`
-	UpdatedAt   time.Time       `json:"updatedAt"`
-	DeletedAt   *gorm.DeletedAt `json:"deletedAt" gorm:"index"`
+	CreatedAt   time.Time       `json:"created_at" mapstructure:"created_at" gorm:"column:created_at"`
+	UpdatedAt   time.Time       `json:"updated_at" mapstructure:"updated_at" gorm:"column:updated_at"`
+	DeletedAt   *gorm.DeletedAt `json:"deleted_at" mapstructure:"deleted_at" gorm:"index;column:deleted_at"`
 }
 
 func (a *Wallet) TableName() string {
@@ -52,8 +52,12 @@ func (a *Wallet) Transform(i domain.IEntity) (IRepoEntity, error) {
 
 func (a *Wallet) BackToDomain() (domain.IEntity, error) {
 	i := &entity.Wallet{}
-	if err := copier.Copy(&i, a); err != nil {
+	if err := copier.Copy(i, a); err != nil {
 		return nil, domainerrors.Wrap(ErrorCodeWalletBackToDomain, err)
+	}
+
+	if a.DeletedAt != nil {
+		i.DeletedAt = a.DeletedAt.Time
 	}
 
 	return i, nil

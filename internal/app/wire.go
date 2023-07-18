@@ -82,12 +82,12 @@ func provideServices(user application_user.IService, role application_role.IServ
 	}
 }
 
-func provideUserService(userRepo *user.RepoImpl, l pwlogger.Interface) application_user.IService {
-	return application_user.NewServiceImpl(userRepo, l)
+func provideUserService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, l pwlogger.Interface) application_user.IService {
+	return application_user.NewServiceImpl(roleRepo, userRepo, transactionRepo, l)
 }
 
-func provideRoleService(roleRepo *role.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, l pwlogger.Interface) application_role.IService {
-	return application_role.NewServiceImpl(roleRepo, transactionRepo, l)
+func provideRoleService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, l pwlogger.Interface) application_role.IService {
+	return application_role.NewServiceImpl(roleRepo, userRepo, transactionRepo, l)
 }
 
 func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Server {

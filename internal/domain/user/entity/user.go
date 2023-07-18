@@ -16,11 +16,11 @@ type User struct {
 	EMail       string    `json:"email"`
 	DisplayName string    `json:"display_name"`
 	Avatar      string    `json:"avatar"`
-	Roles       []Role    `json:"roles" gorm:"many2many:user_roles;"`
-	Department  Group     `json:"departmentId" gorm:"foreignKey:DepartmentID"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
-	DeletedAt   time.Time `json:"deletedAt"`
+	Roles       []*Role   `json:"roles" gorm:"many2many:user_roles;"`
+	Group       *Group    `json:"groupId" gorm:"foreignKey:GroupID"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	DeletedAt   time.Time `json:"deleted_at"`
 }
 
 func NewUser(uid string) (*User, error) {
