@@ -1,12 +1,11 @@
 package event
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 	"time"
 
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 )
 
 type Event interface {
@@ -23,20 +22,20 @@ type Event interface {
 }
 
 type DomainEvent struct {
-	ID        uuid.UUID		// 事件唯一ID
-	EventType string		// 事件的Type名稱，例如：AccountCreatedEvent
-	Data      interface{}	// 事件資料，例如&AccountCreatedEvent{}
+	ID        uuid.UUID   // 事件唯一ID
+	EventType string      // 事件的Type名稱，例如：AccountCreatedEvent
+	Data      interface{} // 事件資料，例如&AccountCreatedEvent{}
 	CreatedAt time.Time
 
-	AggregateType string	// 事件所屬的Aggregate Type，例如AccountCreatedEvent屬於Account
-	AggregateID   string	// aggregate儲存在資料庫，相對應的ID
-	Version       int		// aggregate的版本
+	AggregateType string // 事件所屬的Aggregate Type，例如AccountCreatedEvent屬於Account
+	AggregateID   string // aggregate儲存在資料庫，相對應的ID
+	Version       int    // aggregate的版本
 }
 
 func NewDomainEvent(aggregateID, aggregateType string, version int, data interface{}) *DomainEvent {
 	_, eventType := GetTypeName(data)
 
-	uid, err := uuid.NewV4()
+	uid, err := uuid.NewUUID()
 	if err != nil {
 		return nil
 	}
@@ -100,18 +99,7 @@ func (e *DomainEvent) SetVersion(v int) {
 // 	return e.metadata
 // }
 
-// String implements the String method of the Event interface.
-func (e *DomainEvent) String() string {
-	str := string(e.EventType)
-
-	if e.AggregateID != "" && e.Version != 0 {
-		str += fmt.Sprintf("(%s, v%d)", e.AggregateID, e.Version)
-	}
-
-	return str
-}
-
-// GetTypeName of given struct
+// GetTypeName of given struct.
 func GetTypeName(source interface{}) (reflect.Type, string) {
 	rawType := reflect.TypeOf(source)
 
@@ -124,5 +112,6 @@ func GetTypeName(source interface{}) (reflect.Type, string) {
 	// we need to extract only the name without the package
 	// name currently follows the format `package.StructName`
 	parts := strings.Split(name, ".")
+
 	return rawType, parts[1]
 }
