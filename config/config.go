@@ -20,7 +20,7 @@ type (
 		Storage   `mapstructure:"storage"`
 		HTTP      `mapstructure:"http"`
 		Log       `mapstructure:"logger"`
-    Kafka     `mapstructure:"kafka"`
+		Kafka     `mapstructure:"kafka"`
 		Telemetry `mapstructure:"telemetry"`
 		Env
 	}
