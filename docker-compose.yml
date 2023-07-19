@@ -58,6 +58,7 @@ services:
       - redis
       - kafka
     command: /dockerize -wait tcp://postgres:5432 -wait tcp://redis:6379 -wait tcp://kafka:29092 /app
+
   integration:
     build:
       context: .
@@ -66,6 +67,7 @@ services:
     image: integration
     depends_on:
       - app
+      
 volumes:
   pg-data:
   redis-data:
