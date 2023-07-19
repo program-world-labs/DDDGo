@@ -21,12 +21,20 @@ type ServiceImpl struct {
 	EventProducer   event.EventProducer
 	RoleRepo        repository.RoleRepository
 	UserRepo        repository.UserRepository
+	eventStore      event.EventStore
 	log             pwlogger.Interface
 }
 
 // NewServiceImpl -.
-func NewServiceImpl(roleRepo repository.RoleRepository, userRepo repository.UserRepository, transactionRepo domain.ITransactionRepo, eventProducer event.EventProducer, l pwlogger.Interface) *ServiceImpl {
-	return &ServiceImpl{RoleRepo: roleRepo, UserRepo: userRepo, TransactionRepo: transactionRepo, log: l}
+func NewServiceImpl(roleRepo repository.RoleRepository, userRepo repository.UserRepository, transactionRepo domain.ITransactionRepo, eventProducer event.EventProducer, eventStore event.EventStore, l pwlogger.Interface) *ServiceImpl {
+	return &ServiceImpl{
+		RoleRepo:        roleRepo,
+		UserRepo:        userRepo,
+		TransactionRepo: transactionRepo,
+		EventProducer:   eventProducer,
+		eventStore:      eventStore,
+		log:             l,
+	}
 }
 
 // CreateUser creates a user.

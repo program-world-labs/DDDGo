@@ -107,6 +107,8 @@ require (
 require (
 	github.com/Eun/go-convert v1.2.12 // indirect
 	github.com/Eun/go-doppelgangerreader v0.0.0-20190911075941-30f1527f16b2 // indirect
+	github.com/EventStore/EventStore-Client-Go v1.0.2
+	github.com/EventStore/EventStore-Client-Go/v3 v3.0.0
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.17.0
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/ThreeDotsLabs/watermill v1.3.1

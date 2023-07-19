@@ -20,13 +20,21 @@ type ServiceImpl struct {
 	TransactionRepo domain.ITransactionRepo
 	RoleRepo        repository.RoleRepository
 	UserRepo        repository.UserRepository
+	eventStore      event.EventStore
 	EventProducer   event.EventProducer
 	log             pwlogger.Interface
 }
 
 // NewServiceImpl -.
-func NewServiceImpl(roleRepo repository.RoleRepository, userRepo repository.UserRepository, transactionRepo domain.ITransactionRepo, eventProducer event.EventProducer, l pwlogger.Interface) *ServiceImpl {
-	return &ServiceImpl{RoleRepo: roleRepo, UserRepo: userRepo, TransactionRepo: transactionRepo, EventProducer: eventProducer, log: l}
+func NewServiceImpl(roleRepo repository.RoleRepository, userRepo repository.UserRepository, transactionRepo domain.ITransactionRepo, eventProducer event.EventProducer, eventStore event.EventStore, l pwlogger.Interface) *ServiceImpl {
+	return &ServiceImpl{
+		RoleRepo:        roleRepo,
+		UserRepo:        userRepo,
+		TransactionRepo: transactionRepo,
+		EventProducer:   eventProducer,
+		eventStore:      eventStore,
+		log:             l,
+	}
 }
 
 // CreateRole creates a role.
@@ -69,6 +77,16 @@ func (u *ServiceImpl) CreateRole(ctx context.Context, roleInfo *CreatedInput) (*
 
 	// Apply event to entity
 	createdRoleEntity.ApplyEventHelper(createdRoleEntity, domainEvent, true)
+
+	// Save AccountCreatedEvent to EventStore
+	// err = u.eventStore.SafeStore(ctx, createdRoleEntity.Events, createdRoleEntity.Version)
+	err = u.eventStore.Store(ctx, createdRoleEntity.Events, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	// Clear Aggregate Uncommit Events
+	createdRoleEntity.ClearUnCommitedEvents()
 
 	// Publish event
 	err = u.EventProducer.PublishEvent(createdRoleEntity.Type, domainEvent)

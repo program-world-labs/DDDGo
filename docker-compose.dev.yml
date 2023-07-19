@@ -76,6 +76,14 @@ services:
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
     depends_on:
       - kafka
+
+  esdb:
+    image: eventstore/eventstore:latest
+    command: --insecure --run-projections=All --enable-external-tcp --enable-atom-pub-over-http --start-standard-projections
+    ports:
+      - 2113:2113
+      - 1113:1113
+
 volumes:
   pg-data:
   redis-data:

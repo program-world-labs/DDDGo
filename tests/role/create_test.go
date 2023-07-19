@@ -69,6 +69,7 @@ type ServiceTest struct {
 	transRepoMock *mock_repo.MockITransactionRepo
 	service       *application_role.ServiceImpl
 	producer      *mock_repo.MockEventProducer
+	eventStoreDB  *mock_repo.MockEventStore
 }
 
 func (st *ServiceTest) InitializeScenario(ctx *godog.ScenarioContext) {
@@ -138,7 +139,8 @@ func (st *ServiceTest) reset() {
 	st.userRepoMock = mocks_user.NewMockUserRepository(st.mockCtrl)
 	st.transRepoMock = mock_repo.NewMockITransactionRepo(st.mockCtrl)
 	st.producer = mock_repo.NewMockEventProducer(st.mockCtrl)
-	st.service = application_role.NewServiceImpl(st.repoMock, st.userRepoMock, st.transRepoMock, st.producer, logger)
+	st.eventStoreDB = mock_repo.NewMockEventStore(st.mockCtrl)
+	st.service = application_role.NewServiceImpl(st.repoMock, st.userRepoMock, st.transRepoMock, st.producer, st.eventStoreDB, logger)
 }
 
 func (st *ServiceTest) givenData(name, description, permission string) error {
@@ -156,6 +158,7 @@ func (st *ServiceTest) whenCreateNewRole(_ context.Context) error {
 	e := st.input.ToEntity()
 	st.repoMock.EXPECT().Create(gomock.Any(), RoleEquals(e)).Return(e, nil)
 	st.producer.EXPECT().PublishEvent(gomock.Any(), gomock.Any()).Return(nil)
+	st.eventStoreDB.EXPECT().Store(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 	st.expect.CreatedAt = e.CreatedAt
 	st.expect.UpdatedAt = e.UpdatedAt
 

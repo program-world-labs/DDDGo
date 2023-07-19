@@ -21,6 +21,7 @@ import (
 	user2 "github.com/program-world-labs/DDDGo/internal/application/user"
 	"github.com/program-world-labs/DDDGo/internal/domain/event"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource/cache"
+	"github.com/program-world-labs/DDDGo/internal/infra/datasource/event_store"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource/sql"
 	"github.com/program-world-labs/DDDGo/internal/infra/dto"
 	"github.com/program-world-labs/DDDGo/internal/infra/repository"
@@ -28,6 +29,7 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/infra/user"
 	"github.com/program-world-labs/DDDGo/pkg/cache/local"
 	redis2 "github.com/program-world-labs/DDDGo/pkg/cache/redis"
+	eventstore2 "github.com/program-world-labs/DDDGo/pkg/event_store"
 	"github.com/program-world-labs/DDDGo/pkg/httpserver"
 	message2 "github.com/program-world-labs/DDDGo/pkg/message"
 	"github.com/program-world-labs/DDDGo/pkg/pwsql"
@@ -61,8 +63,17 @@ func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server
 	if err != nil {
 		return nil, err
 	}
-	iService := provideUserService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
-	roleIService := provideRoleService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
+	eventStoreDB, err := provideEventStoreDB(cfg)
+	if err != nil {
+		return nil, err
+	}
+	eventTypeMapper := provideEventTypeMapper()
+	eventStoreDBImpl, err := provideEventStoreDBImpl(eventStoreDB, eventTypeMapper)
+	if err != nil {
+		return nil, err
+	}
+	iService := provideUserService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, eventStoreDBImpl, l)
+	roleIService := provideRoleService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, eventStoreDBImpl, l)
 	services := provideServices(iService, roleIService)
 	engine := v1.NewRouter(l, services, cfg)
 	server := provideHTTPServer(engine, cfg)
@@ -94,8 +105,16 @@ func NewMessageRouter(cfg *config.Config, l pwlogger.Interface) (*message.Router
 	userRepoImpl := provideUserRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
 	transactionDataSourceImpl := sql.NewTransactionRunDataSourceImpl(isqlGorm)
 	transactionRunRepoImpl := provideTransactionRepo(transactionDataSourceImpl)
-	iService := provideUserService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
-	roleIService := provideRoleService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
+	eventStoreDB, err := provideEventStoreDB(cfg)
+	if err != nil {
+		return nil, err
+	}
+	eventStoreDBImpl, err := provideEventStoreDBImpl(eventStoreDB, eventTypeMapper)
+	if err != nil {
+		return nil, err
+	}
+	iService := provideUserService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, eventStoreDBImpl, l)
+	roleIService := provideRoleService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, eventStoreDBImpl, l)
 	services := provideServices(iService, roleIService)
 	router, err := provideMessageRouter(kafkaMessage, eventTypeMapper, services, l)
 	if err != nil {
@@ -159,12 +178,12 @@ func provideServices(user3 user2.IService, role3 role2.IService) application.Ser
 	}
 }
 
-func provideUserService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *message2.KafkaMessage, l pwlogger.Interface) user2.IService {
-	return user2.NewServiceImpl(roleRepo, userRepo, transactionRepo, eventProducer, l)
+func provideUserService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *message2.KafkaMessage, esdb *eventstore.EventStoreDBImpl, l pwlogger.Interface) user2.IService {
+	return user2.NewServiceImpl(roleRepo, userRepo, transactionRepo, eventProducer, esdb, l)
 }
 
-func provideRoleService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *message2.KafkaMessage, l pwlogger.Interface) role2.IService {
-	return role2.NewServiceImpl(roleRepo, userRepo, transactionRepo, eventProducer, l)
+func provideRoleService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *message2.KafkaMessage, esdb *eventstore.EventStoreDBImpl, l pwlogger.Interface) role2.IService {
+	return role2.NewServiceImpl(roleRepo, userRepo, transactionRepo, eventProducer, esdb, l)
 }
 
 func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Server {
@@ -183,11 +202,21 @@ func provideEventTypeMapper() *event.EventTypeMapper {
 	return event.NewEventTypeMapper()
 }
 
+func provideEventStoreDB(cfg *config.Config) (*eventstore2.EventStoreDB, error) {
+	return eventstore2.NewEventStoreDB(cfg.EventStoreDB.Host)
+}
+
+func provideEventStoreDBImpl(esdb *eventstore2.EventStoreDB, mapper *event.EventTypeMapper) (*eventstore.EventStoreDBImpl, error) {
+	return eventstore.NewEventStoreDBImpl(esdb, mapper)
+}
+
 var appSet = wire.NewSet(
 	providePostgres,
 	provideRedisCache,
 	provideLocalCache,
-	provideRocksCache, sql.NewTransactionRunDataSourceImpl, sql.NewCRUDDatasourceImpl, cache.NewBigCacheDataSourceImp, provideTransactionRepo,
+	provideRocksCache,
+	provideEventStoreDB,
+	provideEventStoreDBImpl, sql.NewTransactionRunDataSourceImpl, sql.NewCRUDDatasourceImpl, cache.NewBigCacheDataSourceImp, provideTransactionRepo,
 	provideUserRepo,
 	provideRoleRepo,
 	provideKafkaMessage,
