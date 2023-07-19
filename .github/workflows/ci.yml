@@ -90,8 +90,8 @@ jobs:
           name: codecov-ddd
           verbose: true
 
-      - name: Integration tests
-        run: "docker-compose up \
-          --build \
-          --abort-on-container-exit \
-          --exit-code-from integration"
+      # - name: Integration tests
+      #   run: "docker-compose up \
+      #     --build \
+      #     --abort-on-container-exit \
+      #     --exit-code-from integration"

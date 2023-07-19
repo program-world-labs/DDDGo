@@ -14,7 +14,8 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
 
 # Step 3: Intermediate
 FROM alpine:3.14 as intermediate
-RUN apk add --no-cache wget
+RUN apk update
+RUN apk add --no-cache wget=1.21.1-r1
 RUN wget https://github.com/jwilder/dockerize/releases/download/v0.6.1/dockerize-linux-amd64-v0.6.1.tar.gz \
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-v0.6.1.tar.gz \
     && rm dockerize-linux-amd64-v0.6.1.tar.gz
