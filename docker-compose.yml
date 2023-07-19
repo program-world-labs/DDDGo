@@ -1,6 +1,5 @@
 version: '3.9'
 services:
-
   postgres:
     container_name: postgres
     image: postgres
@@ -44,22 +43,21 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
   app:
-      build: .
-      container_name: app
-      image: app
-      environment:
-        APP_SQL_URL: 'postgres://user:pass@postgres:5432/postgres'
-        APP_REDIS_URL: 'redis://redis:6379/0'
-        APP_KAFKA_URL: 'kafka:29092'
-        APP_ENV: 'dev'
-      ports:
-        - 8080:8080
-      depends_on:
-        - postgres
-        - redis
-        - kafka
-
-
+    build: .
+    container_name: app
+    image: app
+    environment:
+      APP_SQL_URL: 'postgres://user:pass@postgres:5432/postgres'
+      APP_REDIS_URL: 'redis://redis:6379/0'
+      APP_KAFKA_URL: 'kafka:29092'
+      APP_ENV: 'dev'
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
+      - redis
+      - kafka
+    command: /dockerize -wait tcp://postgres:5432 -wait tcp://redis:6379 -wait tcp://kafka:29092 /app
   integration:
     build:
       context: .
