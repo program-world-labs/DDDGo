@@ -206,6 +206,12 @@ func applyEnvSetting(cfg *Config) error {
 		}
 	}
 
+	kafkaDSN := viper.GetString("kafka_url")
+
+	if kafkaDSN != "" {
+		cfg.Kafka.Brokers = []string{kafkaDSN}
+	}
+
 	// Log
 
 	logProject := viper.GetString("log_project")
