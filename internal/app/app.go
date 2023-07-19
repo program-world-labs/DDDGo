@@ -24,7 +24,7 @@ func Run(cfg *config.Config) {
 	// Tracer
 	err := operations.InitNewTracer(cfg.Telemetry.Host, cfg.Telemetry.Port, cfg.Telemetry.Batcher, cfg.Telemetry.SampleRate, cfg.Telemetry.Enabled)
 	if err != nil {
-		l.Err(err).Str("Tracer", "Run").Msg("InitNewTracer error")
+		l.Panic().Err(err).Str("Tracer", "Run").Msg("InitNewTracer error")
 	}
 
 	// Http Server
@@ -35,6 +35,9 @@ func Run(cfg *config.Config) {
 
 	// Message Router
 	router, err := NewMessageRouter(cfg, l)
+	if err != nil {
+		l.Panic().Err(err).Str("app", "Run").Msg("InitializeMessageRouter error")
+	}
 
 	// Waiting signal
 	interrupt := make(chan os.Signal, 1)

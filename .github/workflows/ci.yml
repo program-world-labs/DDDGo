@@ -73,7 +73,7 @@ jobs:
           format: "cucumber"
           auth: ${{ secrets.JIRA_ZEPHYR_TOKEN }}
           file_path: "tests/report/report.zip"
-          auto_create_test_cases: "false"
+          auto_create_test_cases: "true"
           test_cycle: '{"name": "Auto Test Regression", "description": "Regression test cycle 1 to ensure no breaking changes", "jiraProjectVersion": 10000}'
       - name: Generate coverage report
         run: |
