@@ -74,7 +74,7 @@ func (u *ServiceImpl) CreateRole(ctx context.Context, roleInfo *CreatedInput) (*
 	}
 
 	// Publish event
-	err = u.EventProducer.PublishEvent(createdRoleEntity.Type, domainEvent)
+	err = u.EventProducer.PublishEvent(ctx, createdRoleEntity.Type, domainEvent)
 	if err != nil {
 		return nil, domainerrors.WrapWithSpan(ErrorCodePublishEvent, err, span)
 	}
