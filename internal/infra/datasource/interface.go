@@ -42,6 +42,8 @@ type ICacheDataSource interface {
 	Get(ctx context.Context, e dto.IRepoEntity, ttl ...time.Duration) (dto.IRepoEntity, error)
 	Set(ctx context.Context, e dto.IRepoEntity, ttl ...time.Duration) (dto.IRepoEntity, error)
 	Delete(ctx context.Context, e dto.IRepoEntity) error
+	DeleteWithKey(ctx context.Context, key string) error
+	GetListKeys(ctx context.Context, e dto.IRepoEntity) ([]string, error)
 	GetListItem(ctx context.Context, e dto.IRepoEntity, sq *domain.SearchQuery, ttl ...time.Duration) (*dto.List, error)
 	SetListItem(ctx context.Context, e []dto.IRepoEntity, sq *domain.SearchQuery, count int64, ttl ...time.Duration) error
 	DeleteListItem(ctx context.Context, e dto.IRepoEntity, sq *domain.SearchQuery) error

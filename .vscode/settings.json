@@ -28,5 +28,6 @@
       "username": "user",
       "password": "pass"
     }
-  ]
+  ],
+  "sarif-viewer.connectToGithubCodeScanning": "on"
 }

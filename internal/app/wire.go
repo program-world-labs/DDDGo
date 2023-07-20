@@ -56,7 +56,7 @@ func provideRedisCache(cfg *config.Config) (*redis.Client, error) {
 
 func provideRocksCache(r *redis.Client) *rockscache.Client {
 	rc := rockscache.NewClient(r, rockscache.NewDefaultOptions())
-
+	rc.Options.StrongConsistency = true
 	return rc
 }
 

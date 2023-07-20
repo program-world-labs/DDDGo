@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/allegro/bigcache/v3"
@@ -114,6 +115,20 @@ func (r *BigCacheDataSourceImpl) GetListItem(ctx context.Context, model dto.IRep
 		return nil, domainerrors.WrapWithSpan(ErrorCodeCacheGet, err, span)
 	}
 
+	// 取得分頁資訊
+	page, err := r.Cache.Get(fmt.Sprintf("%s-ListKeys", model.TableName()))
+	if err != nil && !errors.Is(err, bigcache.ErrEntryNotFound) {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeCacheGet, err, span)
+	}
+
+	// 加入新的key，儲存所有的List key
+	v := fmt.Sprintf("%s,%s", page, r.cacheKey(model, sq))
+
+	err = r.Cache.Set(fmt.Sprintf("%s-ListKeys", model.TableName()), []byte(v))
+	if err != nil && !errors.Is(err, bigcache.ErrEntryNotFound) {
+		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
+	}
+
 	return result, nil
 }
 
@@ -167,6 +182,37 @@ func (r *BigCacheDataSourceImpl) DeleteListItem(ctx context.Context, model dto.I
 
 	err := r.Cache.Delete(r.cacheKey(model, sq))
 	if err != nil {
+		return domainerrors.WrapWithSpan(ErrorCodeCacheDelete, err, span)
+	}
+
+	return nil
+}
+
+// GetListKeys -.
+func (r *BigCacheDataSourceImpl) GetListKeys(ctx context.Context, model dto.IRepoEntity) ([]string, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	_, span := tracer.Start(ctx, "datasource-getListKeys-local")
+
+	defer span.End()
+
+	data, err := r.Cache.Get(fmt.Sprintf("%s-ListKeys", model.TableName()))
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeCacheGet, err, span)
+	}
+
+	return strings.Split(string(data), ","), nil
+}
+
+func (r *BigCacheDataSourceImpl) DeleteWithKey(ctx context.Context, key string) error {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	_, span := tracer.Start(ctx, "datasource-getListKeys-local")
+
+	defer span.End()
+
+	err := r.Cache.Delete(key)
+	if err != nil && !errors.Is(err, bigcache.ErrEntryNotFound) {
 		return domainerrors.WrapWithSpan(ErrorCodeCacheDelete, err, span)
 	}
 

@@ -1,8 +1,9 @@
 package sql
 
 import (
-	"github.com/program-world-labs/DDDGo/internal/domain"
 	"gorm.io/gorm"
+
+	"github.com/program-world-labs/DDDGo/internal/domain"
 )
 
 var _ domain.ITransactionEvent = (*TransactionEventDataSourceImpl)(nil)

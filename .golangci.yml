@@ -21,6 +21,9 @@ linters-settings:
   goconst:
     min-len: 2
     min-occurrences: 2
+  cyclop:
+    enable: true
+    max-complexity: 20 # 將最大循環複雜度設置為 20
   gomnd:
     settings:
       mnd:

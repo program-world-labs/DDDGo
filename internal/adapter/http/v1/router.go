@@ -41,6 +41,7 @@ func NewRouter(l pwlogger.Interface, s application.Services, cfg *config.Config)
 	// Swagger
 	docs.SwaggerInfo.Version = cfg.App.Version
 	docs.SwaggerInfo.Title = cfg.App.Name
+	docs.SwaggerInfo.Host = cfg.Swagger.Host
 
 	swaggerHandler := ginSwagger.WrapHandler(swaggerFiles.Handler)
 	handler.GET("/swagger/*any", swaggerHandler)

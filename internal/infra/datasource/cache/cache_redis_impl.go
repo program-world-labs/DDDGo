@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/dtm-labs/rockscache"
@@ -74,16 +75,6 @@ func (r *RedisCacheDataSourceImpl) Get(ctx context.Context, model dto.IRepoEntit
 
 // Set -.
 func (r *RedisCacheDataSourceImpl) Set(_ context.Context, model dto.IRepoEntity, _ ...time.Duration) (dto.IRepoEntity, error) {
-	// data, err := json.Marshal(model)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("RedisCacheDataSourceImpl - Create - json.Marshal: %w", err)
-	// }
-
-	// err = r.Client.Set(ctx, r.redisKey(model), data, 0).Err()
-	// if err != nil {
-	// 	return nil, fmt.Errorf("RedisCacheDataSourceImpl - Create - r.Client.Set: %w", err)
-	// }
-
 	return model, nil
 }
 
@@ -109,7 +100,7 @@ func (r *RedisCacheDataSourceImpl) GetListItem(ctx context.Context, model dto.IR
 		t = defaultTTL
 	}
 
-	v, err := r.Client.Fetch(r.redisKey(model, sq), t, func() (string, error) {
+	v, err := r.Client.Fetch2(ctx, r.redisKey(model, sq), t, func() (string, error) {
 		data, err := r.SQLDataSource.GetAll(ctx, sq, model)
 		if err != nil {
 			return "", err
@@ -133,6 +124,21 @@ func (r *RedisCacheDataSourceImpl) GetListItem(ctx context.Context, model dto.IR
 		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
 	}
 
+	v, err = r.Client.Fetch2(ctx, fmt.Sprintf("%s-ListKeys", model.TableName()), t, func() (string, error) {
+		return r.redisKey(model, sq), nil
+	})
+	if err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
+	}
+
+	// 加入新的key，儲存所有的List key
+	v = fmt.Sprintf("%s,%s", v, r.redisKey(model, sq))
+	err = r.Client.RawSet(ctx, fmt.Sprintf("%s-ListKeys", model.TableName()), v, t)
+
+	if err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
+	}
+
 	return value, nil
 }
 
@@ -144,6 +150,26 @@ func (r *RedisCacheDataSourceImpl) SetListItem(_ context.Context, _ []dto.IRepoE
 // DeleteListItem -.
 func (r *RedisCacheDataSourceImpl) DeleteListItem(ctx context.Context, model dto.IRepoEntity, sq *domain.SearchQuery) error {
 	err := r.Client.TagAsDeleted2(ctx, r.redisKey(model, sq))
+	if err != nil {
+		return domainerrors.Wrap(ErrorCodeCacheDelete, err)
+	}
+
+	return nil
+}
+
+func (r *RedisCacheDataSourceImpl) GetListKeys(ctx context.Context, model dto.IRepoEntity) ([]string, error) {
+	keys, err := r.Client.Fetch2(ctx, fmt.Sprintf("%s-ListKeys", model.TableName()), 0, func() (string, error) {
+		return "", nil
+	})
+	if err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
+	}
+
+	return strings.Split(keys, ","), nil
+}
+
+func (r *RedisCacheDataSourceImpl) DeleteWithKey(ctx context.Context, key string) error {
+	err := r.Client.TagAsDeleted2(ctx, key)
 	if err != nil {
 		return domainerrors.Wrap(ErrorCodeCacheDelete, err)
 	}
