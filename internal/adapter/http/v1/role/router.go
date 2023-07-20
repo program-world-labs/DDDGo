@@ -100,6 +100,8 @@ func (r *roleRoutes) create(c *gin.Context) {
 // @Failure		400		{object}	http.Response
 // @Failure		500		{object}	http.Response
 // @Router			/role/list [get].
+//
+//nolint:dupl // business logic is different
 func (r *roleRoutes) list(c *gin.Context) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
@@ -150,6 +152,8 @@ func (r *roleRoutes) list(c *gin.Context) {
 // @Failure		400		{object}	http.Response
 // @Failure		500		{object}	http.Response
 // @Router			/role/detail/{id} [get].
+//
+//nolint:dupl // business logic is different
 func (r *roleRoutes) detail(c *gin.Context) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
@@ -257,6 +261,8 @@ func (r *roleRoutes) update(c *gin.Context) {
 // @Failure		400		{object}	http.Response
 // @Failure		500		{object}	http.Response
 // @Router			/role/delete/{id} [delete].
+//
+//nolint:dupl // business logic is different
 func (r *roleRoutes) delete(c *gin.Context) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)

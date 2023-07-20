@@ -10,9 +10,10 @@ const (
 	ErrorCodeDomainRole  = domainerrors.ErrorCodeDomainRole + iota // 100000
 	ErrorCodeCastToEvent                                           // 100001
 	ErrorCodeCast                                                  // 100002
-	ErrorCodeDomainUser = domainerrors.ErrorCodeDomainRole
+	ErrorCodeDomainUser  = domainerrors.ErrorCodeDomainRole
 )
 
 var (
 	ErrCastToEventFailed = errors.New("cast to event failed")
+	ErrInvalidEventData  = errors.New("invalid event data")
 )

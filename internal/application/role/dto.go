@@ -182,7 +182,7 @@ func (i *ListGotInput) ToSearchQuery() *domain.SearchQuery {
 	return sq
 }
 
-func (c *ListGotInput) ToEntity() *entity.Role {
+func (i *ListGotInput) ToEntity() *entity.Role {
 	return &entity.Role{}
 }
 

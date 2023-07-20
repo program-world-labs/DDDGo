@@ -1,27 +1,23 @@
 package role
 
 import (
-	"context"
 	"encoding/json"
 	"log"
-	"strings"
 
 	"github.com/ThreeDotsLabs/watermill/message"
-	"github.com/jinzhu/copier"
 	"github.com/program-world-labs/pwlogger"
 
 	"github.com/program-world-labs/DDDGo/internal/application/role"
-	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 	"github.com/program-world-labs/DDDGo/internal/domain/event"
 )
 
 type Routes struct {
-	e event.EventTypeMapper
+	e event.TypeMapper
 	s role.IService
 	l pwlogger.Interface
 }
 
-func NewRoleRoutes(e event.EventTypeMapper, r role.IService, l pwlogger.Interface) *Routes {
+func NewRoleRoutes(e event.TypeMapper, r role.IService, l pwlogger.Interface) *Routes {
 	// Register event
 	e.Register((*event.RoleCreatedEvent)(nil))
 	e.Register((*event.RoleDescriptionChangedEvent)(nil))
@@ -72,19 +68,19 @@ func (u *Routes) Handler(msg *message.Message) error {
 	return nil
 }
 
-func (u *Routes) create(event *event.RoleCreatedEvent) error {
-	// Transform event data to service input
-	info := role.CreatedInput{}
-	if err := copier.Copy(&info, event); err != nil {
-		return domainerrors.Wrap(ErrorCodeRoleCopyToInput, err)
-	}
+// func (u *Routes) create(event *event.RoleCreatedEvent) error {
+// 	// Transform event data to service input
+// 	info := role.CreatedInput{}
+// 	if err := copier.Copy(&info, event); err != nil {
+// 		return domainerrors.Wrap(ErrorCodeRoleCopyToInput, err)
+// 	}
 
-	info.Permissions = strings.Join(event.Permissions, ",")
+// 	info.Permissions = strings.Join(event.Permissions, ",")
 
-	_, err := u.s.CreateRole(context.Background(), &info)
-	if err != nil {
-		return err
-	}
+// 	_, err := u.s.CreateRole(context.Background(), &info)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }

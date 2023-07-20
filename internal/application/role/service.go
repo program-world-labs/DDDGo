@@ -20,12 +20,12 @@ type ServiceImpl struct {
 	TransactionRepo domain.ITransactionRepo
 	RoleRepo        repository.RoleRepository
 	UserRepo        repository.UserRepository
-	EventProducer   event.EventProducer
+	EventProducer   event.Producer
 	log             pwlogger.Interface
 }
 
 // NewServiceImpl -.
-func NewServiceImpl(roleRepo repository.RoleRepository, userRepo repository.UserRepository, transactionRepo domain.ITransactionRepo, eventProducer event.EventProducer, l pwlogger.Interface) *ServiceImpl {
+func NewServiceImpl(roleRepo repository.RoleRepository, userRepo repository.UserRepository, transactionRepo domain.ITransactionRepo, eventProducer event.Producer, l pwlogger.Interface) *ServiceImpl {
 	return &ServiceImpl{RoleRepo: roleRepo, UserRepo: userRepo, TransactionRepo: transactionRepo, EventProducer: eventProducer, log: l}
 }
 
@@ -68,12 +68,15 @@ func (u *ServiceImpl) CreateRole(ctx context.Context, roleInfo *CreatedInput) (*
 	domainEvent := event.NewDomainEvent(createdRoleEntity.GetID(), et, -1, createdEvent)
 
 	// Apply event to entity
-	createdRoleEntity.ApplyEventHelper(createdRoleEntity, domainEvent, true)
+	err = createdRoleEntity.ApplyEventHelper(createdRoleEntity, domainEvent, true)
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeApplyEvent, err, span)
+	}
 
 	// Publish event
 	err = u.EventProducer.PublishEvent(createdRoleEntity.Type, domainEvent)
 	if err != nil {
-		return nil, err
+		return nil, domainerrors.WrapWithSpan(ErrorCodePublishEvent, err, span)
 	}
 
 	return NewOutput(createdRoleEntity), nil
@@ -104,6 +107,8 @@ func (u *ServiceImpl) GetRoleList(ctx context.Context, roleInfo *ListGotInput) (
 }
 
 // GetRoleDetail gets role detail.
+//
+//nolint:dupl // business logic is different
 func (u *ServiceImpl) GetRoleDetail(ctx context.Context, roleInfo *DetailGotInput) (*Output, error) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
@@ -162,6 +167,8 @@ func (u *ServiceImpl) UpdateRole(ctx context.Context, roleInfo *UpdatedInput) (*
 }
 
 // DeleteRole deletes role.
+//
+//nolint:dupl // business logic is different
 func (u *ServiceImpl) DeleteRole(ctx context.Context, roleInfo *DeletedInput) (*Output, error) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)

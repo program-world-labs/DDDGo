@@ -18,18 +18,20 @@ var _ IService = (*ServiceImpl)(nil)
 // ServiceImpl -.
 type ServiceImpl struct {
 	TransactionRepo domain.ITransactionRepo
-	EventProducer   event.EventProducer
+	EventProducer   event.Producer
 	RoleRepo        repository.RoleRepository
 	UserRepo        repository.UserRepository
 	log             pwlogger.Interface
 }
 
 // NewServiceImpl -.
-func NewServiceImpl(roleRepo repository.RoleRepository, userRepo repository.UserRepository, transactionRepo domain.ITransactionRepo, eventProducer event.EventProducer, l pwlogger.Interface) *ServiceImpl {
-	return &ServiceImpl{RoleRepo: roleRepo, UserRepo: userRepo, TransactionRepo: transactionRepo, log: l}
+func NewServiceImpl(roleRepo repository.RoleRepository, userRepo repository.UserRepository, transactionRepo domain.ITransactionRepo, eventProducer event.Producer, l pwlogger.Interface) *ServiceImpl {
+	return &ServiceImpl{RoleRepo: roleRepo, UserRepo: userRepo, TransactionRepo: transactionRepo, EventProducer: eventProducer, log: l}
 }
 
 // CreateUser creates a user.
+//
+//nolint:dupl // business logic is different
 func (u *ServiceImpl) CreateUser(ctx context.Context, userInfo *CreatedInput) (*Output, error) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
@@ -90,6 +92,8 @@ func (u *ServiceImpl) GetUserDetail(ctx context.Context, userInfo *DetailGotInpu
 }
 
 // UpdateUser updates a user.
+//
+//nolint:dupl // business logic is different
 func (u *ServiceImpl) UpdateUser(ctx context.Context, userInfo *UpdatedInput) (*Output, error) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
