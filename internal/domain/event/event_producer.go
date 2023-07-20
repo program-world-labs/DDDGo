@@ -1,6 +1,6 @@
 package event
 
-type EventProducer interface {
+type Producer interface {
 	// PublishEvent publish event to pubsub server.
 	PublishEvent(topic string, event interface{}) error
 

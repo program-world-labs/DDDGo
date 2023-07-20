@@ -4,6 +4,12 @@ import (
 	"errors"
 )
 
+var (
+	// GoogleCloudOperation -.
+	ErrJaegerNotSupported  = errors.New("jaeger is not supported yet")
+	ErrBatcherNotSupported = errors.New("batcher is not supported")
+)
+
 // InitNewTracer -.
 func InitNewTracer(host string, _ int, batcher string, sampleRate float64, enabled bool) error {
 	if !enabled {
@@ -14,9 +20,9 @@ func InitNewTracer(host string, _ int, batcher string, sampleRate float64, enabl
 	case "gcp":
 		GoogleCloudOperationInit(host, sampleRate)
 	case "jaeger":
-		return errors.New("jaeger is not supported yet")
+		return ErrJaegerNotSupported
 	default:
-		return errors.New("batcher is not supported")
+		return ErrBatcherNotSupported
 	}
 
 	return nil

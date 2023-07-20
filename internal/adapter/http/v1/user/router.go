@@ -41,6 +41,8 @@ func NewUserRoutes(handler *gin.RouterGroup, u application_user.IService, l pwlo
 // @Failure		400		{object}	http.Response
 // @Failure		500		{object}	http.Response
 // @Router			/user/create [post].
+//
+//nolint:dupl // business logic is different
 func (r *userRoutes) create(c *gin.Context) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
@@ -95,6 +97,8 @@ func (r *userRoutes) create(c *gin.Context) {
 // @Failure		400		{object}	http.Response
 // @Failure		500		{object}	http.Response
 // @Router			/user/list [get].
+//
+//nolint:dupl // business logic is different
 func (r *userRoutes) list(c *gin.Context) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
@@ -145,6 +149,8 @@ func (r *userRoutes) list(c *gin.Context) {
 // @Failure		400		{object}	http.Response
 // @Failure		500		{object}	http.Response
 // @Router			/user/detail/{id} [get].
+//
+//nolint:dupl // business logic is different
 func (r *userRoutes) detail(c *gin.Context) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
@@ -241,6 +247,8 @@ func (r *userRoutes) update(c *gin.Context) {
 // @Failure		400		{object}	http.Response
 // @Failure		500		{object}	http.Response
 // @Router			/user/delete/{id} [delete].
+//
+//nolint:dupl // business logic is different
 func (r *userRoutes) delete(c *gin.Context) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)

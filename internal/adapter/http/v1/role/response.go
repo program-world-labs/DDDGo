@@ -27,8 +27,10 @@ type ResponseList struct {
 
 func NewResponse(model *application_role.Output) Response {
 	userList := make([]user.Response, len(model.Users))
+
 	for i, v := range model.Users {
-		userList[i] = user.NewResponse(&v)
+		value := v
+		userList[i] = user.NewResponse(&value)
 	}
 
 	return Response{

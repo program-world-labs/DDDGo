@@ -74,7 +74,7 @@ func NewMessageRouter(cfg *config.Config, l pwlogger.Interface) (*message.Router
 	if err != nil {
 		return nil, err
 	}
-	eventTypeMapper := provideEventTypeMapper()
+	typeMapper := provideEventTypeMapper()
 	isqlGorm, err := providePostgres(cfg)
 	if err != nil {
 		return nil, err
@@ -97,7 +97,7 @@ func NewMessageRouter(cfg *config.Config, l pwlogger.Interface) (*message.Router
 	iService := provideUserService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
 	roleIService := provideRoleService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
 	services := provideServices(iService, roleIService)
-	router, err := provideMessageRouter(kafkaMessage, eventTypeMapper, services, l)
+	router, err := provideMessageRouter(kafkaMessage, typeMapper, services, l)
 	if err != nil {
 		return nil, err
 	}
@@ -175,11 +175,11 @@ func provideKafkaMessage(cfg *config.Config) (*message2.KafkaMessage, error) {
 	return message2.NewKafkaMessage(cfg.Kafka.Brokers, cfg.Kafka.GroupID)
 }
 
-func provideMessageRouter(handler *message2.KafkaMessage, mapper *event.EventTypeMapper, s application.Services, l pwlogger.Interface) (*message.Router, error) {
+func provideMessageRouter(handler *message2.KafkaMessage, mapper *event.TypeMapper, s application.Services, l pwlogger.Interface) (*message.Router, error) {
 	return message3.NewRouter(handler, mapper, s, l)
 }
 
-func provideEventTypeMapper() *event.EventTypeMapper {
+func provideEventTypeMapper() *event.TypeMapper {
 	return event.NewEventTypeMapper()
 }
 

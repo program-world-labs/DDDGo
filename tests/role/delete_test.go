@@ -22,18 +22,15 @@ type ServiceDeleteTest struct {
 	repoMock      *mocks.MockRoleRepository
 	userRepoMock  *mocks_user.MockUserRepository
 	transRepoMock *mock_repo.MockITransactionRepo
-	service       *application_role.ServiceImpl
+	// service       *application_role.ServiceImpl
 }
 
 func (st *ServiceDeleteTest) reset() {
-	// logger := pwlogger.NewDevelopmentLogger("")
-
 	st.input = nil
 	st.expect = nil
 	st.repoMock = mocks.NewMockRoleRepository(st.mockCtrl)
 	st.userRepoMock = mocks_user.NewMockUserRepository(st.mockCtrl)
 	st.transRepoMock = mock_repo.NewMockITransactionRepo(st.mockCtrl)
-	// st.service = application_role.NewServiceImpl(st.repoMock, st.transRepoMock, logger)
 }
 
 func (st *ServiceDeleteTest) givenData(id string) error {
@@ -46,43 +43,18 @@ func (st *ServiceDeleteTest) givenData(id string) error {
 }
 
 func (st *ServiceDeleteTest) whenDeleteRole(_ context.Context) error {
-	// e := st.input.ToEntity()
-	// st.repoMock.EXPECT().Delete(gomock.Any(), RoleEquals(e)).Return(nil)
-
 	return nil
 }
 
 func (st *ServiceDeleteTest) whenDeleteNotExistingRole(_ context.Context) error {
-	// e := newRolseExistError()
-	// st.repoMock.EXPECT().Create(gomock.Any(), RoleEquals(st.input.ToEntity())).Return(nil, e)
-
 	return nil
 }
 
-func (st *ServiceDeleteTest) thenSuccess(name, description, permission string) error {
-	// st.expect = &application_role.Output{
-	// 	Name:        name,
-	// 	Description: description,
-	// 	Permissions: strings.Split(permission, ","),
-	// 	CreatedAt:   st.expect.CreatedAt,
-	// 	UpdatedAt:   st.expect.UpdatedAt,
-	// }
-	// actual, err := st.service.CreateRole(context.Background(), st.input)
-
-	// if err != nil {
-	// 	return err
-	// }
-
-	// err = tests.AssertExpectedAndActual(assert.Equal, st.expect, actual, "Expected %d role created success and equal, but there is %d", st.expect, actual)
-
-	// return err
+func (st *ServiceDeleteTest) thenSuccess(_, _, _ string) error {
 	return nil
 }
 
 func (st *ServiceDeleteTest) whenDeleteHasUserRole(_ context.Context) error {
-	// e := newRolseExistError()
-	// st.repoMock.EXPECT().Create(gomock.Any(), RoleEquals(st.input.ToEntity())).Return(nil, e)
-
 	return nil
 }
 
@@ -105,8 +77,6 @@ func (st *ServiceDeleteTest) InitializeScenario(ctx *godog.ScenarioContext) {
 	ctx.Step(`^ID不存在並嘗試刪除角色$`, st.whenDeleteNotExistingRole)
 	ctx.Step(`^ID存在並且角色ID已經被分配給用戶$`, st.whenDeleteHasUserRole)
 	ctx.Step(`^角色成功被刪除$`, st.thenSuccess)
-	// ctx.Step(`^返回一個錯誤，說明角色ID不存在$`, st.whenCreateExistingRole)
-	// ctx.Step(`^返回一個錯誤，說明角色已經被分配給用戶$`, st.whenInvalidFormat)
 }
 
 // func TestDelete(t *testing.T) {

@@ -10,7 +10,7 @@ import (
 )
 
 var _ domain.IEntity = (*Role)(nil)
-var _ aggregate.AggregateHandler = (*Role)(nil)
+var _ aggregate.Handler = (*Role)(nil)
 
 type Role struct {
 	aggregate.BaseAggregate

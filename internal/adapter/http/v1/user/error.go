@@ -1,8 +1,9 @@
 package user
 
 import (
-	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 	"github.com/rs/zerolog"
+
+	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 )
 
 const (

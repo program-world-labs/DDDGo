@@ -5,27 +5,27 @@ import (
 	"reflect"
 )
 
-type EventTypeMapper struct {
+type TypeMapper struct {
 	mapper map[string]reflect.Type
 }
 
-func NewEventTypeMapper() *EventTypeMapper {
-	return &EventTypeMapper{
+func NewEventTypeMapper() *TypeMapper {
+	return &TypeMapper{
 		mapper: make(map[string]reflect.Type),
 	}
 }
 
-func (m *EventTypeMapper) Register(event interface{}) {
+func (m *TypeMapper) Register(event interface{}) {
 	t := reflect.TypeOf(event).Elem()
 	m.mapper[t.Name()] = t
 }
 
-func (m *EventTypeMapper) NewInstance(eventName string) (event interface{}, err error) {
+func (m *TypeMapper) NewInstance(eventName string) (event interface{}, err error) {
 	if t, ok := m.mapper[eventName]; ok {
 		event = reflect.New(t).Interface()
 	} else {
-		err = fmt.Errorf("unknown event: %s", eventName)
+		err = fmt.Errorf("%w: %s", ErrNewEventTypeMapper, event)
 	}
-	
+
 	return event, err
 }

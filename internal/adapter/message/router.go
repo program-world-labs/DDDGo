@@ -18,13 +18,13 @@ import (
 )
 
 type Router struct {
-	Handler *pkg_message.KafkaMessage
-	EventMapper *event.EventTypeMapper
-	S       application.Services
-	L       pwlogger.Interface
+	Handler     *pkg_message.KafkaMessage
+	EventMapper *event.TypeMapper
+	S           application.Services
+	L           pwlogger.Interface
 }
 
-func NewRouter(handler *pkg_message.KafkaMessage, mapper *event.EventTypeMapper, s application.Services, l pwlogger.Interface) (*message.Router, error) {
+func NewRouter(handler *pkg_message.KafkaMessage, mapper *event.TypeMapper, s application.Services, l pwlogger.Interface) (*message.Router, error) {
 	// Create a new router.
 	router, err := message.NewRouter(message.RouterConfig{}, watermill.NewStdLogger(false, false))
 	if err != nil {
@@ -68,9 +68,20 @@ func NewRouter(handler *pkg_message.KafkaMessage, mapper *event.EventTypeMapper,
 	router.AddNoPublisherHandler("User", "User", handler.Subscriber, User.Handler)
 	router.AddNoPublisherHandler("Role", "Role", handler.Subscriber, Role.Handler)
 
-	// 啟動 Router
-	go router.Run(context.Background())
+	// 创建一个通道用于接收错误
+	errChan := make(chan error)
 
+	// 启动 Router
+	go func() {
+		errChan <- router.Run(context.Background())
+	}()
+
+	// 通过通道接收错误
+	err = <-errChan
+	if err != nil {
+		// 处理错误
+		l.Panic().Err(err).Msg("router run error")
+	}
 	// 等待直到所有處理器都已啟動
 	<-router.Running()
 

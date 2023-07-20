@@ -103,11 +103,11 @@ func provideKafkaMessage(cfg *config.Config) (*pkg_message.KafkaMessage, error) 
 	return pkg_message.NewKafkaMessage(cfg.Kafka.Brokers, cfg.Kafka.GroupID)
 }
 
-func provideMessageRouter(handler *pkg_message.KafkaMessage, mapper *event.EventTypeMapper, s application.Services, l pwlogger.Interface) (*message.Router, error) {
+func provideMessageRouter(handler *pkg_message.KafkaMessage, mapper *event.TypeMapper, s application.Services, l pwlogger.Interface) (*message.Router, error) {
 	return adapter_message.NewRouter(handler, mapper, s, l)
 }
 
-func provideEventTypeMapper() *event.EventTypeMapper {
+func provideEventTypeMapper() *event.TypeMapper {
 	return event.NewEventTypeMapper()
 }
 

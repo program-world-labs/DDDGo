@@ -144,11 +144,11 @@ func (i *UpdatedInput) Validate() error {
 	return nil
 }
 
-func (c *UpdatedInput) ToEntity() *entity.User {
+func (i *UpdatedInput) ToEntity() *entity.User {
 	return &entity.User{
-		ID:          c.ID,
-		DisplayName: c.DisplayName,
-		Avatar:      c.Avatar,
+		ID:          i.ID,
+		DisplayName: i.DisplayName,
+		Avatar:      i.Avatar,
 	}
 }
 

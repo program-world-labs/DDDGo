@@ -11,7 +11,7 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/domain/event"
 )
 
-var _ event.EventProducer = (*KafkaMessage)(nil)
+var _ event.Producer = (*KafkaMessage)(nil)
 
 type KafkaMessage struct {
 	Subscriber *kafka.Subscriber
