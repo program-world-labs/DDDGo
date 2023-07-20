@@ -211,6 +211,23 @@ func (r *CRUDImpl) Delete(ctx context.Context, e domain.IEntity) (domain.IEntity
 		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
 	}
 
+	listKeys, err := r.Redis.GetListKeys(ctx, info)
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+	}
+
+	for _, key := range listKeys {
+		err = r.Cache.DeleteWithKey(ctx, key)
+		if err != nil {
+			return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+		}
+
+		err = r.Redis.DeleteWithKey(ctx, key)
+		if err != nil {
+			return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+		}
+	}
+
 	d, err := model.BackToDomain()
 	if err != nil {
 		return nil, domainerrors.WrapWithSpan(ErrorCodeRepoBackToDomain, err, span)
@@ -267,7 +284,6 @@ func (r *CRUDImpl) UpdateWithFieldsTx(ctx context.Context, e domain.IEntity, key
 	return r.performUpdate(ctx, e, span, func(ctx context.Context, info dto.IRepoEntity) (dto.IRepoEntity, error) {
 		return r.DB.UpdateWithFieldsTx(ctx, info, keys, tx)
 	})
-
 }
 
 // DeleteTx -.
@@ -296,6 +312,23 @@ func (r *CRUDImpl) DeleteTx(ctx context.Context, e domain.IEntity, tx domain.ITr
 	model, err := r.DB.DeleteTx(ctx, info, tx)
 	if err != nil {
 		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+	}
+
+	listKeys, err := r.Cache.GetListKeys(ctx, info)
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+	}
+
+	for _, key := range listKeys {
+		err = r.Cache.DeleteWithKey(ctx, key)
+		if err != nil {
+			return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+		}
+
+		err = r.Redis.DeleteWithKey(ctx, key)
+		if err != nil {
+			return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+		}
 	}
 
 	return model, nil
