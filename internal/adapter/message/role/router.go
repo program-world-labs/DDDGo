@@ -1,13 +1,17 @@
 package role
 
 import (
+	"context"
 	"encoding/json"
 	"log"
+	"strings"
 
 	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/jinzhu/copier"
 	"github.com/program-world-labs/pwlogger"
 
 	"github.com/program-world-labs/DDDGo/internal/application/role"
+	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 	"github.com/program-world-labs/DDDGo/internal/domain/event"
 )
 
@@ -55,32 +59,34 @@ func (u *Routes) Handler(msg *message.Message) error {
 		panic(err)
 	}
 
-	// switch domainEvent.EventType {
-	// case "RoleCreatedEvent":
-	// 	err = u.create(eventType.(*event.RoleCreatedEvent))
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// default:
-	// 	return domainerrors.Wrap(ErrorCodeHandleMessage, err)
-	// }
+	switch domainEvent.EventType {
+	case "RoleCreatedEvent":
+		err = u.create(msg.Context(), eventType.(*event.RoleCreatedEvent))
+		if err != nil {
+			return err
+		}
+	default:
+		return domainerrors.Wrap(ErrorCodeHandleMessage, err)
+	}
 
 	return nil
 }
 
-// func (u *Routes) create(event *event.RoleCreatedEvent) error {
-// 	// Transform event data to service input
-// 	info := role.CreatedInput{}
-// 	if err := copier.Copy(&info, event); err != nil {
-// 		return domainerrors.Wrap(ErrorCodeRoleCopyToInput, err)
-// 	}
+func (u *Routes) create(ctx context.Context, event *event.RoleCreatedEvent) error {
+	// Transform event data to service input
+	// info := role.CreatedInput{}
+	info := role.UpdatedInput{}
+	if err := copier.Copy(&info, event); err != nil {
+		return domainerrors.Wrap(ErrorCodeRoleCopyToInput, err)
+	}
 
-// 	info.Permissions = strings.Join(event.Permissions, ",")
+	info.Permissions = strings.Join(event.Permissions, ",")
 
-// 	_, err := u.s.CreateRole(context.Background(), &info)
-// 	if err != nil {
-// 		return err
-// 	}
+	// _, err := u.s.CreateRole(ctx, &info)
+	_, err := u.s.UpdateRole(ctx, &info)
+	if err != nil {
+		return err
+	}
 
-// 	return nil
-// }
+	return nil
+}

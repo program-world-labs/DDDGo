@@ -632,6 +632,20 @@ func (mr *MockICacheDataSourceMockRecorder) DeleteListItem(ctx, e, sq interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteListItem", reflect.TypeOf((*MockICacheDataSource)(nil).DeleteListItem), ctx, e, sq)
 }
 
+// DeleteWithKey mocks base method.
+func (m *MockICacheDataSource) DeleteWithKey(ctx context.Context, key string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteWithKey", ctx, key)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteWithKey indicates an expected call of DeleteWithKey.
+func (mr *MockICacheDataSourceMockRecorder) DeleteWithKey(ctx, key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteWithKey", reflect.TypeOf((*MockICacheDataSource)(nil).DeleteWithKey), ctx, key)
+}
+
 // Get mocks base method.
 func (m *MockICacheDataSource) Get(ctx context.Context, e dto.IRepoEntity, ttl ...time.Duration) (dto.IRepoEntity, error) {
 	m.ctrl.T.Helper()
@@ -670,6 +684,21 @@ func (mr *MockICacheDataSourceMockRecorder) GetListItem(ctx, e, sq interface{}, 
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, e, sq}, ttl...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetListItem", reflect.TypeOf((*MockICacheDataSource)(nil).GetListItem), varargs...)
+}
+
+// GetListKeys mocks base method.
+func (m *MockICacheDataSource) GetListKeys(ctx context.Context, e dto.IRepoEntity) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetListKeys", ctx, e)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetListKeys indicates an expected call of GetListKeys.
+func (mr *MockICacheDataSourceMockRecorder) GetListKeys(ctx, e interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetListKeys", reflect.TypeOf((*MockICacheDataSource)(nil).GetListKeys), ctx, e)
 }
 
 // Set mocks base method.
