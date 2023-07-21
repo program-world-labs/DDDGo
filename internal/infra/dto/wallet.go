@@ -39,7 +39,7 @@ type Wallet struct {
 }
 
 func (a *Wallet) TableName() string {
-	return "Wallets"
+	return "Wallet"
 }
 
 func (a *Wallet) Transform(i domain.IEntity) (IRepoEntity, error) {
@@ -63,11 +63,6 @@ func (a *Wallet) BackToDomain() (domain.IEntity, error) {
 	return i, nil
 }
 
-func (a *Wallet) BeforeUpdate(_ *gorm.DB) (err error) {
-	a.UpdatedAt = time.Now()
-
-	return
-}
 func (a *Wallet) BeforeCreate(_ *gorm.DB) (err error) {
 	a.ID, err = generateID()
 	a.UpdatedAt = time.Now()

@@ -18,12 +18,14 @@ import (
 	v1 "github.com/program-world-labs/DDDGo/internal/adapter/http/v1"
 	adapter_message "github.com/program-world-labs/DDDGo/internal/adapter/message"
 	"github.com/program-world-labs/DDDGo/internal/application"
+	application_group "github.com/program-world-labs/DDDGo/internal/application/group"
 	application_role "github.com/program-world-labs/DDDGo/internal/application/role"
 	application_user "github.com/program-world-labs/DDDGo/internal/application/user"
 	"github.com/program-world-labs/DDDGo/internal/domain/event"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource/cache"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource/sql"
 	"github.com/program-world-labs/DDDGo/internal/infra/dto"
+	"github.com/program-world-labs/DDDGo/internal/infra/group"
 	"github.com/program-world-labs/DDDGo/internal/infra/repository"
 	"github.com/program-world-labs/DDDGo/internal/infra/role"
 	"github.com/program-world-labs/DDDGo/internal/infra/user"
@@ -80,10 +82,16 @@ func provideRoleRepo(sqlDatasource *sql.CRUDDatasourceImpl, bigCacheDatasource *
 	return role.NewRepoImpl(sqlDatasource, roleCache, bigCacheDatasource)
 }
 
-func provideServices(user application_user.IService, role application_role.IService) application.Services {
+func provideGroupRepo(sqlDatasource *sql.CRUDDatasourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl, client *rockscache.Client) *group.RepoImpl {
+	groupCache := cache.NewRedisCacheDataSourceImpl(client, sqlDatasource)
+	return group.NewRepoImpl(sqlDatasource, groupCache, bigCacheDatasource)
+}
+
+func provideServices(user application_user.IService, role application_role.IService, group application_group.IService) application.Services {
 	return application.Services{
-		User: user,
-		Role: role,
+		User:  user,
+		Role:  role,
+		Group: group,
 	}
 }
 
@@ -93,6 +101,10 @@ func provideUserService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transa
 
 func provideRoleService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *pkg_message.KafkaMessage, l pwlogger.Interface) application_role.IService {
 	return application_role.NewServiceImpl(roleRepo, userRepo, transactionRepo, eventProducer, l)
+}
+
+func provideGroupService(groupRepo *group.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *pkg_message.KafkaMessage, l pwlogger.Interface) application_group.IService {
+	return application_group.NewServiceImpl(groupRepo, userRepo, transactionRepo, eventProducer, l)
 }
 
 func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Server {
@@ -122,11 +134,13 @@ var appSet = wire.NewSet(
 	provideTransactionRepo,
 	provideUserRepo,
 	provideRoleRepo,
+	provideGroupRepo,
 	provideKafkaMessage,
 	provideMessageRouter,
 	provideEventTypeMapper,
 	provideUserService,
 	provideRoleService,
+	provideGroupService,
 	provideServices,
 	v1.NewRouter,
 	provideHTTPServer,

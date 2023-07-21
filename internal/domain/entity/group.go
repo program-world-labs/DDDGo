@@ -13,7 +13,7 @@ type Group struct {
 	Name        string    `json:"name"`        // Group Name
 	Description string    `json:"description"` // Group Descript
 	Users       []User    `json:"users"`       // Group User List
-	Owner       *User     `json:"owner"`
+	OwnerID     string    `json:"ownerId"`
 	Metadata    string    `json:"metadata"` // json content
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`

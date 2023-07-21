@@ -29,7 +29,7 @@ type Amount struct {
 }
 
 func (a *Amount) TableName() string {
-	return "Amounts"
+	return "Amount"
 }
 
 func (a *Amount) Transform(i domain.IEntity) (IRepoEntity, error) {
@@ -51,12 +51,6 @@ func (a *Amount) BackToDomain() (domain.IEntity, error) {
 	}
 
 	return i, nil
-}
-
-func (a *Amount) BeforeUpdate(_ *gorm.DB) (err error) {
-	a.UpdatedAt = time.Now()
-
-	return
 }
 
 func (a *Amount) BeforeCreate(_ *gorm.DB) (err error) {

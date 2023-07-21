@@ -29,7 +29,7 @@ type Role struct {
 }
 
 func (a *Role) TableName() string {
-	return "Roles"
+	return "Role"
 }
 
 func (a *Role) Transform(i domain.IEntity) (IRepoEntity, error) {
@@ -51,12 +51,6 @@ func (a *Role) BackToDomain() (domain.IEntity, error) {
 	}
 
 	return i, nil
-}
-
-func (a *Role) BeforeUpdate(_ *gorm.DB) (err error) {
-	a.UpdatedAt = time.Now()
-
-	return
 }
 
 func (a *Role) BeforeCreate(_ *gorm.DB) (err error) {

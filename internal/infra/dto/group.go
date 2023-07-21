@@ -21,7 +21,7 @@ type Group struct {
 	Name        string          `json:"name"`
 	Description string          `json:"description"`
 	Users       []User          `json:"users" gorm:"foreignKey:GroupID"`
-	Owner       *User           `json:"owner"`
+	OwnerID     string          `json:"ownerId"`
 	Metadata    string          `json:"metadata"`
 	CreatedAt   time.Time       `json:"created_at" mapstructure:"created_at" gorm:"column:created_at"`
 	UpdatedAt   time.Time       `json:"updated_at" mapstructure:"updated_at" gorm:"column:updated_at"`
@@ -29,7 +29,7 @@ type Group struct {
 }
 
 func (a *Group) TableName() string {
-	return "Groups"
+	return "Group"
 }
 
 func (a *Group) Transform(i domain.IEntity) (IRepoEntity, error) {
@@ -53,11 +53,6 @@ func (a *Group) BackToDomain() (domain.IEntity, error) {
 	return i, nil
 }
 
-func (a *Group) BeforeUpdate(_ *gorm.DB) (err error) {
-	a.UpdatedAt = time.Now()
-
-	return
-}
 func (a *Group) BeforeCreate(_ *gorm.DB) (err error) {
 	a.ID, err = generateID()
 	a.UpdatedAt = time.Now()
@@ -120,7 +115,6 @@ func (a *Group) ParseMap(data map[string]interface{}) (IRepoEntity, error) {
 func (a *Group) GetPreloads() []string {
 	return []string{
 		"Users",
-		"Owner",
 	}
 }
 
