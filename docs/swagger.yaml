@@ -1,5 +1,65 @@
 basePath: /v1
 definitions:
+  group.CreatedRequest:
+    properties:
+      description:
+        example: this is for group
+        type: string
+      name:
+        example: GroupA
+        type: string
+      ownerId:
+        type: string
+    required:
+    - description
+    - name
+    type: object
+  group.Response:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      ownerId:
+        type: string
+      updatedAt:
+        type: string
+      users:
+        items:
+          $ref: '#/definitions/user.Response'
+        type: array
+    type: object
+  group.ResponseList:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/group.Response'
+        type: array
+      limit:
+        type: integer
+      offset:
+        type: integer
+      total:
+        type: integer
+    type: object
+  group.UpdatedRequest:
+    properties:
+      description:
+        example: this is for admin role
+        type: string
+      name:
+        example: admin
+        type: string
+    required:
+    - description
+    - name
+    type: object
   http.Response:
     properties:
       code:
@@ -139,6 +199,203 @@ info:
   title: AI Service API
   version: "1.0"
 paths:
+  /group/create:
+    post:
+      consumes:
+      - application/json
+      description: Create group
+      operationId: CreateGroup
+      parameters:
+      - description: Group Create Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/group.CreatedRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/group.Response'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: Create group
+      tags:
+      - Group
+  /group/delete/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete group
+      operationId: DeleteGroup
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/group.Response'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: Delete group
+      tags:
+      - Group
+  /group/detail/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Detail group
+      operationId: DetailGroup
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/group.Response'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: Detail group
+      tags:
+      - Group
+  /group/list:
+    get:
+      consumes:
+      - application/json
+      description: List group
+      operationId: ListGroup
+      parameters:
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      - description: FilterName
+        in: query
+        name: filterName
+        type: string
+      - description: SortFields
+        in: query
+        name: sortFields
+        type: string
+      - description: Dir
+        in: query
+        name: dir
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/group.ResponseList'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: List group
+      tags:
+      - Group
+  /group/update/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Update group
+      operationId: UpdateGroup
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Group Update Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/group.UpdatedRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/group.Response'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: Update group
+      tags:
+      - Group
   /role/create:
     post:
       consumes:

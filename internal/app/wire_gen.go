@@ -17,12 +17,14 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/adapter/http/v1"
 	message3 "github.com/program-world-labs/DDDGo/internal/adapter/message"
 	"github.com/program-world-labs/DDDGo/internal/application"
+	group2 "github.com/program-world-labs/DDDGo/internal/application/group"
 	role2 "github.com/program-world-labs/DDDGo/internal/application/role"
 	user2 "github.com/program-world-labs/DDDGo/internal/application/user"
 	"github.com/program-world-labs/DDDGo/internal/domain/event"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource/cache"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource/sql"
 	"github.com/program-world-labs/DDDGo/internal/infra/dto"
+	"github.com/program-world-labs/DDDGo/internal/infra/group"
 	"github.com/program-world-labs/DDDGo/internal/infra/repository"
 	"github.com/program-world-labs/DDDGo/internal/infra/role"
 	"github.com/program-world-labs/DDDGo/internal/infra/user"
@@ -63,7 +65,9 @@ func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server
 	}
 	iService := provideUserService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
 	roleIService := provideRoleService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
-	services := provideServices(iService, roleIService)
+	groupRepoImpl := provideGroupRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
+	groupIService := provideGroupService(groupRepoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
+	services := provideServices(iService, roleIService, groupIService)
 	engine := v1.NewRouter(l, services, cfg)
 	server := provideHTTPServer(engine, cfg)
 	return server, nil
@@ -96,7 +100,9 @@ func NewMessageRouter(cfg *config.Config, l pwlogger.Interface) (*message.Router
 	transactionRunRepoImpl := provideTransactionRepo(transactionDataSourceImpl)
 	iService := provideUserService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
 	roleIService := provideRoleService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
-	services := provideServices(iService, roleIService)
+	groupRepoImpl := provideGroupRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
+	groupIService := provideGroupService(groupRepoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
+	services := provideServices(iService, roleIService, groupIService)
 	router, err := provideMessageRouter(kafkaMessage, typeMapper, services, l)
 	if err != nil {
 		return nil, err
@@ -152,10 +158,16 @@ func provideRoleRepo(sqlDatasource *sql.CRUDDatasourceImpl, bigCacheDatasource *
 	return role.NewRepoImpl(sqlDatasource, roleCache, bigCacheDatasource)
 }
 
-func provideServices(user3 user2.IService, role3 role2.IService) application.Services {
+func provideGroupRepo(sqlDatasource *sql.CRUDDatasourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl, client *rockscache.Client) *group.RepoImpl {
+	groupCache := cache.NewRedisCacheDataSourceImpl(client, sqlDatasource)
+	return group.NewRepoImpl(sqlDatasource, groupCache, bigCacheDatasource)
+}
+
+func provideServices(user3 user2.IService, role3 role2.IService, group3 group2.IService) application.Services {
 	return application.Services{
-		User: user3,
-		Role: role3,
+		User:  user3,
+		Role:  role3,
+		Group: group3,
 	}
 }
 
@@ -165,6 +177,10 @@ func provideUserService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transa
 
 func provideRoleService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *message2.KafkaMessage, l pwlogger.Interface) role2.IService {
 	return role2.NewServiceImpl(roleRepo, userRepo, transactionRepo, eventProducer, l)
+}
+
+func provideGroupService(groupRepo *group.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *message2.KafkaMessage, l pwlogger.Interface) group2.IService {
+	return group2.NewServiceImpl(groupRepo, userRepo, transactionRepo, eventProducer, l)
 }
 
 func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Server {
@@ -190,10 +206,12 @@ var appSet = wire.NewSet(
 	provideRocksCache, sql.NewTransactionRunDataSourceImpl, sql.NewCRUDDatasourceImpl, cache.NewBigCacheDataSourceImp, provideTransactionRepo,
 	provideUserRepo,
 	provideRoleRepo,
+	provideGroupRepo,
 	provideKafkaMessage,
 	provideMessageRouter,
 	provideEventTypeMapper,
 	provideUserService,
 	provideRoleService,
+	provideGroupService,
 	provideServices, v1.NewRouter, provideHTTPServer,
 )

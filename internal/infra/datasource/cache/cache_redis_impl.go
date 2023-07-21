@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -61,6 +62,12 @@ func (r *RedisCacheDataSourceImpl) Get(ctx context.Context, model dto.IRepoEntit
 
 		return string(jsonData), nil
 	})
+
+	var e *domainerrors.ErrorInfo
+	if errors.As(err, &e) {
+		return nil, err
+	}
+
 	if err != nil {
 		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
 	}
@@ -113,6 +120,12 @@ func (r *RedisCacheDataSourceImpl) GetListItem(ctx context.Context, model dto.IR
 
 		return string(jsonData), nil
 	})
+
+	var e *domainerrors.ErrorInfo
+	if errors.As(err, &e) {
+		return nil, err
+	}
+
 	if err != nil {
 		return nil, domainerrors.Wrap(ErrorCodeCacheGet, err)
 	}

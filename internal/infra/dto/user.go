@@ -24,9 +24,9 @@ type User struct {
 	DisplayName string          `json:"display_name"`
 	Avatar      string          `json:"avatar"`
 	Enabled     bool            `json:"enabled"`
-	Roles       []*Role         `json:"roles" gorm:"many2many:user_roles;"`
-	Wallets     []*Wallet       `json:"wallets" gorm:"foreignKey:UserID"`
-	Group       *Group          `json:"group"`
+	Roles       []Role          `json:"roles" gorm:"many2many:user_roles;"`
+	Wallets     []Wallet        `json:"wallets" gorm:"foreignKey:UserID"`
+	Group       Group           `json:"group"`
 	GroupID     string          `json:"groupId"`
 	CreatedAt   time.Time       `json:"created_at" mapstructure:"created_at" gorm:"column:created_at"`
 	UpdatedAt   time.Time       `json:"updated_at" mapstructure:"updated_at" gorm:"column:updated_at"`
@@ -34,7 +34,7 @@ type User struct {
 }
 
 func (a *User) TableName() string {
-	return "Users"
+	return "User"
 }
 
 func (a *User) Transform(i domain.IEntity) (IRepoEntity, error) {
@@ -82,11 +82,6 @@ func (a *User) BackToDomain() (domain.IEntity, error) {
 	return i, nil
 }
 
-func (a *User) BeforeUpdate(_ *gorm.DB) (err error) {
-	a.UpdatedAt = time.Now()
-
-	return
-}
 func (a *User) BeforeCreate(_ *gorm.DB) (err error) {
 	a.ID, err = generateID()
 	a.UpdatedAt = time.Now()
