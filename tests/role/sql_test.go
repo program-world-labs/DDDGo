@@ -43,8 +43,8 @@ func TestCreateRole(t *testing.T) {
 		{
 			name: "create role",
 			mock: func() {
-				mock.ExpectPrepare("^INSERT INTO \"Role\".*")
-				mock.ExpectExec("^INSERT INTO \"Role\".*").
+				mock.ExpectPrepare("^INSERT INTO \"Roles\".*")
+				mock.ExpectExec("^INSERT INTO \"Roles\".*").
 					WithArgs(sqlmock.AnyArg(), "test", "test", pq.Array([]string{"test", "test"}), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 			},

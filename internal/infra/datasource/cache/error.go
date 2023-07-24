@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	ErrorCodeCacheSet = domainerrors.ErrorCodeDatasourceCache + iota + 1
+	ErrorCodeCacheSet = domainerrors.ErrorCodeInfraDatasource + domainerrors.ErrorCodeInfraDatasource + domainerrors.ErrorCodeInfraDatasourceCache + iota
 	ErrorCodeCacheDelete
 	ErrorCodeCacheGet
 )

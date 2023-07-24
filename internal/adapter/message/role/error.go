@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	ErrorCodeRoleUsecase = domainerrors.ErrorCodeAdapterMessageRole + iota
-	ErrorCodeRoleCopyToInput
+	ErrorCodeAdapterMessageRole = domainerrors.ErrorCodeAdapter + domainerrors.ErrorCodeAdapterMessage + domainerrors.ErrorCodeAdapterRole + iota
+	ErrorCodeCopyToInput
 	ErrorCodeHandleMessage
 )

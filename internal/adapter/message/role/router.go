@@ -77,7 +77,7 @@ func (u *Routes) create(ctx context.Context, event *event.RoleCreatedEvent) erro
 	// info := role.CreatedInput{}
 	info := role.UpdatedInput{}
 	if err := copier.Copy(&info, event); err != nil {
-		return domainerrors.Wrap(ErrorCodeRoleCopyToInput, err)
+		return domainerrors.Wrap(ErrorCodeCopyToInput, err)
 	}
 
 	info.Permissions = strings.Join(event.Permissions, ",")

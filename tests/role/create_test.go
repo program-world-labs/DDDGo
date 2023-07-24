@@ -99,10 +99,10 @@ func (st *ServiceTest) InitializeScenario(ctx *godog.ScenarioContext) {
 
 var (
 	ErrRoleIsExist                     = errors.New("role is exist")
-	ErrRolePermission                  = errors.New("validation failed: role Permissions invalid permission format")
-	ErrRoleDescriptionExceedsMaxLength = errors.New("validation failed: role Description exceeds max length")
-	ErrRoleNameExceedsMaxLength        = errors.New("validation failed: role Name exceeds max length")
-	ErrRoleNameFormat                  = errors.New("validation failed: role Name invalid format")
+	ErrRolePermission                  = errors.New("validation failed: Role Permissions invalid permission format")
+	ErrRoleDescriptionExceedsMaxLength = errors.New("validation failed: Role Description exceeds max length")
+	ErrRoleNameExceedsMaxLength        = errors.New("validation failed: Role Name exceeds max length")
+	ErrRoleNameFormat                  = errors.New("validation failed: Role Name invalid format")
 )
 
 func newRolseExistError() *domainerrors.ErrorInfo {

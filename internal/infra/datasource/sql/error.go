@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	ErrorCodeSQLCreate = domainerrors.ErrorCodeDatasourceSQL + iota + 1
+	ErrorCodeSQLCreate = domainerrors.ErrorCodeInfraDatasource + domainerrors.ErrorCodeInfraDatasource + domainerrors.ErrorCodeInfraDatasourceSQL + iota
 	ErrorCodeSQLDelete
 	ErrorCodeSQLUpdate
 	ErrorCodeSQLUpdateWithFields

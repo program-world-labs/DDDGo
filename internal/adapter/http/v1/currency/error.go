@@ -7,12 +7,13 @@ import (
 )
 
 const (
-	ErrorCodeCurrencyUsecase = domainerrors.ErrorCodeAdapterHTTPCurrency + iota
-	ErrorCodeCurrencyBindJSON
-	ErrorCodeCurrencyCopyToInput
-	ErrorCodeCurrencyBindQuery
-	ErrorCodeCurrencyValidateInput
-	ErrorCodeCurrencyBindURI
+	ErrorCodeAdapterHTTPCurrency = domainerrors.ErrorCodeAdapter + domainerrors.ErrorCodeAdapterHTTP + domainerrors.ErrorCodeAdapterCurrency + iota
+	ErrorCodeExecuteUsecase
+	ErrorCodeBindJSON
+	ErrorCodeCopyToInput
+	ErrorCodeBindQuery
+	ErrorCodeValidateInput
+	ErrorCodeBindURI
 )
 
 type ErrorEvent struct {

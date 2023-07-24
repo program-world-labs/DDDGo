@@ -55,7 +55,7 @@ func (r *walletRoutes) create(c *gin.Context) {
 	var req CreatedRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindJSON")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletBindJSON, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeBindJSON, err, span))
 
 		return
 	}
@@ -66,7 +66,7 @@ func (r *walletRoutes) create(c *gin.Context) {
 
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletCopyToInput, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCopyToInput, err, span))
 
 		return
 	}
@@ -74,7 +74,7 @@ func (r *walletRoutes) create(c *gin.Context) {
 	walletEntity, err := r.u.CreateWallet(ctx, &input)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - CreateWallet")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletUsecase, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeExecuteUsecase, err, span))
 
 		return
 	}
@@ -111,7 +111,7 @@ func (r *walletRoutes) list(c *gin.Context) {
 	var req ListGotRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindQuery")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletBindQuery, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeBindQuery, err, span))
 
 		return
 	}
@@ -121,7 +121,7 @@ func (r *walletRoutes) list(c *gin.Context) {
 
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletCopyToInput, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCopyToInput, err, span))
 
 		return
 	}
@@ -130,7 +130,7 @@ func (r *walletRoutes) list(c *gin.Context) {
 	walletEntities, err := r.u.GetWalletList(ctx, &input)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - ListWallet")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletUsecase, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeExecuteUsecase, err, span))
 
 		return
 	}
@@ -163,7 +163,7 @@ func (r *walletRoutes) detail(c *gin.Context) {
 	var req DetailGotRequest
 	if err := c.ShouldBindUri(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindUri")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletBindQuery, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeBindQuery, err, span))
 
 		return
 	}
@@ -173,7 +173,7 @@ func (r *walletRoutes) detail(c *gin.Context) {
 
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletCopyToInput, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCopyToInput, err, span))
 
 		return
 	}
@@ -182,7 +182,7 @@ func (r *walletRoutes) detail(c *gin.Context) {
 	walletEntity, err := r.u.GetWalletDetail(ctx, &input)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - DetailWallet")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletUsecase, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeExecuteUsecase, err, span))
 
 		return
 	}
@@ -214,7 +214,7 @@ func (r *walletRoutes) update(c *gin.Context) {
 	var req UpdatedRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindJSON")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletBindJSON, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeBindJSON, err, span))
 
 		return
 	}
@@ -227,7 +227,7 @@ func (r *walletRoutes) update(c *gin.Context) {
 
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletCopyToInput, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCopyToInput, err, span))
 
 		return
 	}
@@ -238,7 +238,7 @@ func (r *walletRoutes) update(c *gin.Context) {
 	data, err := r.u.UpdateWallet(ctx, &input)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - UpdateWallet")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletUsecase, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeExecuteUsecase, err, span))
 
 		return
 	}
@@ -271,7 +271,7 @@ func (r *walletRoutes) delete(c *gin.Context) {
 	var req DeletedRequest
 	if err := c.ShouldBindUri(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindUri")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletBindQuery, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeBindQuery, err, span))
 
 		return
 	}
@@ -281,7 +281,7 @@ func (r *walletRoutes) delete(c *gin.Context) {
 	err := copier.Copy(&input, &req)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletCopyToInput, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCopyToInput, err, span))
 
 		return
 	}
@@ -290,7 +290,7 @@ func (r *walletRoutes) delete(c *gin.Context) {
 	info, err := r.u.DeleteWallet(ctx, &input)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - DeleteWallet")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletUsecase, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeExecuteUsecase, err, span))
 
 		return
 	}
