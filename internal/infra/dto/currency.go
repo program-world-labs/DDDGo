@@ -32,7 +32,7 @@ func (a *Currency) TableName() string {
 
 func (a *Currency) Transform(i domain.IEntity) (IRepoEntity, error) {
 	if err := copier.Copy(a, i); err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeCurrencyTransform, err)
+		return nil, domainerrors.Wrap(ErrorCodeTransform, err)
 	}
 
 	return a, nil
@@ -41,7 +41,7 @@ func (a *Currency) Transform(i domain.IEntity) (IRepoEntity, error) {
 func (a *Currency) BackToDomain() (domain.IEntity, error) {
 	i := &entity.Currency{}
 	if err := copier.Copy(i, a); err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeCurrencyBackToDomain, err)
+		return nil, domainerrors.Wrap(ErrorCodeBackToDomain, err)
 	}
 
 	if a.DeletedAt != nil {
@@ -71,7 +71,7 @@ func (a *Currency) SetID(id string) {
 func (a *Currency) ToJSON() (string, error) {
 	jsonData, err := json.Marshal(a)
 	if err != nil {
-		return "", domainerrors.Wrap(ErrorCodeCurrencyToJSON, err)
+		return "", domainerrors.Wrap(ErrorCodeToJSON, err)
 	}
 
 	return string(jsonData), nil
@@ -87,7 +87,7 @@ func (a *Currency) UnmarshalJSON(data []byte) error {
 	}
 
 	if err := json.Unmarshal(data, &aux); err != nil {
-		return domainerrors.Wrap(ErrorCodeCurrencyDecodeJSON, err)
+		return domainerrors.Wrap(ErrorCodeDecodeJSON, err)
 	}
 
 	return nil
@@ -96,7 +96,7 @@ func (a *Currency) UnmarshalJSON(data []byte) error {
 func (a *Currency) ParseMap(data map[string]interface{}) (IRepoEntity, error) {
 	err := ParseDateString(data)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeCurrencyParseMap, err)
+		return nil, domainerrors.Wrap(ErrorCodeParseMap, err)
 	}
 
 	var info *Currency
@@ -104,7 +104,7 @@ func (a *Currency) ParseMap(data map[string]interface{}) (IRepoEntity, error) {
 	err = mapstructure.Decode(data, &info)
 
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeCurrencyParseMap, err)
+		return nil, domainerrors.Wrap(ErrorCodeParseMap, err)
 	}
 
 	return info, nil

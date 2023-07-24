@@ -72,7 +72,7 @@ mock: ### run mockgen
 .PHONY: mock
 
 wire: ### run mockgen
-	wire
+	wire ./internal/app
 .PHONY: wire
 
 migrate-create:  ### create new migration

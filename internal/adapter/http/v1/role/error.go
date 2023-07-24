@@ -7,12 +7,13 @@ import (
 )
 
 const (
-	ErrorCodeRoleUsecase = domainerrors.ErrorCodeAdapterHTTPRole + iota
-	ErrorCodeRoleBindJSON
-	ErrorCodeRoleCopyToInput
-	ErrorCodeRoleBindQuery
-	ErrorCodeRoleValidateInput
-	ErrorCodeRoleBindURI
+	ErrorCodeAdapterHTTPRole = domainerrors.ErrorCodeAdapter + domainerrors.ErrorCodeAdapterHTTP + domainerrors.ErrorCodeAdapterRole + iota
+	ErrorCodeExecuteUsecase
+	ErrorCodeBindJSON
+	ErrorCodeCopyToInput
+	ErrorCodeBindQuery
+	ErrorCodeValidateInput
+	ErrorCodeBindURI
 )
 
 type ErrorEvent struct {

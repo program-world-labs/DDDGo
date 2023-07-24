@@ -25,7 +25,7 @@ func (c *CreatedInput) Validate() error {
 	if err != nil {
 		var e validator.ValidationErrors
 		if errors.As(err, &e) {
-			return utils.HandleValidationError(e)
+			return utils.HandleValidationError("Group", e)
 		}
 
 		return err
@@ -64,7 +64,7 @@ func (c *UpdatedInput) Validate() error {
 	if err != nil {
 		var e validator.ValidationErrors
 		if errors.As(err, &e) {
-			return utils.HandleValidationError(e)
+			return utils.HandleValidationError("Group", e)
 		}
 
 		return err
@@ -91,7 +91,7 @@ func (i *DeletedInput) Validate() error {
 	if err != nil {
 		var e validator.ValidationErrors
 		if errors.As(err, &e) {
-			return utils.HandleValidationError(e)
+			return utils.HandleValidationError("Group", e)
 		}
 
 		return err
@@ -110,7 +110,7 @@ func (i *DetailGotInput) Validate() error {
 	if err != nil {
 		var e validator.ValidationErrors
 		if errors.As(err, &e) {
-			return utils.HandleValidationError(e)
+			return utils.HandleValidationError("Group", e)
 		}
 
 		return err
@@ -133,7 +133,7 @@ func (i *ListGotInput) Validate() error {
 	if err != nil {
 		var e validator.ValidationErrors
 		if errors.As(err, &e) {
-			return utils.HandleValidationError(e)
+			return utils.HandleValidationError("Group", e)
 		}
 
 		return err

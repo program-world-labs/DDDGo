@@ -12,13 +12,13 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 )
 
-type userRoutes struct {
+type Routes struct {
 	u application_user.IService
 	l pwlogger.Interface
 }
 
 func NewUserRoutes(handler *gin.RouterGroup, u application_user.IService, l pwlogger.Interface) {
-	r := &userRoutes{u, l}
+	r := &Routes{u, l}
 
 	h := handler.Group("/user")
 	{
@@ -43,7 +43,7 @@ func NewUserRoutes(handler *gin.RouterGroup, u application_user.IService, l pwlo
 // @Router			/user/create [post].
 //
 //nolint:dupl // business logic is different
-func (r *userRoutes) create(c *gin.Context) {
+func (r *Routes) create(c *gin.Context) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
 	ctx, span := tracer.Start(c.Request.Context(), "adapter-create-user")
@@ -54,7 +54,7 @@ func (r *userRoutes) create(c *gin.Context) {
 	var req CreatedRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindJSON")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeUserBindJSON, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeBindJSON, err, span))
 
 		return
 	}
@@ -65,7 +65,7 @@ func (r *userRoutes) create(c *gin.Context) {
 
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeUserCopyToInput, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCopyToInput, err, span))
 
 		return
 	}
@@ -73,7 +73,7 @@ func (r *userRoutes) create(c *gin.Context) {
 	userEntity, err := r.u.CreateUser(ctx, &input)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - CreateUser")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeUserUsecase, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeExecuteUsecase, err, span))
 
 		return
 	}
@@ -99,7 +99,7 @@ func (r *userRoutes) create(c *gin.Context) {
 // @Router			/user/list [get].
 //
 //nolint:dupl // business logic is different
-func (r *userRoutes) list(c *gin.Context) {
+func (r *Routes) list(c *gin.Context) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
 	ctx, span := tracer.Start(c.Request.Context(), "adapter-list-user")
@@ -110,7 +110,7 @@ func (r *userRoutes) list(c *gin.Context) {
 	var req ListGotRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindQuery")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeUserBindQuery, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeBindQuery, err, span))
 
 		return
 	}
@@ -121,7 +121,7 @@ func (r *userRoutes) list(c *gin.Context) {
 
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeUserCopyToInput, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCopyToInput, err, span))
 
 		return
 	}
@@ -129,7 +129,7 @@ func (r *userRoutes) list(c *gin.Context) {
 	userList, err := r.u.GetUserList(ctx, &input)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - ListUser")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeUserUsecase, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeExecuteUsecase, err, span))
 
 		return
 	}
@@ -151,7 +151,7 @@ func (r *userRoutes) list(c *gin.Context) {
 // @Router			/user/detail/{id} [get].
 //
 //nolint:dupl // business logic is different
-func (r *userRoutes) detail(c *gin.Context) {
+func (r *Routes) detail(c *gin.Context) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
 	ctx, span := tracer.Start(c.Request.Context(), "adapter-detail-user")
@@ -162,7 +162,7 @@ func (r *userRoutes) detail(c *gin.Context) {
 	var req DetailRequest
 	if err := c.ShouldBindUri(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindUri")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeUserBindURI, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeBindURI, err, span))
 
 		return
 	}
@@ -171,7 +171,7 @@ func (r *userRoutes) detail(c *gin.Context) {
 	userEntity, err := r.u.GetUserDetail(ctx, &application_user.DetailGotInput{ID: req.ID})
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - DetailUser")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeUserUsecase, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeExecuteUsecase, err, span))
 
 		return
 	}
@@ -192,7 +192,7 @@ func (r *userRoutes) detail(c *gin.Context) {
 // @Failure		400		{object}	http.Response
 // @Failure		500		{object}	http.Response
 // @Router			/user/update/{id} [put].
-func (r *userRoutes) update(c *gin.Context) {
+func (r *Routes) update(c *gin.Context) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
 	ctx, span := tracer.Start(c.Request.Context(), "adapter-update-user")
@@ -203,7 +203,7 @@ func (r *userRoutes) update(c *gin.Context) {
 	var req UpdateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindJSON")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeUserBindJSON, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeBindJSON, err, span))
 
 		return
 	}
@@ -217,7 +217,7 @@ func (r *userRoutes) update(c *gin.Context) {
 	err := copier.Copy(&input, &req)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeUserCopyToInput, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCopyToInput, err, span))
 
 		return
 	}
@@ -227,7 +227,7 @@ func (r *userRoutes) update(c *gin.Context) {
 	userEntity, err := r.u.UpdateUser(ctx, &input)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - UpdateUser")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeUserUsecase, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeExecuteUsecase, err, span))
 
 		return
 	}
@@ -249,7 +249,7 @@ func (r *userRoutes) update(c *gin.Context) {
 // @Router			/user/delete/{id} [delete].
 //
 //nolint:dupl // business logic is different
-func (r *userRoutes) delete(c *gin.Context) {
+func (r *Routes) delete(c *gin.Context) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
 	ctx, span := tracer.Start(c.Request.Context(), "adapter-delete-user")
@@ -260,7 +260,7 @@ func (r *userRoutes) delete(c *gin.Context) {
 	var req DeleteRequest
 	if err := c.ShouldBindUri(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindUri")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeUserBindURI, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeBindURI, err, span))
 
 		return
 	}
@@ -269,7 +269,7 @@ func (r *userRoutes) delete(c *gin.Context) {
 	info, err := r.u.DeleteUser(ctx, &application_user.DeletedInput{ID: req.ID})
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - DeleteUser")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeUserUsecase, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeExecuteUsecase, err, span))
 
 		return
 	}

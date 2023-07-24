@@ -34,54 +34,35 @@ type User struct {
 }
 
 func (a *User) TableName() string {
-	return "User"
+	return "Users"
 }
 
 func (a *User) Transform(i domain.IEntity) (IRepoEntity, error) {
 	if err := copier.Copy(a, i); err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeUserTransform, err)
+		return nil, domainerrors.Wrap(ErrorCodeTransform, err)
 	}
 
 	return a, nil
 }
 
 func (a *User) BackToDomain() (domain.IEntity, error) {
-	var groupDelete time.Time
-	if a.Group.DeletedAt != nil {
-		groupDelete = a.Group.DeletedAt.Time
+	i := &entity.User{}
+	if err := copier.Copy(i, a); err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeBackToDomain, err)
 	}
 
-	group := &entity.Group{
-		ID:          a.GroupID,
-		Name:        a.Group.Name,
-		Description: a.Group.Description,
-		Metadata:    a.Group.Metadata,
-		CreatedAt:   a.Group.CreatedAt,
-		UpdatedAt:   a.Group.UpdatedAt,
-		DeletedAt:   groupDelete,
-	}
-
-	var deleteTime time.Time
 	if a.DeletedAt != nil {
-		deleteTime = a.DeletedAt.Time
-	}
-
-	i := &entity.User{
-		ID:          a.ID,
-		Username:    a.Username,
-		Password:    a.Password,
-		EMail:       a.EMail,
-		DisplayName: a.DisplayName,
-		Avatar:      a.Avatar,
-		Group:       group,
-		CreatedAt:   a.CreatedAt,
-		UpdatedAt:   a.UpdatedAt,
-		DeletedAt:   deleteTime,
+		i.DeletedAt = a.DeletedAt.Time
 	}
 
 	return i, nil
 }
 
+func (a *User) BeforeUpdate(_ *gorm.DB) (err error) {
+	a.UpdatedAt = time.Now()
+
+	return
+}
 func (a *User) BeforeCreate(_ *gorm.DB) (err error) {
 	a.ID, err = generateID()
 	a.UpdatedAt = time.Now()
@@ -102,7 +83,7 @@ func (a *User) SetID(id string) {
 func (a *User) ToJSON() (string, error) {
 	jsonData, err := json.Marshal(a)
 	if err != nil {
-		return "", domainerrors.Wrap(ErrorCodeUserToJSON, err)
+		return "", domainerrors.Wrap(ErrorCodeToJSON, err)
 	}
 
 	return string(jsonData), nil
@@ -118,7 +99,7 @@ func (a *User) UnmarshalJSON(data []byte) error {
 	}
 
 	if err := json.Unmarshal(data, &aux); err != nil {
-		return domainerrors.Wrap(ErrorCodeUserDecodeJSON, err)
+		return domainerrors.Wrap(ErrorCodeDecodeJSON, err)
 	}
 
 	return nil
@@ -127,14 +108,14 @@ func (a *User) UnmarshalJSON(data []byte) error {
 func (a *User) ParseMap(data map[string]interface{}) (IRepoEntity, error) {
 	err := ParseDateString(data)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeUserParseMap, err)
+		return nil, domainerrors.Wrap(ErrorCodeParseMap, err)
 	}
 
 	var info *User
 	err = mapstructure.Decode(data, &info)
 
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeUserDecodeJSON, err)
+		return nil, domainerrors.Wrap(ErrorCodeDecodeJSON, err)
 	}
 
 	return info, nil

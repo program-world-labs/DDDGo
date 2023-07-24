@@ -55,7 +55,7 @@ func (r *currencyRoutes) create(c *gin.Context) {
 	var req CreatedRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindJSON")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCurrencyBindJSON, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeBindJSON, err, span))
 
 		return
 	}
@@ -66,7 +66,7 @@ func (r *currencyRoutes) create(c *gin.Context) {
 
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCurrencyCopyToInput, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCopyToInput, err, span))
 
 		return
 	}
@@ -74,7 +74,7 @@ func (r *currencyRoutes) create(c *gin.Context) {
 	currencyEntity, err := r.u.CreateCurrency(ctx, &input)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - CreateCurrency")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCurrencyUsecase, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeExecuteUsecase, err, span))
 
 		return
 	}
@@ -111,7 +111,7 @@ func (r *currencyRoutes) list(c *gin.Context) {
 	var req ListGotRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindQuery")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCurrencyBindQuery, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeBindQuery, err, span))
 
 		return
 	}
@@ -121,7 +121,7 @@ func (r *currencyRoutes) list(c *gin.Context) {
 
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCurrencyCopyToInput, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCopyToInput, err, span))
 
 		return
 	}
@@ -130,7 +130,7 @@ func (r *currencyRoutes) list(c *gin.Context) {
 	currencyEntities, err := r.u.GetCurrencyList(ctx, &input)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - ListCurrency")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCurrencyUsecase, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeExecuteUsecase, err, span))
 
 		return
 	}
@@ -163,7 +163,7 @@ func (r *currencyRoutes) detail(c *gin.Context) {
 	var req DetailGotRequest
 	if err := c.ShouldBindUri(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindUri")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCurrencyBindQuery, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeBindQuery, err, span))
 
 		return
 	}
@@ -173,7 +173,7 @@ func (r *currencyRoutes) detail(c *gin.Context) {
 
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCurrencyCopyToInput, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCopyToInput, err, span))
 
 		return
 	}
@@ -182,7 +182,7 @@ func (r *currencyRoutes) detail(c *gin.Context) {
 	currencyEntity, err := r.u.GetCurrencyDetail(ctx, &input)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - DetailCurrency")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCurrencyUsecase, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeExecuteUsecase, err, span))
 
 		return
 	}
@@ -214,7 +214,7 @@ func (r *currencyRoutes) update(c *gin.Context) {
 	var req UpdatedRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindJSON")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCurrencyBindJSON, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeBindJSON, err, span))
 
 		return
 	}
@@ -227,7 +227,7 @@ func (r *currencyRoutes) update(c *gin.Context) {
 
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCurrencyCopyToInput, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCopyToInput, err, span))
 
 		return
 	}
@@ -238,7 +238,7 @@ func (r *currencyRoutes) update(c *gin.Context) {
 	data, err := r.u.UpdateCurrency(ctx, &input)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - UpdateCurrency")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCurrencyUsecase, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeExecuteUsecase, err, span))
 
 		return
 	}
@@ -271,7 +271,7 @@ func (r *currencyRoutes) delete(c *gin.Context) {
 	var req DeletedRequest
 	if err := c.ShouldBindUri(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindUri")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCurrencyBindQuery, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeBindQuery, err, span))
 
 		return
 	}
@@ -281,7 +281,7 @@ func (r *currencyRoutes) delete(c *gin.Context) {
 	err := copier.Copy(&input, &req)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCurrencyCopyToInput, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCopyToInput, err, span))
 
 		return
 	}
@@ -290,7 +290,7 @@ func (r *currencyRoutes) delete(c *gin.Context) {
 	info, err := r.u.DeleteCurrency(ctx, &input)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - DeleteCurrency")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeCurrencyUsecase, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeExecuteUsecase, err, span))
 
 		return
 	}

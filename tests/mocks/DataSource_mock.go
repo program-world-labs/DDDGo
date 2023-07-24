@@ -618,6 +618,20 @@ func (mr *MockICacheDataSourceMockRecorder) Delete(ctx, e interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockICacheDataSource)(nil).Delete), ctx, e)
 }
 
+// DeleteListKeys mocks base method.
+func (m *MockICacheDataSource) DeleteListKeys(ctx context.Context, e dto.IRepoEntity) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteListKeys", ctx, e)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteListKeys indicates an expected call of DeleteListKeys.
+func (mr *MockICacheDataSourceMockRecorder) DeleteListKeys(ctx, e interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteListKeys", reflect.TypeOf((*MockICacheDataSource)(nil).DeleteListKeys), ctx, e)
+}
+
 // DeleteWithKey mocks base method.
 func (m *MockICacheDataSource) DeleteWithKey(ctx context.Context, key string) error {
 	m.ctrl.T.Helper()

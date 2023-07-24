@@ -44,7 +44,7 @@ func (a *Wallet) TableName() string {
 
 func (a *Wallet) Transform(i domain.IEntity) (IRepoEntity, error) {
 	if err := copier.Copy(a, i); err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeWalletTransform, err)
+		return nil, domainerrors.Wrap(ErrorCodeTransform, err)
 	}
 
 	return a, nil
@@ -53,7 +53,7 @@ func (a *Wallet) Transform(i domain.IEntity) (IRepoEntity, error) {
 func (a *Wallet) BackToDomain() (domain.IEntity, error) {
 	i := &entity.Wallet{}
 	if err := copier.Copy(i, a); err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeWalletBackToDomain, err)
+		return nil, domainerrors.Wrap(ErrorCodeBackToDomain, err)
 	}
 
 	if a.DeletedAt != nil {
@@ -83,7 +83,7 @@ func (a *Wallet) SetID(id string) {
 func (a *Wallet) ToJSON() (string, error) {
 	jsonData, err := json.Marshal(a)
 	if err != nil {
-		return "", domainerrors.Wrap(ErrorCodeWalletToJSON, err)
+		return "", domainerrors.Wrap(ErrorCodeToJSON, err)
 	}
 
 	return string(jsonData), nil
@@ -99,7 +99,7 @@ func (a *Wallet) UnmarshalJSON(data []byte) error {
 	}
 
 	if err := json.Unmarshal(data, &aux); err != nil {
-		return domainerrors.Wrap(ErrorCodeWalletDecodeJSON, err)
+		return domainerrors.Wrap(ErrorCodeDecodeJSON, err)
 	}
 
 	return nil
@@ -108,14 +108,14 @@ func (a *Wallet) UnmarshalJSON(data []byte) error {
 func (a *Wallet) ParseMap(data map[string]interface{}) (IRepoEntity, error) {
 	err := ParseDateString(data)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeWalletParseMap, err)
+		return nil, domainerrors.Wrap(ErrorCodeParseMap, err)
 	}
 
 	var info *Wallet
 	err = mapstructure.Decode(data, &info)
 
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeWalletParseMap, err)
+		return nil, domainerrors.Wrap(ErrorCodeParseMap, err)
 	}
 
 	return info, nil
