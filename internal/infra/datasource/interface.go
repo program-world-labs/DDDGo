@@ -45,8 +45,8 @@ type ICacheDataSource interface {
 	DeleteWithKey(ctx context.Context, key string) error
 	GetListKeys(ctx context.Context, e dto.IRepoEntity) ([]string, error)
 	GetListItem(ctx context.Context, e dto.IRepoEntity, sq *domain.SearchQuery, ttl ...time.Duration) (*dto.List, error)
+	DeleteListKeys(ctx context.Context, e dto.IRepoEntity) error
 	SetListItem(ctx context.Context, e []dto.IRepoEntity, sq *domain.SearchQuery, count int64, ttl ...time.Duration) error
-	DeleteListItem(ctx context.Context, e dto.IRepoEntity, sq *domain.SearchQuery) error
 }
 
 type ITransactionRun interface {

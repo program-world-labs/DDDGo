@@ -43,13 +43,22 @@ const (
 	ErrorCodeWalletParseMap
 )
 const (
-	ErrorCodeAmountTransform = domainerrors.ErrorCodeDatasourceAmountRepoDTO + iota + 1
-	ErrorCodeAmountBackToDomain
-	ErrorCodeAmountToJSON
-	ErrorCodeAmountDecodeJSON
-	ErrorCodeAmountInvalidFilterField
-	ErrorCodeAmountInvalidOrderField
-	ErrorCodeAmountParseMap
+	ErrorCodeWalletBalanceTransform = domainerrors.ErrorCodeDatasourceWalletBalanceRepoDTO + iota + 1
+	ErrorCodeWalletBalanceBackToDomain
+	ErrorCodeWalletBalanceToJSON
+	ErrorCodeWalletBalanceDecodeJSON
+	ErrorCodeWalletBalanceInvalidFilterField
+	ErrorCodeWalletBalanceInvalidOrderField
+	ErrorCodeWalletBalanceParseMap
+)
+const (
+	ErrorCodeCurrencyTransform = domainerrors.ErrorCodeDatasourceCurrencyRepoDTO + iota + 1
+	ErrorCodeCurrencyBackToDomain
+	ErrorCodeCurrencyToJSON
+	ErrorCodeCurrencyDecodeJSON
+	ErrorCodeCurrencyInvalidFilterField
+	ErrorCodeCurrencyInvalidOrderField
+	ErrorCodeCurrencyParseMap
 )
 
 var (

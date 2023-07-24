@@ -1,5 +1,63 @@
 basePath: /v1
 definitions:
+  currency.CreatedRequest:
+    properties:
+      name:
+        type: string
+      symbol:
+        type: string
+    type: object
+  currency.Response:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      symbol:
+        type: string
+      updatedAt:
+        type: string
+      walletBalances:
+        items:
+          $ref: '#/definitions/wallet.BalancesResponse'
+        type: array
+    type: object
+  currency.ResponseList:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/currency.Response'
+        type: array
+      limit:
+        type: integer
+      offset:
+        type: integer
+      total:
+        type: integer
+    type: object
+  currency.UpdatedRequest:
+    properties:
+      name:
+        type: string
+      symbol:
+        type: string
+    type: object
+  entity.Chain:
+    enum:
+    - None
+    - Bitcoin
+    - Ethereum
+    - Polygon
+    type: string
+    x-enum-varnames:
+    - None
+    - Bitcoin
+    - Ethereum
+    - Polygon
   group.CreatedRequest:
     properties:
       description:
@@ -192,6 +250,103 @@ definitions:
       displayName:
         type: string
     type: object
+  wallet.BalancesResponse:
+    properties:
+      balance:
+        type: integer
+      currencyId:
+        type: string
+      decimal:
+        type: integer
+      id:
+        type: string
+      walletId:
+        type: string
+    type: object
+  wallet.CreatedRequest:
+    properties:
+      chain:
+        allOf:
+        - $ref: '#/definitions/entity.Chain'
+        example: Polygon
+      description:
+        example: this is for admin wallet
+        type: string
+      name:
+        example: admin
+        type: string
+      userId:
+        example: abcdef2nopabcdef2nop
+        type: string
+    required:
+    - chain
+    - description
+    - name
+    - userId
+    type: object
+  wallet.Response:
+    properties:
+      chain:
+        allOf:
+        - $ref: '#/definitions/entity.Chain'
+        example: Polygon
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        type: string
+      userId:
+        example: abcd-efgh-ijkl-mnop
+        type: string
+      walletBalances:
+        items:
+          $ref: '#/definitions/wallet.BalancesResponse'
+        type: array
+    required:
+    - chain
+    - userId
+    type: object
+  wallet.ResponseList:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/wallet.Response'
+        type: array
+      limit:
+        type: integer
+      offset:
+        type: integer
+      total:
+        type: integer
+    type: object
+  wallet.UpdatedRequest:
+    properties:
+      chain:
+        allOf:
+        - $ref: '#/definitions/entity.Chain'
+        example: Polygon
+      description:
+        example: this is for admin wallet
+        type: string
+      name:
+        example: admin
+        type: string
+      userId:
+        example: abcd-efgh-ijkl-mnop
+        type: string
+    required:
+    - chain
+    - description
+    - name
+    - userId
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -199,6 +354,203 @@ info:
   title: AI Service API
   version: "1.0"
 paths:
+  /currency/create:
+    post:
+      consumes:
+      - application/json
+      description: Create currency
+      operationId: CreateCurrency
+      parameters:
+      - description: Currency Create Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/currency.CreatedRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/currency.Response'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: Create currency
+      tags:
+      - Currency
+  /currency/delete/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete currency
+      operationId: DeleteCurrency
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/currency.Response'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: Delete currency
+      tags:
+      - Currency
+  /currency/detail/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Detail currency
+      operationId: DetailCurrency
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/currency.Response'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: Detail currency
+      tags:
+      - Currency
+  /currency/list:
+    get:
+      consumes:
+      - application/json
+      description: List currency
+      operationId: ListCurrency
+      parameters:
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      - description: FilterName
+        in: query
+        name: filterName
+        type: string
+      - description: SortFields
+        in: query
+        name: sortFields
+        type: string
+      - description: Dir
+        in: query
+        name: dir
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/currency.ResponseList'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: List currency
+      tags:
+      - Currency
+  /currency/update/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Update currency
+      operationId: UpdateCurrency
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Currency Update Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/currency.UpdatedRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/currency.Response'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: Update currency
+      tags:
+      - Currency
   /group/create:
     post:
       consumes:
@@ -770,4 +1122,201 @@ paths:
       summary: Update user
       tags:
       - User
+  /wallet/create:
+    post:
+      consumes:
+      - application/json
+      description: Create wallet
+      operationId: CreateWallet
+      parameters:
+      - description: Wallet Create Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/wallet.CreatedRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/wallet.Response'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: Create wallet
+      tags:
+      - Wallet
+  /wallet/delete/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete wallet
+      operationId: DeleteWallet
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/wallet.Response'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: Delete wallet
+      tags:
+      - Wallet
+  /wallet/detail/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Detail wallet
+      operationId: DetailWallet
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/wallet.Response'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: Detail wallet
+      tags:
+      - Wallet
+  /wallet/list:
+    get:
+      consumes:
+      - application/json
+      description: List wallet
+      operationId: ListWallet
+      parameters:
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      - description: FilterName
+        in: query
+        name: filterName
+        type: string
+      - description: SortFields
+        in: query
+        name: sortFields
+        type: string
+      - description: Dir
+        in: query
+        name: dir
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/wallet.ResponseList'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: List wallet
+      tags:
+      - Wallet
+  /wallet/update/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Update wallet
+      operationId: UpdateWallet
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Wallet Update Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/wallet.UpdatedRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/wallet.Response'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.Response'
+      summary: Update wallet
+      tags:
+      - Wallet
 swagger: "2.0"

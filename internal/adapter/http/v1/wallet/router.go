@@ -1,4 +1,4 @@
-package group
+package wallet
 
 import (
 	"github.com/gin-gonic/gin"
@@ -8,46 +8,46 @@ import (
 	"go.opentelemetry.io/otel/codes"
 
 	"github.com/program-world-labs/DDDGo/internal/adapter/http"
-	application_group "github.com/program-world-labs/DDDGo/internal/application/group"
+	application_wallet "github.com/program-world-labs/DDDGo/internal/application/wallet"
 	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 )
 
-type groupRoutes struct {
-	u application_group.IService
+type walletRoutes struct {
+	u application_wallet.IService
 	l pwlogger.Interface
 }
 
-func NewGroupRoutes(handler *gin.RouterGroup, u application_group.IService, l pwlogger.Interface) {
-	r := &groupRoutes{u, l}
+func NewWalletRoutes(handler *gin.RouterGroup, u application_wallet.IService, l pwlogger.Interface) {
+	r := &walletRoutes{u, l}
 
-	h := handler.Group("/group")
+	h := handler.Group("/wallet")
 	{
 		h.POST("/create", r.create)
 		h.GET("/list", r.list)
 		h.GET("/detail/:id", r.detail)
 		h.PUT("/update/:id", r.update)
 		h.DELETE("/delete/:id", r.delete)
-		// h.PUT("/assign-group/:id", r.assignGroup)
+		// h.PUT("/assign-wallet/:id", r.assignWallet)
 	}
 }
 
-// @Summary     Create group
-// @Description Create group
-// @ID          CreateGroup
-// @Tags  	    Group
+// @Summary     Create wallet
+// @Description Create wallet
+// @ID          CreateWallet
+// @Tags  	    Wallet
 // @Accept      json
 // @Produce     json
-// @Param		body	body		CreatedRequest	true	"Group Create Request"
+// @Param		body	body		CreatedRequest	true	"Wallet Create Request"
 // @Success		200		{object}	http.Response{data=Response}
 // @Failure		400		{object}	http.Response
 // @Failure		500		{object}	http.Response
-// @Router			/group/create [post].
+// @Router			/wallet/create [post].
 //
 //nolint:dupl // business logic is different
-func (r *groupRoutes) create(c *gin.Context) {
+func (r *walletRoutes) create(c *gin.Context) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
-	ctx, span := tracer.Start(c.Request.Context(), "adapter-create-group")
+	ctx, span := tracer.Start(c.Request.Context(), "adapter-create-wallet")
 
 	defer span.End()
 
@@ -55,38 +55,38 @@ func (r *groupRoutes) create(c *gin.Context) {
 	var req CreatedRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindJSON")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeGroupBindJSON, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletBindJSON, err, span))
 
 		return
 	}
 
 	// // 執行UseCase
-	var input application_group.CreatedInput
+	var input application_wallet.CreatedInput
 	err := copier.Copy(&input, &req)
 
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeGroupCopyToInput, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletCopyToInput, err, span))
 
 		return
 	}
 
-	groupEntity, err := r.u.CreateGroup(ctx, &input)
+	walletEntity, err := r.u.CreateWallet(ctx, &input)
 	if err != nil {
-		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - CreateGroup")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeGroupUsecase, err, span))
+		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - CreateWallet")
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletUsecase, err, span))
 
 		return
 	}
 
 	span.SetStatus(codes.Ok, "OK")
-	http.SuccessResponse(c, NewResponse(groupEntity))
+	http.SuccessResponse(c, NewResponse(walletEntity))
 }
 
-// @Summary     List group
-// @Description List group
-// @ID          ListGroup
-// @Tags  	    Group
+// @Summary     List wallet
+// @Description List wallet
+// @ID          ListWallet
+// @Tags  	    Wallet
 // @Accept      json
 // @Produce     json
 // @Param		limit	query	int		false	"Limit"
@@ -97,13 +97,13 @@ func (r *groupRoutes) create(c *gin.Context) {
 // @Success		200		{object}	http.Response{data=ResponseList}
 // @Failure		400		{object}	http.Response
 // @Failure		500		{object}	http.Response
-// @Router			/group/list [get].
+// @Router			/wallet/list [get].
 //
 //nolint:dupl // business logic is different
-func (r *groupRoutes) list(c *gin.Context) {
+func (r *walletRoutes) list(c *gin.Context) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
-	ctx, span := tracer.Start(c.Request.Context(), "adapter-list-group")
+	ctx, span := tracer.Start(c.Request.Context(), "adapter-list-wallet")
 
 	defer span.End()
 
@@ -111,51 +111,51 @@ func (r *groupRoutes) list(c *gin.Context) {
 	var req ListGotRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindQuery")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeGroupBindQuery, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletBindQuery, err, span))
 
 		return
 	}
 
-	var input application_group.ListGotInput
+	var input application_wallet.ListGotInput
 	err := copier.Copy(&input, &req)
 
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeGroupCopyToInput, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletCopyToInput, err, span))
 
 		return
 	}
 
 	// // 執行UseCase
-	groupEntities, err := r.u.GetGroupList(ctx, &input)
+	walletEntities, err := r.u.GetWalletList(ctx, &input)
 	if err != nil {
-		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - ListGroup")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeGroupUsecase, err, span))
+		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - ListWallet")
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletUsecase, err, span))
 
 		return
 	}
 
 	span.SetStatus(codes.Ok, "OK")
-	http.SuccessResponse(c, NewResponseList(groupEntities))
+	http.SuccessResponse(c, NewResponseList(walletEntities))
 }
 
-// @Summary     Detail group
-// @Description Detail group
-// @ID          DetailGroup
-// @Tags  	    Group
+// @Summary     Detail wallet
+// @Description Detail wallet
+// @ID          DetailWallet
+// @Tags  	    Wallet
 // @Accept      json
 // @Produce     json
 // @Param		id	path	string	true	"ID"
 // @Success		200		{object}	http.Response{data=Response}
 // @Failure		400		{object}	http.Response
 // @Failure		500		{object}	http.Response
-// @Router			/group/detail/{id} [get].
+// @Router			/wallet/detail/{id} [get].
 //
 //nolint:dupl // business logic is different
-func (r *groupRoutes) detail(c *gin.Context) {
+func (r *walletRoutes) detail(c *gin.Context) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
-	ctx, span := tracer.Start(c.Request.Context(), "adapter-detail-group")
+	ctx, span := tracer.Start(c.Request.Context(), "adapter-detail-wallet")
 
 	defer span.End()
 
@@ -163,50 +163,50 @@ func (r *groupRoutes) detail(c *gin.Context) {
 	var req DetailGotRequest
 	if err := c.ShouldBindUri(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindUri")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeGroupBindQuery, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletBindQuery, err, span))
 
 		return
 	}
 
-	var input application_group.DetailGotInput
+	var input application_wallet.DetailGotInput
 	err := copier.Copy(&input, &req)
 
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeGroupCopyToInput, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletCopyToInput, err, span))
 
 		return
 	}
 
 	// 執行UseCase
-	groupEntity, err := r.u.GetGroupDetail(ctx, &input)
+	walletEntity, err := r.u.GetWalletDetail(ctx, &input)
 	if err != nil {
-		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - DetailGroup")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeGroupUsecase, err, span))
+		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - DetailWallet")
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletUsecase, err, span))
 
 		return
 	}
 
 	span.SetStatus(codes.Ok, "OK")
-	http.SuccessResponse(c, NewResponse(groupEntity))
+	http.SuccessResponse(c, NewResponse(walletEntity))
 }
 
-// @Summary     Update group
-// @Description Update group
-// @ID          UpdateGroup
-// @Tags  	    Group
+// @Summary     Update wallet
+// @Description Update wallet
+// @ID          UpdateWallet
+// @Tags  	    Wallet
 // @Accept      json
 // @Produce     json
 // @Param		id	path	string	true	"ID"
-// @Param		body	body		UpdatedRequest	true	"Group Update Request"
+// @Param		body	body		UpdatedRequest	true	"Wallet Update Request"
 // @Success		200		{object}	http.Response{data=Response}
 // @Failure		400		{object}	http.Response
 // @Failure		500		{object}	http.Response
-// @Router			/group/update/{id} [put].
-func (r *groupRoutes) update(c *gin.Context) {
+// @Router			/wallet/update/{id} [put].
+func (r *walletRoutes) update(c *gin.Context) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
-	ctx, span := tracer.Start(c.Request.Context(), "adapter-update-group")
+	ctx, span := tracer.Start(c.Request.Context(), "adapter-update-wallet")
 
 	defer span.End()
 
@@ -214,7 +214,7 @@ func (r *groupRoutes) update(c *gin.Context) {
 	var req UpdatedRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindJSON")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeGroupBindJSON, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletBindJSON, err, span))
 
 		return
 	}
@@ -222,12 +222,12 @@ func (r *groupRoutes) update(c *gin.Context) {
 	// 從path取得id
 	id := c.Param("id")
 
-	var input application_group.UpdatedInput
+	var input application_wallet.UpdatedInput
 	err := copier.Copy(&input, &req)
 
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeGroupCopyToInput, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletCopyToInput, err, span))
 
 		return
 	}
@@ -235,10 +235,10 @@ func (r *groupRoutes) update(c *gin.Context) {
 	input.ID = id
 
 	// // 執行UseCase
-	data, err := r.u.UpdateGroup(ctx, &input)
+	data, err := r.u.UpdateWallet(ctx, &input)
 	if err != nil {
-		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - UpdateGroup")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeGroupUsecase, err, span))
+		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - UpdateWallet")
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletUsecase, err, span))
 
 		return
 	}
@@ -247,23 +247,23 @@ func (r *groupRoutes) update(c *gin.Context) {
 	http.SuccessResponse(c, NewResponse(data))
 }
 
-// @Summary     Delete group
-// @Description Delete group
-// @ID          DeleteGroup
-// @Tags  	    Group
+// @Summary     Delete wallet
+// @Description Delete wallet
+// @ID          DeleteWallet
+// @Tags  	    Wallet
 // @Accept      json
 // @Produce     json
 // @Param		id	path	string	true	"ID"
 // @Success		200		{object}	http.Response{data=Response}
 // @Failure		400		{object}	http.Response
 // @Failure		500		{object}	http.Response
-// @Router			/group/delete/{id} [delete].
+// @Router			/wallet/delete/{id} [delete].
 //
 //nolint:dupl // business logic is different
-func (r *groupRoutes) delete(c *gin.Context) {
+func (r *walletRoutes) delete(c *gin.Context) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
-	ctx, span := tracer.Start(c.Request.Context(), "adapter-delete-group")
+	ctx, span := tracer.Start(c.Request.Context(), "adapter-delete-wallet")
 
 	defer span.End()
 
@@ -271,26 +271,26 @@ func (r *groupRoutes) delete(c *gin.Context) {
 	var req DeletedRequest
 	if err := c.ShouldBindUri(&req); err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("ShouldBindUri")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeGroupBindQuery, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletBindQuery, err, span))
 
 		return
 	}
 
-	var input application_group.DeletedInput
+	var input application_wallet.DeletedInput
 
 	err := copier.Copy(&input, &req)
 	if err != nil {
 		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Copy")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeGroupCopyToInput, err, span))
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletCopyToInput, err, span))
 
 		return
 	}
 
 	// 執行UseCase
-	info, err := r.u.DeleteGroup(ctx, &input)
+	info, err := r.u.DeleteWallet(ctx, &input)
 	if err != nil {
-		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - DeleteGroup")
-		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeGroupUsecase, err, span))
+		r.l.Error().Object("Adapter", ErrorEvent{err}).Msg("Usecase - DeleteWallet")
+		http.HandleErrorResponse(c, domainerrors.WrapWithSpan(ErrorCodeWalletUsecase, err, span))
 
 		return
 	}

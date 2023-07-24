@@ -160,16 +160,6 @@ func (r *RedisCacheDataSourceImpl) SetListItem(_ context.Context, _ []dto.IRepoE
 	return nil
 }
 
-// DeleteListItem -.
-func (r *RedisCacheDataSourceImpl) DeleteListItem(ctx context.Context, model dto.IRepoEntity, sq *domain.SearchQuery) error {
-	err := r.Client.TagAsDeleted2(ctx, r.redisKey(model, sq))
-	if err != nil {
-		return domainerrors.Wrap(ErrorCodeCacheDelete, err)
-	}
-
-	return nil
-}
-
 func (r *RedisCacheDataSourceImpl) GetListKeys(ctx context.Context, model dto.IRepoEntity) ([]string, error) {
 	keys, err := r.Client.Fetch2(ctx, fmt.Sprintf("%s-ListKeys", model.TableName()), 0, func() (string, error) {
 		return "", nil
@@ -179,6 +169,16 @@ func (r *RedisCacheDataSourceImpl) GetListKeys(ctx context.Context, model dto.IR
 	}
 
 	return strings.Split(keys, ","), nil
+}
+
+// DeleteListKeys -.
+func (r *RedisCacheDataSourceImpl) DeleteListKeys(ctx context.Context, model dto.IRepoEntity) error {
+	err := r.Client.TagAsDeleted2(ctx, fmt.Sprintf("%s-ListKeys", model.TableName()))
+	if err != nil {
+		return domainerrors.Wrap(ErrorCodeCacheDelete, err)
+	}
+
+	return nil
 }
 
 func (r *RedisCacheDataSourceImpl) DeleteWithKey(ctx context.Context, key string) error {

@@ -27,7 +27,7 @@ type User struct {
 	Roles       []Role          `json:"roles" gorm:"many2many:user_roles;"`
 	Wallets     []Wallet        `json:"wallets" gorm:"foreignKey:UserID"`
 	Group       Group           `json:"group"`
-	GroupID     string          `json:"groupId"`
+	GroupID     string          `json:"groupId" gorm:"index"`
 	CreatedAt   time.Time       `json:"created_at" mapstructure:"created_at" gorm:"column:created_at"`
 	UpdatedAt   time.Time       `json:"updated_at" mapstructure:"updated_at" gorm:"column:updated_at"`
 	DeletedAt   *gorm.DeletedAt `json:"deleted_at" mapstructure:"deleted_at" gorm:"index;column:deleted_at"`

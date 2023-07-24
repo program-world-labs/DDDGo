@@ -4,11 +4,12 @@ import (
 	"net/http"
 
 	"github.com/ThreeDotsLabs/watermill/message"
-	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 )
 
 type KafkaTracer struct {

@@ -14,35 +14,24 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/domain/entity"
 )
 
-type Chain string
+var _ IRepoEntity = (*WalletBalance)(nil)
 
-const (
-	None     Chain = "None"
-	Bitcoin  Chain = "Bitcoin"
-	Ethereum Chain = "Ethereum"
-	Polygon  Chain = "Polygon"
-)
-
-var _ IRepoEntity = (*Wallet)(nil)
-
-type Wallet struct {
-	ID             string          `json:"id" gorm:"primary_key"`
-	Name           string          `json:"name"`
-	Description    string          `json:"description"`
-	Chain          Chain           `json:"chain"`
-	Address        string          `json:"address"`
-	UserID         string          `json:"userId" gorm:"index"`
-	WalletBalances []WalletBalance `json:"walletBalances" gorm:"foreignKey:WalletID"`
-	CreatedAt      time.Time       `json:"created_at" mapstructure:"created_at" gorm:"column:created_at"`
-	UpdatedAt      time.Time       `json:"updated_at" mapstructure:"updated_at" gorm:"column:updated_at"`
-	DeletedAt      *gorm.DeletedAt `json:"deleted_at" mapstructure:"deleted_at" gorm:"index;column:deleted_at"`
+type WalletBalance struct {
+	ID         string          `json:"id" gorm:"primary_key"`
+	WalletID   string          `json:"walletId" gorm:"index"`
+	CurrencyID string          `json:"currencyId" gorm:"index"`
+	Balance    uint            `json:"balance"`
+	Decimal    uint            `json:"decimal"`
+	CreatedAt  time.Time       `json:"created_at" mapstructure:"created_at" gorm:"column:created_at"`
+	UpdatedAt  time.Time       `json:"updated_at" mapstructure:"updated_at" gorm:"column:updated_at"`
+	DeletedAt  *gorm.DeletedAt `json:"deleted_at" mapstructure:"deleted_at" gorm:"index;column:deleted_at"`
 }
 
-func (a *Wallet) TableName() string {
-	return "Wallet"
+func (a *WalletBalance) TableName() string {
+	return "WalletBalance"
 }
 
-func (a *Wallet) Transform(i domain.IEntity) (IRepoEntity, error) {
+func (a *WalletBalance) Transform(i domain.IEntity) (IRepoEntity, error) {
 	if err := copier.Copy(a, i); err != nil {
 		return nil, domainerrors.Wrap(ErrorCodeWalletTransform, err)
 	}
@@ -50,7 +39,7 @@ func (a *Wallet) Transform(i domain.IEntity) (IRepoEntity, error) {
 	return a, nil
 }
 
-func (a *Wallet) BackToDomain() (domain.IEntity, error) {
+func (a *WalletBalance) BackToDomain() (domain.IEntity, error) {
 	i := &entity.Wallet{}
 	if err := copier.Copy(i, a); err != nil {
 		return nil, domainerrors.Wrap(ErrorCodeWalletBackToDomain, err)
@@ -63,7 +52,7 @@ func (a *Wallet) BackToDomain() (domain.IEntity, error) {
 	return i, nil
 }
 
-func (a *Wallet) BeforeCreate(_ *gorm.DB) (err error) {
+func (a *WalletBalance) BeforeCreate(_ *gorm.DB) (err error) {
 	a.ID, err = generateID()
 	a.UpdatedAt = time.Now()
 	a.CreatedAt = time.Now()
@@ -72,15 +61,15 @@ func (a *Wallet) BeforeCreate(_ *gorm.DB) (err error) {
 	return
 }
 
-func (a *Wallet) GetID() string {
+func (a *WalletBalance) GetID() string {
 	return a.ID
 }
 
-func (a *Wallet) SetID(id string) {
+func (a *WalletBalance) SetID(id string) {
 	a.ID = id
 }
 
-func (a *Wallet) ToJSON() (string, error) {
+func (a *WalletBalance) ToJSON() (string, error) {
 	jsonData, err := json.Marshal(a)
 	if err != nil {
 		return "", domainerrors.Wrap(ErrorCodeWalletToJSON, err)
@@ -89,8 +78,8 @@ func (a *Wallet) ToJSON() (string, error) {
 	return string(jsonData), nil
 }
 
-func (a *Wallet) UnmarshalJSON(data []byte) error {
-	type Alias Wallet
+func (a *WalletBalance) UnmarshalJSON(data []byte) error {
+	type Alias WalletBalance
 
 	aux := &struct {
 		*Alias
@@ -105,13 +94,13 @@ func (a *Wallet) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a *Wallet) ParseMap(data map[string]interface{}) (IRepoEntity, error) {
+func (a *WalletBalance) ParseMap(data map[string]interface{}) (IRepoEntity, error) {
 	err := ParseDateString(data)
 	if err != nil {
 		return nil, domainerrors.Wrap(ErrorCodeWalletParseMap, err)
 	}
 
-	var info *Wallet
+	var info *WalletBalance
 	err = mapstructure.Decode(data, &info)
 
 	if err != nil {
@@ -121,12 +110,11 @@ func (a *Wallet) ParseMap(data map[string]interface{}) (IRepoEntity, error) {
 	return info, nil
 }
 
-func (a *Wallet) GetPreloads() []string {
-	// return []string{"WalletBalances"}
+func (a *WalletBalance) GetPreloads() []string {
 	return []string{}
 }
 
-func (a *Wallet) GetListType() interface{} {
+func (a *WalletBalance) GetListType() interface{} {
 	entityType := reflect.TypeOf(Role{})
 	sliceType := reflect.SliceOf(entityType)
 	sliceValue := reflect.MakeSlice(sliceType, 0, 0)

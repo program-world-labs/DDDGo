@@ -17,10 +17,13 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/adapter/http/v1"
 	message3 "github.com/program-world-labs/DDDGo/internal/adapter/message"
 	"github.com/program-world-labs/DDDGo/internal/application"
+	currency2 "github.com/program-world-labs/DDDGo/internal/application/currency"
 	group2 "github.com/program-world-labs/DDDGo/internal/application/group"
 	role2 "github.com/program-world-labs/DDDGo/internal/application/role"
 	user2 "github.com/program-world-labs/DDDGo/internal/application/user"
+	wallet2 "github.com/program-world-labs/DDDGo/internal/application/wallet"
 	"github.com/program-world-labs/DDDGo/internal/domain/event"
+	"github.com/program-world-labs/DDDGo/internal/infra/currency"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource/cache"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource/sql"
 	"github.com/program-world-labs/DDDGo/internal/infra/dto"
@@ -28,6 +31,7 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/infra/repository"
 	"github.com/program-world-labs/DDDGo/internal/infra/role"
 	"github.com/program-world-labs/DDDGo/internal/infra/user"
+	"github.com/program-world-labs/DDDGo/internal/infra/wallet"
 	"github.com/program-world-labs/DDDGo/pkg/cache/local"
 	redis2 "github.com/program-world-labs/DDDGo/pkg/cache/redis"
 	"github.com/program-world-labs/DDDGo/pkg/httpserver"
@@ -67,7 +71,11 @@ func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server
 	roleIService := provideRoleService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
 	groupRepoImpl := provideGroupRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
 	groupIService := provideGroupService(groupRepoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
-	services := provideServices(iService, roleIService, groupIService)
+	walletRepoImpl := provideWalletRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
+	walletIService := provideWalletService(walletRepoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
+	currencyRepoImpl := provideCurrencyRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
+	currencyIService := provideCurrencyService(currencyRepoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
+	services := provideServices(iService, roleIService, groupIService, walletIService, currencyIService)
 	engine := v1.NewRouter(l, services, cfg)
 	server := provideHTTPServer(engine, cfg)
 	return server, nil
@@ -102,7 +110,11 @@ func NewMessageRouter(cfg *config.Config, l pwlogger.Interface) (*message.Router
 	roleIService := provideRoleService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
 	groupRepoImpl := provideGroupRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
 	groupIService := provideGroupService(groupRepoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
-	services := provideServices(iService, roleIService, groupIService)
+	walletRepoImpl := provideWalletRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
+	walletIService := provideWalletService(walletRepoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
+	currencyRepoImpl := provideCurrencyRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
+	currencyIService := provideCurrencyService(currencyRepoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
+	services := provideServices(iService, roleIService, groupIService, walletIService, currencyIService)
 	router, err := provideMessageRouter(kafkaMessage, typeMapper, services, l)
 	if err != nil {
 		return nil, err
@@ -117,7 +129,7 @@ func providePostgres(cfg *config.Config) (pwsql.ISQLGorm, error) {
 	port := fmt.Sprint(cfg.SQL.Port)
 	dsn := cfg.SQL.Type + "://" + cfg.SQL.User + ":" + cfg.SQL.Password + "@" + cfg.SQL.Host + ":" + port + "/" + cfg.SQL.DB
 	client, err := pwsql.New(dsn, pwsql.MaxPoolSize(cfg.SQL.PoolMax))
-	client.GetDB().AutoMigrate(&dto.User{}, &dto.Role{})
+	client.GetDB().AutoMigrate(&dto.User{}, &dto.Role{}, &dto.Group{}, &dto.Wallet{}, &dto.Currency{})
 
 	return client, err
 }
@@ -163,11 +175,23 @@ func provideGroupRepo(sqlDatasource *sql.CRUDDatasourceImpl, bigCacheDatasource 
 	return group.NewRepoImpl(sqlDatasource, groupCache, bigCacheDatasource)
 }
 
-func provideServices(user3 user2.IService, role3 role2.IService, group3 group2.IService) application.Services {
+func provideWalletRepo(sqlDatasource *sql.CRUDDatasourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl, client *rockscache.Client) *wallet.RepoImpl {
+	walletCache := cache.NewRedisCacheDataSourceImpl(client, sqlDatasource)
+	return wallet.NewRepoImpl(sqlDatasource, walletCache, bigCacheDatasource)
+}
+
+func provideCurrencyRepo(sqlDatasource *sql.CRUDDatasourceImpl, bigCacheDatasource *cache.BigCacheDataSourceImpl, client *rockscache.Client) *currency.RepoImpl {
+	currencyCache := cache.NewRedisCacheDataSourceImpl(client, sqlDatasource)
+	return currency.NewRepoImpl(sqlDatasource, currencyCache, bigCacheDatasource)
+}
+
+func provideServices(user3 user2.IService, role3 role2.IService, group3 group2.IService, wallet3 wallet2.IService, currency3 currency2.IService) application.Services {
 	return application.Services{
-		User:  user3,
-		Role:  role3,
-		Group: group3,
+		User:     user3,
+		Role:     role3,
+		Group:    group3,
+		Wallet:   wallet3,
+		Currency: currency3,
 	}
 }
 
@@ -181,6 +205,14 @@ func provideRoleService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transa
 
 func provideGroupService(groupRepo *group.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *message2.KafkaMessage, l pwlogger.Interface) group2.IService {
 	return group2.NewServiceImpl(groupRepo, userRepo, transactionRepo, eventProducer, l)
+}
+
+func provideWalletService(walletRepo *wallet.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *message2.KafkaMessage, l pwlogger.Interface) wallet2.IService {
+	return wallet2.NewServiceImpl(walletRepo, userRepo, transactionRepo, eventProducer, l)
+}
+
+func provideCurrencyService(currencyRepo *currency.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *message2.KafkaMessage, l pwlogger.Interface) currency2.IService {
+	return currency2.NewServiceImpl(currencyRepo, userRepo, transactionRepo, eventProducer, l)
 }
 
 func provideHTTPServer(handler *gin.Engine, cfg *config.Config) *httpserver.Server {
@@ -207,11 +239,15 @@ var appSet = wire.NewSet(
 	provideUserRepo,
 	provideRoleRepo,
 	provideGroupRepo,
+	provideWalletRepo,
+	provideCurrencyRepo,
 	provideKafkaMessage,
 	provideMessageRouter,
 	provideEventTypeMapper,
 	provideUserService,
 	provideRoleService,
 	provideGroupService,
+	provideWalletService,
+	provideCurrencyService,
 	provideServices, v1.NewRouter, provideHTTPServer,
 )

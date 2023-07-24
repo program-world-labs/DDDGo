@@ -172,22 +172,6 @@ func (r *BigCacheDataSourceImpl) SetListItem(ctx context.Context, model []dto.IR
 	return nil
 }
 
-// DeleteListItem -.
-func (r *BigCacheDataSourceImpl) DeleteListItem(ctx context.Context, model dto.IRepoEntity, sq *domain.SearchQuery) error {
-	// 開始追蹤
-	var tracer = otel.Tracer(domainerrors.GruopID)
-	_, span := tracer.Start(ctx, "datasource-deleteListItem-local")
-
-	defer span.End()
-
-	err := r.Cache.Delete(r.cacheKey(model, sq))
-	if err != nil {
-		return domainerrors.WrapWithSpan(ErrorCodeCacheDelete, err, span)
-	}
-
-	return nil
-}
-
 // GetListKeys -.
 func (r *BigCacheDataSourceImpl) GetListKeys(ctx context.Context, model dto.IRepoEntity) ([]string, error) {
 	// 開始追蹤
@@ -202,6 +186,22 @@ func (r *BigCacheDataSourceImpl) GetListKeys(ctx context.Context, model dto.IRep
 	}
 
 	return strings.Split(string(data), ","), nil
+}
+
+// DeleteListKeys -.
+func (r *BigCacheDataSourceImpl) DeleteListKeys(ctx context.Context, model dto.IRepoEntity) error {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	_, span := tracer.Start(ctx, "datasource-getListKeys-local")
+
+	defer span.End()
+
+	err := r.Cache.Delete(fmt.Sprintf("%s-ListKeys", model.TableName()))
+	if err != nil && !errors.Is(err, bigcache.ErrEntryNotFound) {
+		return domainerrors.WrapWithSpan(ErrorCodeCacheDelete, err, span)
+	}
+
+	return nil
 }
 
 func (r *BigCacheDataSourceImpl) DeleteWithKey(ctx context.Context, key string) error {

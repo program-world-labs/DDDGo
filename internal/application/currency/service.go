@@ -1,4 +1,4 @@
-package group
+package currency
 
 import (
 	"context"
@@ -18,67 +18,67 @@ var _ IService = (*ServiceImpl)(nil)
 // ServiceImpl -.
 type ServiceImpl struct {
 	TransactionRepo domain.ITransactionRepo
-	GroupRepo       repository.GroupRepository
+	CurrencyRepo    repository.CurrencyRepository
 	UserRepo        repository.UserRepository
 	EventProducer   event.Producer
 	log             pwlogger.Interface
 }
 
 // NewServiceImpl -.
-func NewServiceImpl(groupRepo repository.GroupRepository, userRepo repository.UserRepository, transactionRepo domain.ITransactionRepo, eventProducer event.Producer, l pwlogger.Interface) *ServiceImpl {
-	return &ServiceImpl{GroupRepo: groupRepo, UserRepo: userRepo, TransactionRepo: transactionRepo, EventProducer: eventProducer, log: l}
+func NewServiceImpl(currencyRepo repository.CurrencyRepository, userRepo repository.UserRepository, transactionRepo domain.ITransactionRepo, eventProducer event.Producer, l pwlogger.Interface) *ServiceImpl {
+	return &ServiceImpl{CurrencyRepo: currencyRepo, UserRepo: userRepo, TransactionRepo: transactionRepo, EventProducer: eventProducer, log: l}
 }
 
-// CreateGroup creates a group.
+// CreateCurrency creates a currency.
 //
 //nolint:dupl // business logic is different
-func (u *ServiceImpl) CreateGroup(ctx context.Context, groupInfo *CreatedInput) (*Output, error) {
+func (u *ServiceImpl) CreateCurrency(ctx context.Context, currencyInfo *CreatedInput) (*Output, error) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
-	ctx, span := tracer.Start(ctx, "usecase-createGroup")
+	ctx, span := tracer.Start(ctx, "usecase-createCurrency")
 
 	defer span.End()
 	// Validate input.
-	err := groupInfo.Validate()
+	err := currencyInfo.Validate()
 	if err != nil {
 		return nil, domainerrors.WrapWithSpan(ErrorCodeValidateInput, err, span)
 	}
 
-	// Create group.
-	e := groupInfo.ToEntity()
+	// Create currency.
+	e := currencyInfo.ToEntity()
 
-	createdGroup, err := u.GroupRepo.Create(ctx, e)
+	createdCurrency, err := u.CurrencyRepo.Create(ctx, e)
 
 	if err != nil {
 		return nil, domainerrors.WrapWithSpan(ErrorCodeRepository, err, span)
 	}
 
-	// Cast to entity.Group.
-	createdGroupEntity, ok := createdGroup.(*entity.Group)
+	// Cast to entity.Currency.
+	createdCurrencyEntity, ok := createdCurrency.(*entity.Currency)
 	if !ok {
 		return nil, domainerrors.WrapWithSpan(ErrorCodeCast, err, span)
 	}
 
-	return NewOutput(createdGroupEntity), nil
+	return NewOutput(createdCurrencyEntity), nil
 }
 
-// GetGroupList gets group list.
-func (u *ServiceImpl) GetGroupList(ctx context.Context, groupInfo *ListGotInput) (*OutputList, error) {
+// GetCurrencyList gets currency list.
+func (u *ServiceImpl) GetCurrencyList(ctx context.Context, currencyInfo *ListGotInput) (*OutputList, error) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
-	ctx, span := tracer.Start(ctx, "usecase-getGroupList")
+	ctx, span := tracer.Start(ctx, "usecase-getCurrencyList")
 
 	defer span.End()
 	// Validate input.
-	err := groupInfo.Validate()
+	err := currencyInfo.Validate()
 	if err != nil {
 		return nil, domainerrors.WrapWithSpan(ErrorCodeValidateInput, err, span)
 	}
 
-	sq := groupInfo.ToSearchQuery()
+	sq := currencyInfo.ToSearchQuery()
 
-	// Get group list.
-	list, err := u.GroupRepo.GetAll(ctx, sq, &entity.Group{})
+	// Get currency list.
+	list, err := u.CurrencyRepo.GetAll(ctx, sq, &entity.Currency{})
 	if err != nil {
 		return nil, domainerrors.WrapWithSpan(ErrorCodeRepository, err, span)
 	}
@@ -86,94 +86,94 @@ func (u *ServiceImpl) GetGroupList(ctx context.Context, groupInfo *ListGotInput)
 	return NewListOutput(list), nil
 }
 
-// GetGroupDetail gets group detail.
+// GetCurrencyDetail gets currency detail.
 //
 //nolint:dupl // business logic is different
-func (u *ServiceImpl) GetGroupDetail(ctx context.Context, groupInfo *DetailGotInput) (*Output, error) {
+func (u *ServiceImpl) GetCurrencyDetail(ctx context.Context, currencyInfo *DetailGotInput) (*Output, error) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
-	ctx, span := tracer.Start(ctx, "usecase-getGroupDetail")
+	ctx, span := tracer.Start(ctx, "usecase-getCurrencyDetail")
 
 	defer span.End()
 	// Validate input.
-	err := groupInfo.Validate()
+	err := currencyInfo.Validate()
 	if err != nil {
 		return nil, domainerrors.WrapWithSpan(ErrorCodeValidateInput, err, span)
 	}
 
-	// Get group detail.
-	group, err := u.GroupRepo.GetByID(ctx, &entity.Group{ID: groupInfo.ID})
+	// Get currency detail.
+	currency, err := u.CurrencyRepo.GetByID(ctx, &entity.Currency{ID: currencyInfo.ID})
 	if err != nil {
 		return nil, domainerrors.WrapWithSpan(ErrorCodeRepository, err, span)
 	}
 
-	// Cast to entity.Group.
-	groupEntity, ok := group.(*entity.Group)
+	// Cast to entity.Currency.
+	currencyEntity, ok := currency.(*entity.Currency)
 	if !ok {
 		return nil, domainerrors.WrapWithSpan(ErrorCodeCast, err, span)
 	}
 
-	return NewOutput(groupEntity), nil
+	return NewOutput(currencyEntity), nil
 }
 
-// UpdateGroup updates group.
+// UpdateCurrency updates currency.
 //
 //nolint:dupl // business logic is different
-func (u *ServiceImpl) UpdateGroup(ctx context.Context, groupInfo *UpdatedInput) (*Output, error) {
+func (u *ServiceImpl) UpdateCurrency(ctx context.Context, currencyInfo *UpdatedInput) (*Output, error) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
-	ctx, span := tracer.Start(ctx, "usecase-updateGroup")
+	ctx, span := tracer.Start(ctx, "usecase-updateCurrency")
 
 	defer span.End()
 	// Validate input.
-	err := groupInfo.Validate()
+	err := currencyInfo.Validate()
 	if err != nil {
 		return nil, domainerrors.WrapWithSpan(ErrorCodeValidateInput, err, span)
 	}
 
-	// Update group.
-	e := groupInfo.ToEntity()
+	// Update currency.
+	e := currencyInfo.ToEntity()
 
-	updatedGroup, err := u.GroupRepo.Update(ctx, e)
+	updatedCurrency, err := u.CurrencyRepo.Update(ctx, e)
 	if err != nil {
 		return nil, domainerrors.WrapWithSpan(ErrorCodeRepository, err, span)
 	}
 
-	// Cast to entity.Group.
-	updatedGroupEntity, ok := updatedGroup.(*entity.Group)
+	// Cast to entity.Currency.
+	updatedCurrencyEntity, ok := updatedCurrency.(*entity.Currency)
 	if !ok {
 		return nil, domainerrors.WrapWithSpan(ErrorCodeCast, err, span)
 	}
 
-	return NewOutput(updatedGroupEntity), nil
+	return NewOutput(updatedCurrencyEntity), nil
 }
 
-// DeleteGroup deletes group.
+// DeleteCurrency deletes currency.
 //
 //nolint:dupl // business logic is different
-func (u *ServiceImpl) DeleteGroup(ctx context.Context, groupInfo *DeletedInput) (*Output, error) {
+func (u *ServiceImpl) DeleteCurrency(ctx context.Context, currencyInfo *DeletedInput) (*Output, error) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
-	ctx, span := tracer.Start(ctx, "usecase-deleteGroup")
+	ctx, span := tracer.Start(ctx, "usecase-deleteCurrency")
 
 	defer span.End()
 	// Validate input.
-	err := groupInfo.Validate()
+	err := currencyInfo.Validate()
 	if err != nil {
 		return nil, domainerrors.WrapWithSpan(ErrorCodeValidateInput, err, span)
 	}
 
-	// Delete group.
-	info, err := u.GroupRepo.Delete(ctx, &entity.Group{ID: groupInfo.ID})
+	// Delete currency.
+	info, err := u.CurrencyRepo.Delete(ctx, &entity.Currency{ID: currencyInfo.ID})
 	if err != nil {
 		return nil, domainerrors.WrapWithSpan(ErrorCodeRepository, err, span)
 	}
 
-	// Cast to entity.Group.
-	groupEntity, ok := info.(*entity.Group)
+	// Cast to entity.Currency.
+	currencyEntity, ok := info.(*entity.Currency)
 	if !ok {
 		return nil, domainerrors.WrapWithSpan(ErrorCodeCast, err, span)
 	}
 
-	return NewOutput(groupEntity), nil
+	return NewOutput(currencyEntity), nil
 }
