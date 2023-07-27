@@ -26,6 +26,7 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/domain/event"
 	"github.com/program-world-labs/DDDGo/internal/infra/currency"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource/cache"
+	infra_eventstore "github.com/program-world-labs/DDDGo/internal/infra/datasource/event_store"
 	"github.com/program-world-labs/DDDGo/internal/infra/datasource/sql"
 	"github.com/program-world-labs/DDDGo/internal/infra/dto"
 	"github.com/program-world-labs/DDDGo/internal/infra/group"
@@ -35,6 +36,7 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/infra/wallet"
 	"github.com/program-world-labs/DDDGo/pkg/cache/local"
 	redisCache "github.com/program-world-labs/DDDGo/pkg/cache/redis"
+	pkg_eventstore "github.com/program-world-labs/DDDGo/pkg/event_store"
 	"github.com/program-world-labs/DDDGo/pkg/httpserver"
 	pkg_message "github.com/program-world-labs/DDDGo/pkg/message"
 	"github.com/program-world-labs/DDDGo/pkg/pwsql"
@@ -111,12 +113,12 @@ func provideServices(user application_user.IService, role application_role.IServ
 	}
 }
 
-func provideUserService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *pkg_message.KafkaMessage, l pwlogger.Interface) application_user.IService {
-	return application_user.NewServiceImpl(roleRepo, userRepo, transactionRepo, eventProducer, l)
+func provideUserService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *pkg_message.KafkaMessage, esdb *infra_eventstore.DBImpl, l pwlogger.Interface) application_user.IService {
+	return application_user.NewServiceImpl(roleRepo, userRepo, transactionRepo, eventProducer, esdb, l)
 }
 
-func provideRoleService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *pkg_message.KafkaMessage, l pwlogger.Interface) application_role.IService {
-	return application_role.NewServiceImpl(roleRepo, userRepo, transactionRepo, eventProducer, l)
+func provideRoleService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *pkg_message.KafkaMessage, esdb *infra_eventstore.DBImpl, l pwlogger.Interface) application_role.IService {
+	return application_role.NewServiceImpl(roleRepo, userRepo, transactionRepo, eventProducer, esdb, l)
 }
 
 func provideGroupService(groupRepo *group.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *pkg_message.KafkaMessage, l pwlogger.Interface) application_group.IService {
@@ -147,11 +149,21 @@ func provideEventTypeMapper() *event.TypeMapper {
 	return event.NewEventTypeMapper()
 }
 
+func provideEventStoreDB(cfg *config.Config) (*pkg_eventstore.StoreDB, error) {
+	return pkg_eventstore.NewEventStoreDB(cfg.EventStoreDB.Host)
+}
+
+func provideEventStoreDBImpl(esdb *pkg_eventstore.StoreDB, mapper *event.TypeMapper) (*infra_eventstore.DBImpl, error) {
+	return infra_eventstore.NewEventStoreDBImpl(esdb, mapper)
+}
+
 var appSet = wire.NewSet(
 	providePostgres,
 	provideRedisCache,
 	provideLocalCache,
 	provideRocksCache,
+	provideEventStoreDB,
+	provideEventStoreDBImpl,
 	sql.NewTransactionRunDataSourceImpl,
 	sql.NewCRUDDatasourceImpl,
 	cache.NewBigCacheDataSourceImp,

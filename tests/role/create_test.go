@@ -68,6 +68,7 @@ type ServiceTest struct {
 	userRepoMock  *mocks_user.MockUserRepository
 	transRepoMock *mock_repo.MockITransactionRepo
 	service       *application_role.ServiceImpl
+	eventStoreDB  *mock_repo.MockEventStore
 	producer      *mock_repo.MockProducer
 }
 
@@ -138,7 +139,11 @@ func (st *ServiceTest) reset() {
 	st.userRepoMock = mocks_user.NewMockUserRepository(st.mockCtrl)
 	st.transRepoMock = mock_repo.NewMockITransactionRepo(st.mockCtrl)
 	st.producer = mock_repo.NewMockProducer(st.mockCtrl)
-	st.service = application_role.NewServiceImpl(st.repoMock, st.userRepoMock, st.transRepoMock, st.producer, logger)
+	st.eventStoreDB = mock_repo.NewMockEventStore(st.mockCtrl)
+	st.service = application_role.NewServiceImpl(st.repoMock, st.userRepoMock, st.transRepoMock, st.producer, st.eventStoreDB, logger)
+	st.producer = mock_repo.NewMockProducer(st.mockCtrl)
+	st.eventStoreDB = mock_repo.NewMockEventStore(st.mockCtrl)
+	st.service = application_role.NewServiceImpl(st.repoMock, st.userRepoMock, st.transRepoMock, st.producer, st.eventStoreDB, logger)
 }
 
 func (st *ServiceTest) givenData(name, description, permission string) error {
@@ -156,6 +161,7 @@ func (st *ServiceTest) whenCreateNewRole(_ context.Context) error {
 	e := st.input.ToEntity()
 	st.repoMock.EXPECT().Create(gomock.Any(), RoleEquals(e)).Return(e, nil)
 	st.producer.EXPECT().PublishEvent(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+	st.eventStoreDB.EXPECT().Store(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 	st.expect.CreatedAt = e.CreatedAt
 	st.expect.UpdatedAt = e.UpdatedAt
 

@@ -42,8 +42,9 @@ const (
 	ErrorCodeInfraDTO        = 020000000
 	ErrorCodeInfraRepo       = 030000000
 	// Infra Layer Datasource Error Code.
-	ErrorCodeInfraDatasourceSQL   = 001000000
-	ErrorCodeInfraDatasourceCache = 002000000
+	ErrorCodeInfraDatasourceSQL        = 001000000
+	ErrorCodeInfraDatasourceCache      = 002000000
+	ErrorCodeInfraDatasourceEventStore = 003000000
 	// Infra Layer DTO Error Code.
 	ErrorCodeInfraDTOMapper = 001000000
 	ErrorCodeInfraDTOVO     = 002000000
