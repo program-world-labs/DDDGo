@@ -16,12 +16,12 @@ import (
 )
 
 type Routes struct {
-	e event.EventTypeMapper
+	e event.TypeMapper
 	s role.IService
 	l pwlogger.Interface
 }
 
-func NewRoleRoutes(e event.EventTypeMapper, r role.IService, l pwlogger.Interface) *Routes {
+func NewRoleRoutes(e event.TypeMapper, r role.IService, l pwlogger.Interface) *Routes {
 	// Register event
 	e.Register((*event.RoleCreatedEvent)(nil))
 	e.Register((*event.RoleDescriptionChangedEvent)(nil))
@@ -59,29 +59,31 @@ func (u *Routes) Handler(msg *message.Message) error {
 		panic(err)
 	}
 
-	// switch domainEvent.EventType {
-	// case "RoleCreatedEvent":
-	// 	err = u.create(eventType.(*event.RoleCreatedEvent))
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// default:
-	// 	return domainerrors.Wrap(ErrorCodeHandleMessage, err)
-	// }
+	switch domainEvent.EventType {
+	case "RoleCreatedEvent":
+		err = u.create(msg.Context(), eventType.(*event.RoleCreatedEvent))
+		if err != nil {
+			return err
+		}
+	default:
+		return domainerrors.Wrap(ErrorCodeHandleMessage, err)
+	}
 
 	return nil
 }
 
-func (u *Routes) create(event *event.RoleCreatedEvent) error {
+func (u *Routes) create(ctx context.Context, event *event.RoleCreatedEvent) error {
 	// Transform event data to service input
-	info := role.CreatedInput{}
+	// info := role.CreatedInput{}
+	info := role.UpdatedInput{}
 	if err := copier.Copy(&info, event); err != nil {
-		return domainerrors.Wrap(ErrorCodeRoleCopyToInput, err)
+		return domainerrors.Wrap(ErrorCodeCopyToInput, err)
 	}
 
 	info.Permissions = strings.Join(event.Permissions, ",")
 
-	_, err := u.s.CreateRole(context.Background(), &info)
+	// _, err := u.s.CreateRole(ctx, &info)
+	_, err := u.s.UpdateRole(ctx, &info)
 	if err != nil {
 		return err
 	}

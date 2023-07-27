@@ -26,8 +26,6 @@ func (i *CreatedInput) ToEntity() *entity.User {
 		roles = append(roles, &entity.Role{ID: v})
 	}
 
-	group := &entity.Group{ID: i.GroupID}
-
 	return &entity.User{
 		Username:    i.Username,
 		Password:    i.Password,
@@ -35,7 +33,6 @@ func (i *CreatedInput) ToEntity() *entity.User {
 		DisplayName: i.DisplayName,
 		Avatar:      i.Avatar,
 		Roles:       roles,
-		Group:       group,
 	}
 }
 
@@ -45,7 +42,7 @@ func (i *CreatedInput) Validate() error {
 	if err != nil {
 		var e validator.ValidationErrors
 		if errors.As(err, &e) {
-			return utils.HandleValidationError(e)
+			return utils.HandleValidationError("User", e)
 		}
 
 		return err
@@ -95,7 +92,7 @@ func (i *ListGotInput) Validate() error {
 	if err != nil {
 		var e validator.ValidationErrors
 		if errors.As(err, &e) {
-			return utils.HandleValidationError(e)
+			return utils.HandleValidationError("User", e)
 		}
 
 		return err
@@ -114,7 +111,7 @@ func (i *DetailGotInput) Validate() error {
 	if err != nil {
 		var e validator.ValidationErrors
 		if errors.As(err, &e) {
-			return utils.HandleValidationError(e)
+			return utils.HandleValidationError("User", e)
 		}
 
 		return err
@@ -135,7 +132,7 @@ func (i *UpdatedInput) Validate() error {
 	if err != nil {
 		var e validator.ValidationErrors
 		if errors.As(err, &e) {
-			return utils.HandleValidationError(e)
+			return utils.HandleValidationError("User", e)
 		}
 
 		return err
@@ -144,11 +141,11 @@ func (i *UpdatedInput) Validate() error {
 	return nil
 }
 
-func (c *UpdatedInput) ToEntity() *entity.User {
+func (i *UpdatedInput) ToEntity() *entity.User {
 	return &entity.User{
-		ID:          c.ID,
-		DisplayName: c.DisplayName,
-		Avatar:      c.Avatar,
+		ID:          i.ID,
+		DisplayName: i.DisplayName,
+		Avatar:      i.Avatar,
 	}
 }
 
@@ -162,7 +159,7 @@ func (i *DeletedInput) Validate() error {
 	if err != nil {
 		var e validator.ValidationErrors
 		if errors.As(err, &e) {
-			return utils.HandleValidationError(e)
+			return utils.HandleValidationError("User", e)
 		}
 
 		return err

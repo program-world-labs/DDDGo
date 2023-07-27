@@ -13,8 +13,11 @@ import (
 
 	"github.com/program-world-labs/DDDGo/config"
 	"github.com/program-world-labs/DDDGo/docs"
+	"github.com/program-world-labs/DDDGo/internal/adapter/http/v1/currency"
+	"github.com/program-world-labs/DDDGo/internal/adapter/http/v1/group"
 	"github.com/program-world-labs/DDDGo/internal/adapter/http/v1/role"
 	"github.com/program-world-labs/DDDGo/internal/adapter/http/v1/user"
+	"github.com/program-world-labs/DDDGo/internal/adapter/http/v1/wallet"
 	"github.com/program-world-labs/DDDGo/internal/application"
 )
 
@@ -41,6 +44,7 @@ func NewRouter(l pwlogger.Interface, s application.Services, cfg *config.Config)
 	// Swagger
 	docs.SwaggerInfo.Version = cfg.App.Version
 	docs.SwaggerInfo.Title = cfg.App.Name
+	docs.SwaggerInfo.Host = cfg.Swagger.Host
 
 	swaggerHandler := ginSwagger.WrapHandler(swaggerFiles.Handler)
 	handler.GET("/swagger/*any", swaggerHandler)
@@ -56,6 +60,9 @@ func NewRouter(l pwlogger.Interface, s application.Services, cfg *config.Config)
 	{
 		user.NewUserRoutes(h, s.User, l)
 		role.NewRoleRoutes(h, s.Role, l)
+		group.NewGroupRoutes(h, s.Group, l)
+		wallet.NewWalletRoutes(h, s.Wallet, l)
+		currency.NewCurrencyRoutes(h, s.Currency, l)
 	}
 
 	return handler

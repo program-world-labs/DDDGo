@@ -9,7 +9,7 @@ swagger:
   host: "localhost:8080"
 
 kafka:
-  brokers: "localhost:29092"
+  brokers: "localhost:29092,localhost:29093,localhost:29094"
   group_id: "ai-dev"
 
 esdb:
@@ -49,8 +49,7 @@ storage:
   type: "gcp"
 
 telemetry:
-  enabled: false
-  host: ""
+  enabled: true
   port: 0
   batcher: "gcp"
   sample_rate: 1.0

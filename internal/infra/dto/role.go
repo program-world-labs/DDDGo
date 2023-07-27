@@ -34,7 +34,7 @@ func (a *Role) TableName() string {
 
 func (a *Role) Transform(i domain.IEntity) (IRepoEntity, error) {
 	if err := copier.Copy(a, i); err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRoleTransform, err)
+		return nil, domainerrors.Wrap(ErrorCodeTransform, err)
 	}
 
 	return a, nil
@@ -43,7 +43,7 @@ func (a *Role) Transform(i domain.IEntity) (IRepoEntity, error) {
 func (a *Role) BackToDomain() (domain.IEntity, error) {
 	i := &entity.Role{}
 	if err := copier.Copy(i, a); err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRoleBackToDomain, err)
+		return nil, domainerrors.Wrap(ErrorCodeBackToDomain, err)
 	}
 
 	if a.DeletedAt != nil {
@@ -79,7 +79,7 @@ func (a *Role) SetID(id string) {
 func (a *Role) ToJSON() (string, error) {
 	jsonData, err := json.Marshal(a)
 	if err != nil {
-		return "", domainerrors.Wrap(ErrorCodeRoleToJSON, err)
+		return "", domainerrors.Wrap(ErrorCodeToJSON, err)
 	}
 
 	return string(jsonData), nil
@@ -95,7 +95,7 @@ func (a *Role) UnmarshalJSON(data []byte) error {
 	}
 
 	if err := json.Unmarshal(data, &aux); err != nil {
-		return domainerrors.Wrap(ErrorCodeRoleDecodeJSON, err)
+		return domainerrors.Wrap(ErrorCodeDecodeJSON, err)
 	}
 
 	return nil
@@ -104,7 +104,7 @@ func (a *Role) UnmarshalJSON(data []byte) error {
 func (a *Role) ParseMap(data map[string]interface{}) (IRepoEntity, error) {
 	err := ParseDateString(data)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRoleParseMap, err)
+		return nil, domainerrors.Wrap(ErrorCodeParseMap, err)
 	}
 
 	var info *Role
@@ -121,7 +121,7 @@ func (a *Role) ParseMap(data map[string]interface{}) (IRepoEntity, error) {
 	err = mapstructure.Decode(data, &info)
 
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeRoleParseMap, err)
+		return nil, domainerrors.Wrap(ErrorCodeParseMap, err)
 	}
 
 	return info, nil

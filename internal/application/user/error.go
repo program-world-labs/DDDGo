@@ -7,9 +7,9 @@ import (
 )
 
 const (
-	ErrorCodeRepository    = domainerrors.ErrorCodeAdapterHTTPUser + iota // 20000000
-	ErrorCodeValidateInput                                                // 20000001
-	ErrorCodeCast                                                         // 20000002
+	ErrorCodeRepository = domainerrors.ErrorCodeApplication + domainerrors.ErrorCodeApplicationUser + iota
+	ErrorCodeValidateInput
+	ErrorCodeCast
 )
 
 var (

@@ -55,7 +55,7 @@ func (r *CRUDDatasourceImpl) Create(ctx context.Context, model dto.IRepoEntity) 
 
 // Update -.
 func (r *CRUDDatasourceImpl) Update(ctx context.Context, model dto.IRepoEntity) (dto.IRepoEntity, error) {
-	err := r.DB.WithContext(ctx).Save(model).Error
+	err := r.DB.WithContext(ctx).Omit("created_at").Omit("deleted_at").Updates(model).Error
 	if err != nil {
 		return nil, domainerrors.Wrap(ErrorCodeSQLUpdate, err)
 	}
@@ -102,15 +102,17 @@ func (r *CRUDDatasourceImpl) GetAll(ctx context.Context, sq *domain.SearchQuery,
 		}
 	}
 
-	var data = model.GetListType()
-	err := db.Find(&data).Error
+	var count int64
+
+	dbCount := r.DB.WithContext(ctx).Table(model.TableName()).Where(sq.GetWhere(), sq.GetArgs()...).Where("deleted_at IS NULL")
+	err := dbCount.Count(&count).Error
 
 	if err != nil {
 		return nil, domainerrors.Wrap(ErrorCodeSQLGetAll, err)
 	}
 
-	var count int64
-	err = r.DB.Table(model.TableName()).Where(sq.GetWhere(), sq.GetArgs()...).Count(&count).Error
+	var data = model.GetListType()
+	err = db.Find(&data).Error
 
 	if err != nil {
 		return nil, domainerrors.Wrap(ErrorCodeSQLGetAll, err)

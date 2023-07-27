@@ -24,10 +24,10 @@ type User struct {
 	DisplayName string          `json:"display_name"`
 	Avatar      string          `json:"avatar"`
 	Enabled     bool            `json:"enabled"`
-	Roles       []*Role         `json:"roles" gorm:"many2many:user_roles;"`
-	Wallets     []*Wallet       `json:"wallets" gorm:"foreignKey:UserID"`
-	Group       *Group          `json:"group"`
-	GroupID     string          `json:"groupId"`
+	Roles       []Role          `json:"roles" gorm:"many2many:user_roles;"`
+	Wallets     []Wallet        `json:"wallets" gorm:"foreignKey:UserID"`
+	Group       Group           `json:"group"`
+	GroupID     string          `json:"groupId" gorm:"index"`
 	CreatedAt   time.Time       `json:"created_at" mapstructure:"created_at" gorm:"column:created_at"`
 	UpdatedAt   time.Time       `json:"updated_at" mapstructure:"updated_at" gorm:"column:updated_at"`
 	DeletedAt   *gorm.DeletedAt `json:"deleted_at" mapstructure:"deleted_at" gorm:"index;column:deleted_at"`
@@ -39,44 +39,20 @@ func (a *User) TableName() string {
 
 func (a *User) Transform(i domain.IEntity) (IRepoEntity, error) {
 	if err := copier.Copy(a, i); err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeUserTransform, err)
+		return nil, domainerrors.Wrap(ErrorCodeTransform, err)
 	}
 
 	return a, nil
 }
 
 func (a *User) BackToDomain() (domain.IEntity, error) {
-	var groupDelete time.Time
-	if a.Group.DeletedAt != nil {
-		groupDelete = a.Group.DeletedAt.Time
+	i := &entity.User{}
+	if err := copier.Copy(i, a); err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeBackToDomain, err)
 	}
 
-	group := &entity.Group{
-		ID:          a.GroupID,
-		Name:        a.Group.Name,
-		Description: a.Group.Description,
-		Metadata:    a.Group.Metadata,
-		CreatedAt:   a.Group.CreatedAt,
-		UpdatedAt:   a.Group.UpdatedAt,
-		DeletedAt:   groupDelete,
-	}
-
-	var deleteTime time.Time
 	if a.DeletedAt != nil {
-		deleteTime = a.DeletedAt.Time
-	}
-
-	i := &entity.User{
-		ID:          a.ID,
-		Username:    a.Username,
-		Password:    a.Password,
-		EMail:       a.EMail,
-		DisplayName: a.DisplayName,
-		Avatar:      a.Avatar,
-		Group:       group,
-		CreatedAt:   a.CreatedAt,
-		UpdatedAt:   a.UpdatedAt,
-		DeletedAt:   deleteTime,
+		i.DeletedAt = a.DeletedAt.Time
 	}
 
 	return i, nil
@@ -107,7 +83,7 @@ func (a *User) SetID(id string) {
 func (a *User) ToJSON() (string, error) {
 	jsonData, err := json.Marshal(a)
 	if err != nil {
-		return "", domainerrors.Wrap(ErrorCodeUserToJSON, err)
+		return "", domainerrors.Wrap(ErrorCodeToJSON, err)
 	}
 
 	return string(jsonData), nil
@@ -123,7 +99,7 @@ func (a *User) UnmarshalJSON(data []byte) error {
 	}
 
 	if err := json.Unmarshal(data, &aux); err != nil {
-		return domainerrors.Wrap(ErrorCodeUserDecodeJSON, err)
+		return domainerrors.Wrap(ErrorCodeDecodeJSON, err)
 	}
 
 	return nil
@@ -132,14 +108,14 @@ func (a *User) UnmarshalJSON(data []byte) error {
 func (a *User) ParseMap(data map[string]interface{}) (IRepoEntity, error) {
 	err := ParseDateString(data)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeUserParseMap, err)
+		return nil, domainerrors.Wrap(ErrorCodeParseMap, err)
 	}
 
 	var info *User
 	err = mapstructure.Decode(data, &info)
 
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeUserDecodeJSON, err)
+		return nil, domainerrors.Wrap(ErrorCodeDecodeJSON, err)
 	}
 
 	return info, nil

@@ -1,8 +1,10 @@
 package event
 
-type EventProducer interface {
+import "context"
+
+type Producer interface {
 	// PublishEvent publish event to pubsub server.
-	PublishEvent(topic string, event interface{}) error
+	PublishEvent(ctx context.Context, topic string, event interface{}) error
 
 	// Close connection.
 	Close() error

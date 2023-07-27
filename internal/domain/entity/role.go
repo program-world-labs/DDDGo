@@ -10,18 +10,18 @@ import (
 )
 
 var _ domain.IEntity = (*Role)(nil)
-var _ aggregate.AggregateHandler = (*Role)(nil)
+var _ aggregate.Handler = (*Role)(nil)
 
 type Role struct {
-	aggregate.BaseAggregate
-	ID          string    `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Permissions []string  `json:"permissions"`
-	Users       []User    `json:"users"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	DeletedAt   time.Time `json:"deleted_at"`
+	aggregate.BaseAggregate `copier:"-"`
+	ID                      string    `json:"id"`
+	Name                    string    `json:"name"`
+	Description             string    `json:"description"`
+	Permissions             []string  `json:"permissions"`
+	Users                   []User    `json:"users"`
+	CreatedAt               time.Time `json:"created_at"`
+	UpdatedAt               time.Time `json:"updated_at"`
+	DeletedAt               time.Time `json:"deleted_at"`
 }
 
 func NewRole(name, description string, permissions []string) *Role {

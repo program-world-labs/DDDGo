@@ -18,16 +18,16 @@ const (
 var _ domain.IEntity = (*Wallet)(nil)
 
 type Wallet struct {
-	ID          string    `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Chain       Chain     `json:"chain"`
-	Address     string    `json:"address"`
-	UserID      string    `json:"userId"`
-	Amounts     []Amount  `json:"amounts"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	DeletedAt   time.Time `json:"deleted_at"`
+	ID             string          `json:"id"`
+	Name           string          `json:"name"`
+	Description    string          `json:"description"`
+	Chain          Chain           `json:"chain"`
+	Address        string          `json:"address"`
+	UserID         string          `json:"userId"`
+	WalletBalances []WalletBalance `json:"walletBalances"`
+	CreatedAt      time.Time       `json:"created_at"`
+	UpdatedAt      time.Time       `json:"updated_at"`
+	DeletedAt      time.Time       `json:"deleted_at"`
 }
 
 func (a *Wallet) GetID() string {

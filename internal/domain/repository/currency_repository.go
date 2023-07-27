@@ -4,6 +4,6 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/domain"
 )
 
-type AmountRepository interface {
+type CurrencyRepository interface {
 	domain.ICRUDRepository
 }

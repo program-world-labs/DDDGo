@@ -119,6 +119,28 @@ func (r *CRUDImpl) Create(ctx context.Context, e domain.IEntity) (domain.IEntity
 		return nil, domainerrors.WrapWithSpan(ErrorCodeRepoCreate, err, span)
 	}
 
+	listKeys, err := r.Redis.GetListKeys(ctx, info)
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+	}
+
+	for _, key := range listKeys {
+		err = r.Cache.DeleteWithKey(ctx, key)
+		if err != nil {
+			return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+		}
+
+		err = r.Redis.DeleteWithKey(ctx, key)
+		if err != nil {
+			return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+		}
+	}
+
+	err = r.Redis.DeleteListKeys(ctx, info)
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+	}
+
 	d, err := info.BackToDomain()
 	if err != nil {
 		return nil, domainerrors.WrapWithSpan(ErrorCodeRepoBackToDomain, err, span)
@@ -148,8 +170,26 @@ func (r *CRUDImpl) performUpdate(ctx context.Context, e domain.IEntity, span tra
 		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
 	}
 
-	if data == nil {
-		return nil, nil
+	listKeys, err := r.Redis.GetListKeys(ctx, info)
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+	}
+
+	for _, key := range listKeys {
+		err = r.Cache.DeleteWithKey(ctx, key)
+		if err != nil {
+			return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+		}
+
+		err = r.Redis.DeleteWithKey(ctx, key)
+		if err != nil {
+			return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+		}
+	}
+
+	err = r.Redis.DeleteListKeys(ctx, info)
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
 	}
 
 	d, err := data.BackToDomain()
@@ -211,6 +251,28 @@ func (r *CRUDImpl) Delete(ctx context.Context, e domain.IEntity) (domain.IEntity
 		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
 	}
 
+	listKeys, err := r.Redis.GetListKeys(ctx, info)
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+	}
+
+	for _, key := range listKeys {
+		err = r.Cache.DeleteWithKey(ctx, key)
+		if err != nil {
+			return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+		}
+
+		err = r.Redis.DeleteWithKey(ctx, key)
+		if err != nil {
+			return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+		}
+	}
+
+	err = r.Redis.DeleteListKeys(ctx, info)
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+	}
+
 	d, err := model.BackToDomain()
 	if err != nil {
 		return nil, domainerrors.WrapWithSpan(ErrorCodeRepoBackToDomain, err, span)
@@ -235,6 +297,28 @@ func (r *CRUDImpl) CreateTx(ctx context.Context, e domain.IEntity, tx domain.ITr
 	_, err = r.DB.CreateTx(ctx, info, tx)
 	if err != nil {
 		return nil, domainerrors.WrapWithSpan(ErrorCodeRepoCreateTx, err, span)
+	}
+
+	listKeys, err := r.Redis.GetListKeys(ctx, info)
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+	}
+
+	for _, key := range listKeys {
+		err = r.Cache.DeleteWithKey(ctx, key)
+		if err != nil {
+			return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+		}
+
+		err = r.Redis.DeleteWithKey(ctx, key)
+		if err != nil {
+			return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+		}
+	}
+
+	err = r.Redis.DeleteListKeys(ctx, info)
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
 	}
 
 	d, err := info.BackToDomain()
@@ -267,7 +351,6 @@ func (r *CRUDImpl) UpdateWithFieldsTx(ctx context.Context, e domain.IEntity, key
 	return r.performUpdate(ctx, e, span, func(ctx context.Context, info dto.IRepoEntity) (dto.IRepoEntity, error) {
 		return r.DB.UpdateWithFieldsTx(ctx, info, keys, tx)
 	})
-
 }
 
 // DeleteTx -.
@@ -296,6 +379,23 @@ func (r *CRUDImpl) DeleteTx(ctx context.Context, e domain.IEntity, tx domain.ITr
 	model, err := r.DB.DeleteTx(ctx, info, tx)
 	if err != nil {
 		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+	}
+
+	listKeys, err := r.Cache.GetListKeys(ctx, info)
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+	}
+
+	for _, key := range listKeys {
+		err = r.Cache.DeleteWithKey(ctx, key)
+		if err != nil {
+			return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+		}
+
+		err = r.Redis.DeleteWithKey(ctx, key)
+		if err != nil {
+			return nil, domainerrors.WrapWithSpan(ErrorCodeDatasource, err, span)
+		}
 	}
 
 	return model, nil

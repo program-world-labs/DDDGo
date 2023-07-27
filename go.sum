@@ -83,8 +83,8 @@ github.com/Shopify/sarama v1.38.0 h1:Q81EWxDT2Xs7kCaaiDGV30GyNCWd6K1Xmd4k2qpTWE8
 github.com/Shopify/sarama v1.38.0/go.mod h1:djdek3V4gS0N9LZ+OhfuuM6rE1bEKeDffYY8UvsRNyM=
 github.com/Shopify/toxiproxy/v2 v2.3.0/go.mod h1:KvQTtB6RjCJY4zqNJn7C7JDFgsG5uoHYDirfUfpIm0c=
 github.com/Shopify/toxiproxy/v2 v2.5.0 h1:i4LPT+qrSlKNtQf5QliVjdP08GyAH8+BUIc9gT0eahc=
-github.com/ThreeDotsLabs/watermill v1.3.1 h1:Fm+K9soLPEO/N2U90OkdwoyrIm4X8YsCDPxmuyniOR8=
-github.com/ThreeDotsLabs/watermill v1.3.1/go.mod h1:zn/7F0TGOr1K/RX7bFbVxii6p1abOMLllAMpVpKinQg=
+github.com/ThreeDotsLabs/watermill v1.3.2 h1:uU0F+sDmjHh6aYr0xo4gBZy8Tq77DM5F2cvJU46CO6I=
+github.com/ThreeDotsLabs/watermill v1.3.2/go.mod h1:zn/7F0TGOr1K/RX7bFbVxii6p1abOMLllAMpVpKinQg=
 github.com/ThreeDotsLabs/watermill-kafka/v2 v2.4.0 h1:LsPG2EfI9Wz3ENGvrIXFSNehGqc+dM54E6bL19MtEX8=
 github.com/ThreeDotsLabs/watermill-kafka/v2 v2.4.0/go.mod h1:w+9jhI7x5ZP67ceSUIIpkgLzjAakotfHX4sWyqsKVjs=
 github.com/aaw/maybe_tls v0.0.0-20160803104303-89c499bcc6aa h1:6yJyU8MlPBB2enGJdPciPlr8P+PC0nhCFHnSHYMirZI=

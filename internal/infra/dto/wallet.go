@@ -26,25 +26,25 @@ const (
 var _ IRepoEntity = (*Wallet)(nil)
 
 type Wallet struct {
-	ID          string          `json:"id" gorm:"primary_key"`
-	Name        string          `json:"name"`
-	Description string          `json:"description"`
-	Chain       Chain           `json:"chain"`
-	Address     string          `json:"address"`
-	UserID      string          `json:"userId"`
-	Amounts     []Amount        `json:"amounts" gorm:"foreignKey:WalletID"`
-	CreatedAt   time.Time       `json:"created_at" mapstructure:"created_at" gorm:"column:created_at"`
-	UpdatedAt   time.Time       `json:"updated_at" mapstructure:"updated_at" gorm:"column:updated_at"`
-	DeletedAt   *gorm.DeletedAt `json:"deleted_at" mapstructure:"deleted_at" gorm:"index;column:deleted_at"`
+	ID             string          `json:"id" gorm:"primary_key"`
+	Name           string          `json:"name"`
+	Description    string          `json:"description"`
+	Chain          Chain           `json:"chain"`
+	Address        string          `json:"address"`
+	UserID         string          `json:"userId" gorm:"index"`
+	WalletBalances []WalletBalance `json:"walletBalances" gorm:"foreignKey:WalletID"`
+	CreatedAt      time.Time       `json:"created_at" mapstructure:"created_at" gorm:"column:created_at"`
+	UpdatedAt      time.Time       `json:"updated_at" mapstructure:"updated_at" gorm:"column:updated_at"`
+	DeletedAt      *gorm.DeletedAt `json:"deleted_at" mapstructure:"deleted_at" gorm:"index;column:deleted_at"`
 }
 
 func (a *Wallet) TableName() string {
-	return "Wallets"
+	return "Wallet"
 }
 
 func (a *Wallet) Transform(i domain.IEntity) (IRepoEntity, error) {
 	if err := copier.Copy(a, i); err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeWalletTransform, err)
+		return nil, domainerrors.Wrap(ErrorCodeTransform, err)
 	}
 
 	return a, nil
@@ -53,7 +53,7 @@ func (a *Wallet) Transform(i domain.IEntity) (IRepoEntity, error) {
 func (a *Wallet) BackToDomain() (domain.IEntity, error) {
 	i := &entity.Wallet{}
 	if err := copier.Copy(i, a); err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeWalletBackToDomain, err)
+		return nil, domainerrors.Wrap(ErrorCodeBackToDomain, err)
 	}
 
 	if a.DeletedAt != nil {
@@ -63,11 +63,6 @@ func (a *Wallet) BackToDomain() (domain.IEntity, error) {
 	return i, nil
 }
 
-func (a *Wallet) BeforeUpdate(_ *gorm.DB) (err error) {
-	a.UpdatedAt = time.Now()
-
-	return
-}
 func (a *Wallet) BeforeCreate(_ *gorm.DB) (err error) {
 	a.ID, err = generateID()
 	a.UpdatedAt = time.Now()
@@ -88,7 +83,7 @@ func (a *Wallet) SetID(id string) {
 func (a *Wallet) ToJSON() (string, error) {
 	jsonData, err := json.Marshal(a)
 	if err != nil {
-		return "", domainerrors.Wrap(ErrorCodeWalletToJSON, err)
+		return "", domainerrors.Wrap(ErrorCodeToJSON, err)
 	}
 
 	return string(jsonData), nil
@@ -104,7 +99,7 @@ func (a *Wallet) UnmarshalJSON(data []byte) error {
 	}
 
 	if err := json.Unmarshal(data, &aux); err != nil {
-		return domainerrors.Wrap(ErrorCodeWalletDecodeJSON, err)
+		return domainerrors.Wrap(ErrorCodeDecodeJSON, err)
 	}
 
 	return nil
@@ -113,21 +108,22 @@ func (a *Wallet) UnmarshalJSON(data []byte) error {
 func (a *Wallet) ParseMap(data map[string]interface{}) (IRepoEntity, error) {
 	err := ParseDateString(data)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeWalletParseMap, err)
+		return nil, domainerrors.Wrap(ErrorCodeParseMap, err)
 	}
 
 	var info *Wallet
 	err = mapstructure.Decode(data, &info)
 
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeWalletParseMap, err)
+		return nil, domainerrors.Wrap(ErrorCodeParseMap, err)
 	}
 
 	return info, nil
 }
 
 func (a *Wallet) GetPreloads() []string {
-	return []string{"Amounts"}
+	// return []string{"WalletBalances"}
+	return []string{}
 }
 
 func (a *Wallet) GetListType() interface{} {

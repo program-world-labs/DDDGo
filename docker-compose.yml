@@ -1,6 +1,5 @@
 version: '3.9'
 services:
-
   postgres:
     container_name: postgres
     image: postgres
@@ -20,19 +19,45 @@ services:
       - redis-data:/data
     ports:
       - 6379:6379
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 22181:2181
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - 29092:29092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
   app:
-      build: .
-      container_name: app
-      image: app
-      environment:
-        APP_SQL_URL: 'postgres://user:pass@postgres:5432/postgres'
-        APP_REDIS_URL: 'redis://redis:6379/0'
-        APP_ENV: 'dev'
-      ports:
-        - 8080:8080
-      depends_on:
-        - postgres
-        - redis
+    build: .
+    container_name: app
+    image: app
+    environment:
+      APP_SQL_URL: 'postgres://user:pass@postgres:5432/postgres'
+      APP_REDIS_URL: 'redis://redis:6379/0'
+      APP_KAFKA_URL: 'kafka:29092'
+      APP_ENV: 'dev'
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
+      - redis
+      - kafka
+    command: /dockerize -wait tcp://postgres:5432 -wait tcp://redis:6379 -wait tcp://kafka:29092 /app
 
   integration:
     build:
@@ -42,6 +67,8 @@ services:
     image: integration
     depends_on:
       - app
+    command: /dockerize -wait tcp://app:8080 go test -v ./integration-test/...
+
 volumes:
   pg-data:
   redis-data:

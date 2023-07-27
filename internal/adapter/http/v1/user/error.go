@@ -1,17 +1,19 @@
 package user
 
 import (
-	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 	"github.com/rs/zerolog"
+
+	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 )
 
 const (
-	ErrorCodeUserUsecase       = domainerrors.ErrorCodeAdapterHTTPUser + iota // 2000000
-	ErrorCodeUserBindJSON                                                     // 2000001
-	ErrorCodeUserCopyToInput                                                  // 2000002
-	ErrorCodeUserBindQuery                                                    // 2000003
-	ErrorCodeUserValidateInput                                                // 2000004
-	ErrorCodeUserBindURI                                                      // 2000005
+	ErrorCodeAdapterHTTPUser = domainerrors.ErrorCodeAdapter + domainerrors.ErrorCodeAdapterHTTP + domainerrors.ErrorCodeAdapterUser + iota
+	ErrorCodeExecuteUsecase
+	ErrorCodeBindJSON
+	ErrorCodeCopyToInput
+	ErrorCodeBindQuery
+	ErrorCodeValidateInput
+	ErrorCodeBindURI
 )
 
 type ErrorEvent struct {

@@ -1,11 +1,13 @@
 package repository
 
 import (
+	"errors"
+
 	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 )
 
 const (
-	ErrorCodeDatasource = domainerrors.ErrorCodeRepo + iota
+	ErrorCodeDatasource = domainerrors.ErrorCodeInfraRepo + domainerrors.ErrorCodeInfraRepoCRUD + iota
 	ErrorCodeRepoTransform
 	ErrorCodeRepoBackToDomain
 	ErrorCodeRepoCast
@@ -21,6 +23,10 @@ const (
 	ErrorCodeRepoUpdateTx
 	ErrorCodeRepoUpdateWithFieldsTx
 	ErrorCodeRepoParseMap
+)
+
+var (
+	ErrCastTypeFailed = errors.New("repo transform failed")
 )
 
 // func NewDatasourceError(err error) *domainerrors.ErrorInfo {

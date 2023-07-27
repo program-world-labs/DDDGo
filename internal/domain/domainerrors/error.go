@@ -10,24 +10,55 @@ import (
 )
 
 const (
-	GruopID                          = "LLM"
-	ErrorCodeAdapterHTTPRole         = 110000000
-	ErrorCodeAdapterHTTPUser         = 120000000
-	ErrorCodeAdapterMessageRole      = 210000000
-	ErrorCodeAdapterMessageUser      = 220000000
-	ErrorCodeApplicationRole         = 1000000
-	ErrorCodeApplicationUser         = 2000000
-	ErrorCodeDomainRole              = 100000
-	ErrorCodeDomainUser              = 200000
-	ErrorCodeRepo                    = 10000
-	ErrorCodeDatasourceSQL           = 1000
-	ErrorCodeDatasourceCache         = 2000
-	ErrorCodeDatasourceUserRepoDTO   = 3000
-	ErrorCodeDatasourceRoleRepoDTO   = 4000
-	ErrorCodeDatasourceGroupRepoDTO  = 5000
-	ErrorCodeDatasourceWalletRepoDTO = 6000
-	ErrorCodeDatasourceAmountRepoDTO = 7000
-	ErrorCodeSystem                  = 900000000
+	GruopID = "PAAC"
+	// Adapter Layer Error Code Offset.
+	ErrorCodeAdapter         = 100000000
+	ErrorCodeAdapterHTTP     = 010000000
+	ErrorCodeAdapterMessage  = 020000000
+	ErrorCodeAdapterUser     = 001000000
+	ErrorCodeAdapterRole     = 002000000
+	ErrorCodeAdapterGroup    = 003000000
+	ErrorCodeAdapterWallet   = 004000000
+	ErrorCodeAdapterCurrency = 005000000
+	// Application Layer Error Code Offset.
+	ErrorCodeApplication         = 200000000
+	ErrorCodeApplicationUser     = 010000000
+	ErrorCodeApplicationRole     = 020000000
+	ErrorCodeApplicationGroup    = 030000000
+	ErrorCodeApplicationWallet   = 040000000
+	ErrorCodeApplicationCurrency = 050000000
+	// Domain Layer Error Code Offset.
+	ErrorCodeDomain         = 300000000
+	ErrorCodeDomainEntity   = 010000000
+	ErrorCodeDomainEvent    = 020000000
+	ErrorCodeDomainUser     = 001000000
+	ErrorCodeDomainRole     = 002000000
+	ErrorCodeDomainGroup    = 003000000
+	ErrorCodeDomainWallet   = 004000000
+	ErrorCodeDomainCurrency = 005000000
+	// Infra Layer Error Code Offset.
+	ErrorCodeInfra           = 200000000
+	ErrorCodeInfraDatasource = 010000000
+	ErrorCodeInfraDTO        = 020000000
+	ErrorCodeInfraRepo       = 030000000
+	// Infra Layer Datasource Error Code.
+	ErrorCodeInfraDatasourceSQL   = 001000000
+	ErrorCodeInfraDatasourceCache = 002000000
+	// Infra Layer DTO Error Code.
+	ErrorCodeInfraDTOMapper = 001000000
+	ErrorCodeInfraDTOVO     = 002000000
+	ErrorCodeInfraDTOBase   = 003000000
+	ErrorCodeInfraDTOList   = 004000000
+	// Infra Layer Repository Error Code.
+	ErrorCodeInfraRepoCRUD        = 001000000
+	ErrorCodeInfraRepoTransaction = 002000000
+	ErrorCodeInfraRepoUser        = 003000000
+	ErrorCodeInfraRepoRole        = 004000000
+	ErrorCodeInfraRepoGroup       = 005000000
+	ErrorCodeInfraRepoWallet      = 006000000
+	ErrorCodeInfraRepoCurrency    = 007000000
+
+	ErrorCodeSystem = 900000000
 )
 
 type ErrorInfo struct {

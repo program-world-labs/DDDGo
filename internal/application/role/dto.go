@@ -39,7 +39,7 @@ func (c *CreatedInput) Validate() error {
 	if err != nil {
 		var e validator.ValidationErrors
 		if errors.As(err, &e) {
-			return utils.HandleValidationError(e)
+			return utils.HandleValidationError("Role", e)
 		}
 
 		return err
@@ -76,7 +76,7 @@ func (c *UpdatedInput) Validate() error {
 	if err != nil {
 		var e validator.ValidationErrors
 		if errors.As(err, &e) {
-			return utils.HandleValidationError(e)
+			return utils.HandleValidationError("Role", e)
 		}
 
 		return err
@@ -104,7 +104,7 @@ func (i *DeletedInput) Validate() error {
 	if err != nil {
 		var e validator.ValidationErrors
 		if errors.As(err, &e) {
-			return utils.HandleValidationError(e)
+			return utils.HandleValidationError("Role", e)
 		}
 
 		return err
@@ -123,7 +123,7 @@ func (i *DetailGotInput) Validate() error {
 	if err != nil {
 		var e validator.ValidationErrors
 		if errors.As(err, &e) {
-			return utils.HandleValidationError(e)
+			return utils.HandleValidationError("Role", e)
 		}
 
 		return err
@@ -146,7 +146,7 @@ func (i *ListGotInput) Validate() error {
 	if err != nil {
 		var e validator.ValidationErrors
 		if errors.As(err, &e) {
-			return utils.HandleValidationError(e)
+			return utils.HandleValidationError("Role", e)
 		}
 
 		return err
@@ -182,7 +182,7 @@ func (i *ListGotInput) ToSearchQuery() *domain.SearchQuery {
 	return sq
 }
 
-func (c *ListGotInput) ToEntity() *entity.Role {
+func (i *ListGotInput) ToEntity() *entity.Role {
 	return &entity.Role{}
 }
 

@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"errors"
 	"time"
 
 	"github.com/program-world-labs/DDDGo/internal/domain"
@@ -10,7 +9,7 @@ import (
 )
 
 var _ domain.IEntity = (*User)(nil)
-var _ aggregate.AggregateHandler = (*User)(nil)
+var _ aggregate.Handler = (*User)(nil)
 
 // User -.
 type User struct {
@@ -84,7 +83,7 @@ func (u *User) ApplyEvent(domainEvent *event.DomainEvent) error {
 func (u *User) applyCreated(domainEvent *event.DomainEvent) error {
 	eventData, ok := domainEvent.Data.(*event.UserCreatedEvent)
 	if !ok {
-		return errors.New("invalid event data")
+		return ErrInvalidEventData
 	}
 
 	u.Username = eventData.UserName
@@ -97,7 +96,7 @@ func (u *User) applyCreated(domainEvent *event.DomainEvent) error {
 func (u *User) applyPasswordChanged(domainEvent *event.DomainEvent) error {
 	eventData, ok := domainEvent.Data.(*event.UserPasswordChangedEvent)
 	if !ok {
-		return errors.New("invalid event data")
+		return ErrInvalidEventData
 	}
 
 	u.Password = eventData.Password
@@ -108,7 +107,7 @@ func (u *User) applyPasswordChanged(domainEvent *event.DomainEvent) error {
 func (u *User) applyEmailChanged(domainEvent *event.DomainEvent) error {
 	eventData, ok := domainEvent.Data.(*event.UserEmailChangedEvent)
 	if !ok {
-		return errors.New("invalid event data")
+		return ErrInvalidEventData
 	}
 
 	u.EMail = eventData.EMail

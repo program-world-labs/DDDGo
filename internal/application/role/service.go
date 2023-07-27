@@ -21,7 +21,7 @@ type ServiceImpl struct {
 	RoleRepo        repository.RoleRepository
 	UserRepo        repository.UserRepository
 	eventStore      event.EventStore
-	EventProducer   event.EventProducer
+	EventProducer   event.Producer
 	log             pwlogger.Interface
 }
 
@@ -76,7 +76,10 @@ func (u *ServiceImpl) CreateRole(ctx context.Context, roleInfo *CreatedInput) (*
 	domainEvent := event.NewDomainEvent(createdRoleEntity.GetID(), et, -1, createdEvent)
 
 	// Apply event to entity
-	createdRoleEntity.ApplyEventHelper(createdRoleEntity, domainEvent, true)
+	err = createdRoleEntity.ApplyEventHelper(createdRoleEntity, domainEvent, true)
+	if err != nil {
+		return nil, domainerrors.WrapWithSpan(ErrorCodeApplyEvent, err, span)
+	}
 
 	// Save AccountCreatedEvent to EventStore
 	// err = u.eventStore.SafeStore(ctx, createdRoleEntity.Events, createdRoleEntity.Version)
@@ -89,9 +92,9 @@ func (u *ServiceImpl) CreateRole(ctx context.Context, roleInfo *CreatedInput) (*
 	createdRoleEntity.ClearUnCommitedEvents()
 
 	// Publish event
-	err = u.EventProducer.PublishEvent(createdRoleEntity.Type, domainEvent)
+	err = u.EventProducer.PublishEvent(ctx, createdRoleEntity.Type, domainEvent)
 	if err != nil {
-		return nil, err
+		return nil, domainerrors.WrapWithSpan(ErrorCodePublishEvent, err, span)
 	}
 
 	return NewOutput(createdRoleEntity), nil
@@ -122,6 +125,8 @@ func (u *ServiceImpl) GetRoleList(ctx context.Context, roleInfo *ListGotInput) (
 }
 
 // GetRoleDetail gets role detail.
+//
+//nolint:dupl // business logic is different
 func (u *ServiceImpl) GetRoleDetail(ctx context.Context, roleInfo *DetailGotInput) (*Output, error) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
@@ -180,6 +185,8 @@ func (u *ServiceImpl) UpdateRole(ctx context.Context, roleInfo *UpdatedInput) (*
 }
 
 // DeleteRole deletes role.
+//
+//nolint:dupl // business logic is different
 func (u *ServiceImpl) DeleteRole(ctx context.Context, roleInfo *DeletedInput) (*Output, error) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)

@@ -18,7 +18,7 @@ var _ IService = (*ServiceImpl)(nil)
 // ServiceImpl -.
 type ServiceImpl struct {
 	TransactionRepo domain.ITransactionRepo
-	EventProducer   event.EventProducer
+	EventProducer   event.Producer
 	RoleRepo        repository.RoleRepository
 	UserRepo        repository.UserRepository
 	eventStore      event.EventStore
@@ -38,6 +38,8 @@ func NewServiceImpl(roleRepo repository.RoleRepository, userRepo repository.User
 }
 
 // CreateUser creates a user.
+//
+//nolint:dupl // business logic is different
 func (u *ServiceImpl) CreateUser(ctx context.Context, userInfo *CreatedInput) (*Output, error) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)
@@ -98,6 +100,8 @@ func (u *ServiceImpl) GetUserDetail(ctx context.Context, userInfo *DetailGotInpu
 }
 
 // UpdateUser updates a user.
+//
+//nolint:dupl // business logic is different
 func (u *ServiceImpl) UpdateUser(ctx context.Context, userInfo *UpdatedInput) (*Output, error) {
 	// 開始追蹤
 	var tracer = otel.Tracer(domainerrors.GruopID)

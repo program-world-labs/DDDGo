@@ -7,51 +7,17 @@ import (
 )
 
 const (
-	ErrorCodeUserTransform = domainerrors.ErrorCodeDatasourceUserRepoDTO + iota + 1
-	ErrorCodeUserBackToDomain
-	ErrorCodeUserToJSON
-	ErrorCodeUserDecodeJSON
-	ErrorCodeUserInvalidFilterField
-	ErrorCodeUserInvalidOrderField
-	ErrorCodeUserParseMap
-)
-const (
-	ErrorCodeRoleTransform = domainerrors.ErrorCodeDatasourceRoleRepoDTO + iota + 1
-	ErrorCodeRoleBackToDomain
-	ErrorCodeRoleToJSON
-	ErrorCodeRoleDecodeJSON
-	ErrorCodeRoleInvalidFilterField
-	ErrorCodeRoleInvalidOrderField
-	ErrorCodeRoleParseMap
-)
-const (
-	ErrorCodeGroupTransform = domainerrors.ErrorCodeDatasourceGroupRepoDTO + iota + 1
-	ErrorCodeGroupBackToDomain
-	ErrorCodeGroupToJSON
-	ErrorCodeGroupDecodeJSON
-	ErrorCodeGroupInvalidFilterField
-	ErrorCodeGroupInvalidOrderField
-	ErrorCodeGroupParseMap
-)
-const (
-	ErrorCodeWalletTransform = domainerrors.ErrorCodeDatasourceWalletRepoDTO + iota + 1
-	ErrorCodeWalletBackToDomain
-	ErrorCodeWalletToJSON
-	ErrorCodeWalletDecodeJSON
-	ErrorCodeWalletInvalidFilterField
-	ErrorCodeWalletInvalidOrderField
-	ErrorCodeWalletParseMap
-)
-const (
-	ErrorCodeAmountTransform = domainerrors.ErrorCodeDatasourceAmountRepoDTO + iota + 1
-	ErrorCodeAmountBackToDomain
-	ErrorCodeAmountToJSON
-	ErrorCodeAmountDecodeJSON
-	ErrorCodeAmountInvalidFilterField
-	ErrorCodeAmountInvalidOrderField
-	ErrorCodeAmountParseMap
+	ErrorCodeDtoBase = domainerrors.ErrorCodeInfraDTO + domainerrors.ErrorCodeInfraDTO + domainerrors.ErrorCodeInfraDTOBase + iota
+	ErrorCodeTransform
+	ErrorCodeBackToDomain
+	ErrorCodeToJSON
+	ErrorCodeDecodeJSON
+	ErrorCodeInvalidFilterField
+	ErrorCodeInvalidOrderField
+	ErrorCodeParseMap
 )
 
 var (
 	ErrParesMapFailed = errors.New("parse map failed")
+	ErrCastTypeFailed = errors.New("cast type failed")
 )

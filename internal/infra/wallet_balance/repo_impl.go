@@ -1,4 +1,4 @@
-package amount
+package wallet
 
 import (
 	"github.com/program-world-labs/DDDGo/internal/domain/repository"
@@ -7,14 +7,14 @@ import (
 	base_repository "github.com/program-world-labs/DDDGo/internal/infra/repository"
 )
 
-var _ repository.AmountRepository = (*RepoImpl)(nil)
+var _ repository.WalletBalanceRepository = (*RepoImpl)(nil)
 
 type RepoImpl struct {
 	base_repository.CRUDImpl
 }
 
 func NewRepoImpl(db datasource.IRelationDataSource, redis datasource.ICacheDataSource, cache datasource.ICacheDataSource) *RepoImpl {
-	dtoAmount := &dto.Amount{}
+	dtoWalletBalance := &dto.WalletBalance{}
 
-	return &RepoImpl{CRUDImpl: *base_repository.NewCRUDImpl(db, redis, cache, dtoAmount)}
+	return &RepoImpl{CRUDImpl: *base_repository.NewCRUDImpl(db, redis, cache, dtoWalletBalance)}
 }

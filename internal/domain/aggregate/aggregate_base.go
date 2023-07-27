@@ -7,10 +7,10 @@ import (
 	"github.com/program-world-labs/DDDGo/internal/domain/event"
 )
 
-type AggregateHandler interface {
+type Handler interface {
 	LoadFromHistory(events []event.DomainEvent) error
 	ApplyEvent(event *event.DomainEvent) error
-	ApplyEventHelper(aggregate AggregateHandler, event *event.DomainEvent, commit bool)
+	ApplyEventHelper(aggregate Handler, event *event.DomainEvent, commit bool) error
 	// HandleCommand(command interface{}) error
 	UnCommitedEvents() []event.DomainEvent
 	ClearUnCommitedEvents()
@@ -51,7 +51,7 @@ func (b *BaseAggregate) GetID() string {
 	return b.ID
 }
 
-func (b *BaseAggregate) ApplyEventHelper(aggregate AggregateHandler, event *event.DomainEvent, commit bool) {
+func (b *BaseAggregate) ApplyEventHelper(aggregate Handler, event *event.DomainEvent, commit bool) error {
 	// increments the version in event and aggregate
 	b.IncrementVersion()
 
@@ -60,7 +60,10 @@ func (b *BaseAggregate) ApplyEventHelper(aggregate AggregateHandler, event *even
 	b.Type = aggregateType
 
 	// apply the event itself
-	aggregate.ApplyEvent(event)
+	err := aggregate.ApplyEvent(event)
+	if err != nil {
+		return err
+	}
 
 	// Check if Need to commit to EventStore and EventPublisher
 	if commit {
@@ -70,6 +73,8 @@ func (b *BaseAggregate) ApplyEventHelper(aggregate AggregateHandler, event *even
 		event.SetEventType(et)
 		b.Events = append(b.Events, *event)
 	}
+
+	return nil
 }
 
 func (b *BaseAggregate) GetTypeName(source interface{}) (reflect.Type, string) {
@@ -84,6 +89,6 @@ func (b *BaseAggregate) GetTypeName(source interface{}) (reflect.Type, string) {
 	// we only need the name, not the package
 	// the name follows the format `package.StructName`
 	parts := strings.Split(name, ".")
-	
+
 	return rawType, parts[len(parts)-1]
 }

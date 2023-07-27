@@ -21,7 +21,7 @@ type Group struct {
 	Name        string          `json:"name"`
 	Description string          `json:"description"`
 	Users       []User          `json:"users" gorm:"foreignKey:GroupID"`
-	Owner       *User           `json:"owner"`
+	OwnerID     string          `json:"ownerId"`
 	Metadata    string          `json:"metadata"`
 	CreatedAt   time.Time       `json:"created_at" mapstructure:"created_at" gorm:"column:created_at"`
 	UpdatedAt   time.Time       `json:"updated_at" mapstructure:"updated_at" gorm:"column:updated_at"`
@@ -29,12 +29,12 @@ type Group struct {
 }
 
 func (a *Group) TableName() string {
-	return "Groups"
+	return "Group"
 }
 
 func (a *Group) Transform(i domain.IEntity) (IRepoEntity, error) {
 	if err := copier.Copy(a, i); err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeGroupTransform, err)
+		return nil, domainerrors.Wrap(ErrorCodeTransform, err)
 	}
 
 	return a, nil
@@ -43,7 +43,7 @@ func (a *Group) Transform(i domain.IEntity) (IRepoEntity, error) {
 func (a *Group) BackToDomain() (domain.IEntity, error) {
 	i := &entity.Group{}
 	if err := copier.Copy(i, a); err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeGroupBackToDomain, err)
+		return nil, domainerrors.Wrap(ErrorCodeBackToDomain, err)
 	}
 
 	if a.DeletedAt != nil {
@@ -53,11 +53,6 @@ func (a *Group) BackToDomain() (domain.IEntity, error) {
 	return i, nil
 }
 
-func (a *Group) BeforeUpdate(_ *gorm.DB) (err error) {
-	a.UpdatedAt = time.Now()
-
-	return
-}
 func (a *Group) BeforeCreate(_ *gorm.DB) (err error) {
 	a.ID, err = generateID()
 	a.UpdatedAt = time.Now()
@@ -78,7 +73,7 @@ func (a *Group) SetID(id string) {
 func (a *Group) ToJSON() (string, error) {
 	jsonData, err := json.Marshal(a)
 	if err != nil {
-		return "", domainerrors.Wrap(ErrorCodeGroupToJSON, err)
+		return "", domainerrors.Wrap(ErrorCodeToJSON, err)
 	}
 
 	return string(jsonData), nil
@@ -94,7 +89,7 @@ func (a *Group) UnmarshalJSON(data []byte) error {
 	}
 
 	if err := json.Unmarshal(data, &aux); err != nil {
-		return domainerrors.Wrap(ErrorCodeGroupDecodeJSON, err)
+		return domainerrors.Wrap(ErrorCodeDecodeJSON, err)
 	}
 
 	return nil
@@ -103,7 +98,7 @@ func (a *Group) UnmarshalJSON(data []byte) error {
 func (a *Group) ParseMap(data map[string]interface{}) (IRepoEntity, error) {
 	err := ParseDateString(data)
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeGroupParseMap, err)
+		return nil, domainerrors.Wrap(ErrorCodeParseMap, err)
 	}
 
 	var info *Group
@@ -111,7 +106,7 @@ func (a *Group) ParseMap(data map[string]interface{}) (IRepoEntity, error) {
 	err = mapstructure.Decode(data, &info)
 
 	if err != nil {
-		return nil, domainerrors.Wrap(ErrorCodeGroupParseMap, err)
+		return nil, domainerrors.Wrap(ErrorCodeParseMap, err)
 	}
 
 	return info, nil
@@ -120,7 +115,6 @@ func (a *Group) ParseMap(data map[string]interface{}) (IRepoEntity, error) {
 func (a *Group) GetPreloads() []string {
 	return []string{
 		"Users",
-		"Owner",
 	}
 }
 

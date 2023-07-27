@@ -68,8 +68,8 @@ type ServiceTest struct {
 	userRepoMock  *mocks_user.MockUserRepository
 	transRepoMock *mock_repo.MockITransactionRepo
 	service       *application_role.ServiceImpl
-	producer      *mock_repo.MockEventProducer
 	eventStoreDB  *mock_repo.MockEventStore
+	producer      *mock_repo.MockProducer
 }
 
 func (st *ServiceTest) InitializeScenario(ctx *godog.ScenarioContext) {
@@ -100,10 +100,10 @@ func (st *ServiceTest) InitializeScenario(ctx *godog.ScenarioContext) {
 
 var (
 	ErrRoleIsExist                     = errors.New("role is exist")
-	ErrRolePermission                  = errors.New("validation failed: role Permissions invalid permission format")
-	ErrRoleDescriptionExceedsMaxLength = errors.New("validation failed: role Description exceeds max length")
-	ErrRoleNameExceedsMaxLength        = errors.New("validation failed: role Name exceeds max length")
-	ErrRoleNameFormat                  = errors.New("validation failed: role Name invalid format")
+	ErrRolePermission                  = errors.New("validation failed: Role Permissions invalid permission format")
+	ErrRoleDescriptionExceedsMaxLength = errors.New("validation failed: Role Description exceeds max length")
+	ErrRoleNameExceedsMaxLength        = errors.New("validation failed: Role Name exceeds max length")
+	ErrRoleNameFormat                  = errors.New("validation failed: Role Name invalid format")
 )
 
 func newRolseExistError() *domainerrors.ErrorInfo {
@@ -141,6 +141,9 @@ func (st *ServiceTest) reset() {
 	st.producer = mock_repo.NewMockEventProducer(st.mockCtrl)
 	st.eventStoreDB = mock_repo.NewMockEventStore(st.mockCtrl)
 	st.service = application_role.NewServiceImpl(st.repoMock, st.userRepoMock, st.transRepoMock, st.producer, st.eventStoreDB, logger)
+	st.producer = mock_repo.NewMockProducer(st.mockCtrl)
+  st.eventStoreDB = mock_repo.NewMockEventStore(st.mockCtrl)
+	st.service = application_role.NewServiceImpl(st.repoMock, st.userRepoMock, st.transRepoMock, st.producer, st.eventStoreDB, logger)
 }
 
 func (st *ServiceTest) givenData(name, description, permission string) error {
@@ -157,7 +160,7 @@ func (st *ServiceTest) givenData(name, description, permission string) error {
 func (st *ServiceTest) whenCreateNewRole(_ context.Context) error {
 	e := st.input.ToEntity()
 	st.repoMock.EXPECT().Create(gomock.Any(), RoleEquals(e)).Return(e, nil)
-	st.producer.EXPECT().PublishEvent(gomock.Any(), gomock.Any()).Return(nil)
+	st.producer.EXPECT().PublishEvent(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 	st.eventStoreDB.EXPECT().Store(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 	st.expect.CreatedAt = e.CreatedAt
 	st.expect.UpdatedAt = e.UpdatedAt
