@@ -4,11 +4,11 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/v3/esdb"
 )
 
-type EventStoreDB struct {
+type StoreDB struct {
 	Client *esdb.Client
 }
 
-func NewEventStoreDB(connectString string) (*EventStoreDB, error) {
+func NewEventStoreDB(connectString string) (*StoreDB, error) {
 	// region createClient
 	settings, err := esdb.ParseConnectionString(connectString)
 	if err != nil {
@@ -21,9 +21,9 @@ func NewEventStoreDB(connectString string) (*EventStoreDB, error) {
 		return nil, err
 	}
 
-	return &EventStoreDB{Client: client}, nil
+	return &StoreDB{Client: client}, nil
 }
 
-func (e *EventStoreDB) Close() error {
+func (e *StoreDB) Close() error {
 	return e.Client.Close()
 }

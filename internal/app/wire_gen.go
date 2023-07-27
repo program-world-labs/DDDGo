@@ -69,17 +69,17 @@ func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server
 	if err != nil {
 		return nil, err
 	}
-	eventStoreDB, err := provideEventStoreDB(cfg)
+	storeDB, err := provideEventStoreDB(cfg)
 	if err != nil {
 		return nil, err
 	}
-	eventTypeMapper := provideEventTypeMapper()
-	eventStoreDBImpl, err := provideEventStoreDBImpl(eventStoreDB, eventTypeMapper)
+	typeMapper := provideEventTypeMapper()
+	dbImpl, err := provideEventStoreDBImpl(storeDB, typeMapper)
 	if err != nil {
 		return nil, err
 	}
-	iService := provideUserService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, eventStoreDBImpl, l)
-	roleIService := provideRoleService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, eventStoreDBImpl, l)
+	iService := provideUserService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, dbImpl, l)
+	roleIService := provideRoleService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, dbImpl, l)
 	groupRepoImpl := provideGroupRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
 	groupIService := provideGroupService(groupRepoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
 	walletRepoImpl := provideWalletRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
@@ -117,19 +117,16 @@ func NewMessageRouter(cfg *config.Config, l pwlogger.Interface) (*message.Router
 	userRepoImpl := provideUserRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
 	transactionDataSourceImpl := sql.NewTransactionRunDataSourceImpl(isqlGorm)
 	transactionRunRepoImpl := provideTransactionRepo(transactionDataSourceImpl)
-
-	eventStoreDB, err := provideEventStoreDB(cfg)
+	storeDB, err := provideEventStoreDB(cfg)
 	if err != nil {
 		return nil, err
 	}
-	eventStoreDBImpl, err := provideEventStoreDBImpl(eventStoreDB, eventTypeMapper)
+	dbImpl, err := provideEventStoreDBImpl(storeDB, typeMapper)
 	if err != nil {
 		return nil, err
 	}
-	iService := provideUserService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, eventStoreDBImpl, l)
-	roleIService := provideRoleService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, eventStoreDBImpl, l)
-	services := provideServices(iService, roleIService)
-	router, err := provideMessageRouter(kafkaMessage, eventTypeMapper, services, l)
+	iService := provideUserService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, dbImpl, l)
+	roleIService := provideRoleService(repoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, dbImpl, l)
 	groupRepoImpl := provideGroupRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
 	groupIService := provideGroupService(groupRepoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
 	walletRepoImpl := provideWalletRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
@@ -137,7 +134,7 @@ func NewMessageRouter(cfg *config.Config, l pwlogger.Interface) (*message.Router
 	currencyRepoImpl := provideCurrencyRepo(crudDatasourceImpl, bigCacheDataSourceImpl, rockscacheClient)
 	currencyIService := provideCurrencyService(currencyRepoImpl, userRepoImpl, transactionRunRepoImpl, kafkaMessage, l)
 	services := provideServices(iService, roleIService, groupIService, walletIService, currencyIService)
-
+	router, err := provideMessageRouter(kafkaMessage, typeMapper, services, l)
 	if err != nil {
 		return nil, err
 	}
@@ -217,11 +214,11 @@ func provideServices(user3 user2.IService, role3 role2.IService, group3 group2.I
 	}
 }
 
-func provideUserService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *message2.KafkaMessage, esdb *eventstore.EventStoreDBImpl, l pwlogger.Interface) user2.IService {
+func provideUserService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *message2.KafkaMessage, esdb *eventstore.DBImpl, l pwlogger.Interface) user2.IService {
 	return user2.NewServiceImpl(roleRepo, userRepo, transactionRepo, eventProducer, esdb, l)
 }
 
-func provideRoleService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *message2.KafkaMessage, esdb *eventstore.EventStoreDBImpl, l pwlogger.Interface) role2.IService {
+func provideRoleService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *message2.KafkaMessage, esdb *eventstore.DBImpl, l pwlogger.Interface) role2.IService {
 	return role2.NewServiceImpl(roleRepo, userRepo, transactionRepo, eventProducer, esdb, l)
 }
 
@@ -253,11 +250,11 @@ func provideEventTypeMapper() *event.TypeMapper {
 	return event.NewEventTypeMapper()
 }
 
-func provideEventStoreDB(cfg *config.Config) (*eventstore2.EventStoreDB, error) {
+func provideEventStoreDB(cfg *config.Config) (*eventstore2.StoreDB, error) {
 	return eventstore2.NewEventStoreDB(cfg.EventStoreDB.Host)
 }
 
-func provideEventStoreDBImpl(esdb *eventstore2.EventStoreDB, mapper *event.EventTypeMapper) (*eventstore.EventStoreDBImpl, error) {
+func provideEventStoreDBImpl(esdb *eventstore2.StoreDB, mapper *event.TypeMapper) (*eventstore.DBImpl, error) {
 	return eventstore.NewEventStoreDBImpl(esdb, mapper)
 }
 

@@ -138,11 +138,11 @@ func (st *ServiceTest) reset() {
 	st.repoMock = mocks.NewMockRoleRepository(st.mockCtrl)
 	st.userRepoMock = mocks_user.NewMockUserRepository(st.mockCtrl)
 	st.transRepoMock = mock_repo.NewMockITransactionRepo(st.mockCtrl)
-	st.producer = mock_repo.NewMockEventProducer(st.mockCtrl)
+	st.producer = mock_repo.NewMockProducer(st.mockCtrl)
 	st.eventStoreDB = mock_repo.NewMockEventStore(st.mockCtrl)
 	st.service = application_role.NewServiceImpl(st.repoMock, st.userRepoMock, st.transRepoMock, st.producer, st.eventStoreDB, logger)
 	st.producer = mock_repo.NewMockProducer(st.mockCtrl)
-  st.eventStoreDB = mock_repo.NewMockEventStore(st.mockCtrl)
+	st.eventStoreDB = mock_repo.NewMockEventStore(st.mockCtrl)
 	st.service = application_role.NewServiceImpl(st.repoMock, st.userRepoMock, st.transRepoMock, st.producer, st.eventStoreDB, logger)
 }
 

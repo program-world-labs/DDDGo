@@ -4,45 +4,50 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"strings"
 
 	"github.com/EventStore/EventStore-Client-Go/v3/esdb"
+	"go.opentelemetry.io/otel"
 
+	"github.com/program-world-labs/DDDGo/internal/domain/domainerrors"
 	"github.com/program-world-labs/DDDGo/internal/domain/event"
 	eventstore "github.com/program-world-labs/DDDGo/pkg/event_store"
 )
 
-var _ event.EventStore = (*EventStoreDBImpl)(nil)
+const (
+	ReadStreadNum = 100
+	EventSplitNum = 2
+)
 
-type EventStoreDBImpl struct {
-	esdb   *eventstore.EventStoreDB
-	mapper *event.EventTypeMapper
+var _ event.Store = (*DBImpl)(nil)
+
+type DBImpl struct {
+	esdb   *eventstore.StoreDB
+	mapper *event.TypeMapper
 }
 
-func NewEventStoreDBImpl(esdb *eventstore.EventStoreDB, mapper *event.EventTypeMapper) (*EventStoreDBImpl, error) {
-
-	return &EventStoreDBImpl{esdb: esdb, mapper: mapper}, nil
+func NewEventStoreDBImpl(esdb *eventstore.StoreDB, mapper *event.TypeMapper) (*DBImpl, error) {
+	return &DBImpl{esdb: esdb, mapper: mapper}, nil
 }
 
-func (e *EventStoreDBImpl) Store(ctx context.Context, events []event.DomainEvent, version int) error {
+func (e *DBImpl) Store(ctx context.Context, events []event.DomainEvent, version int) error {
 	return e.store(ctx, events, version, false)
 }
 
-func (e *EventStoreDBImpl) SafeStore(ctx context.Context, events []event.DomainEvent, expectedVersion int) error {
+func (e *DBImpl) SafeStore(ctx context.Context, events []event.DomainEvent, expectedVersion int) error {
 	return e.store(ctx, events, expectedVersion, true)
 }
 
-func (e *EventStoreDBImpl) Load(ctx context.Context, streamID string, version int) ([]event.DomainEvent, error) {
+func (e *DBImpl) Load(ctx context.Context, streamID string, version int) ([]event.DomainEvent, error) {
 	return e.loadFrom(ctx, streamID, uint64(version))
 }
 
-func (e *EventStoreDBImpl) Close() error {
+func (e *DBImpl) Close() error {
 	return e.esdb.Close()
 }
 
-func (e *EventStoreDBImpl) store(ctx context.Context, events []event.DomainEvent, version int, safe bool) error {
+func (e *DBImpl) store(ctx context.Context, events []event.DomainEvent, version int, safe bool) error {
 	if len(events) == 0 {
 		return nil
 	}
@@ -93,7 +98,13 @@ func (e *EventStoreDBImpl) store(ctx context.Context, events []event.DomainEvent
 	return err
 }
 
-func (e *EventStoreDBImpl) loadFrom(ctx context.Context, id string, version uint64) ([]event.DomainEvent, error) {
+func (e *DBImpl) loadFrom(ctx context.Context, id string, version uint64) ([]event.DomainEvent, error) {
+	// 開始追蹤
+	var tracer = otel.Tracer(domainerrors.GruopID)
+	_, span := tracer.Start(ctx, "datasource-eventstore-loadFrom")
+
+	defer span.End()
+
 	streamID := id // use the provided id to construct the stream ID
 	events := make([]event.DomainEvent, 0)
 	// region read-from-stream-position
@@ -101,22 +112,22 @@ func (e *EventStoreDBImpl) loadFrom(ctx context.Context, id string, version uint
 		From: esdb.Revision(version),
 	}
 
-	stream, err := e.esdb.Client.ReadStream(context.Background(), streamID, ropts, 100)
-	defer stream.Close()
-
+	stream, err := e.esdb.Client.ReadStream(context.Background(), streamID, ropts, ReadStreadNum)
 	if err != nil {
 		return nil, err
 	}
+
+	defer stream.Close()
 
 	for {
 		stream, err := stream.Recv()
 		if err, ok := esdb.FromError(err); !ok {
 			if err.Code() == esdb.ErrorCodeResourceNotFound {
-				fmt.Print("Stream not found")
+				return nil, domainerrors.WrapWithSpan(ErrorCodeResourceNotFound, err, span)
 			} else if errors.Is(err, io.EOF) {
 				break
 			} else {
-				panic(err)
+				return nil, err
 			}
 		}
 
@@ -125,6 +136,7 @@ func (e *EventStoreDBImpl) loadFrom(ctx context.Context, id string, version uint
 		if err != nil {
 			return nil, err
 		}
+
 		err = json.Unmarshal(stream.Event.Data, &eventType)
 		if err != nil {
 			return nil, err
@@ -132,9 +144,10 @@ func (e *EventStoreDBImpl) loadFrom(ctx context.Context, id string, version uint
 
 		// Get Aggregate Type and ID
 		parts := strings.Split(stream.Event.StreamID, "-")
-		if len(parts) != 2 {
-			return nil, errors.New("Stream Event Invalid Format")
+		if len(parts) != EventSplitNum {
+			return nil, domainerrors.WrapWithSpan(ErrorCodeEventFormatWrong, err, span)
 		}
+
 		aggregateType := parts[0]
 		aggregateID := parts[1]
 
@@ -150,10 +163,7 @@ func (e *EventStoreDBImpl) loadFrom(ctx context.Context, id string, version uint
 			events,
 			*e,
 		)
-
-		fmt.Printf("Event> %v", stream)
 	}
 
 	return events, nil
-
 }

@@ -1,8 +1,8 @@
 package event
 
 type RoleCreatedEvent struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
 	Permissions []string `json:"permissions"`
 }
 

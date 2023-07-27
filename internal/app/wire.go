@@ -113,11 +113,11 @@ func provideServices(user application_user.IService, role application_role.IServ
 	}
 }
 
-func provideUserService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *pkg_message.KafkaMessage, esdb *infra_eventstore.EventStoreDBImpl, l pwlogger.Interface) application_user.IService {
+func provideUserService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *pkg_message.KafkaMessage, esdb *infra_eventstore.DBImpl, l pwlogger.Interface) application_user.IService {
 	return application_user.NewServiceImpl(roleRepo, userRepo, transactionRepo, eventProducer, esdb, l)
 }
 
-func provideRoleService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *pkg_message.KafkaMessage, esdb *infra_eventstore.EventStoreDBImpl, l pwlogger.Interface) application_role.IService {
+func provideRoleService(roleRepo *role.RepoImpl, userRepo *user.RepoImpl, transactionRepo *repository.TransactionRunRepoImpl, eventProducer *pkg_message.KafkaMessage, esdb *infra_eventstore.DBImpl, l pwlogger.Interface) application_role.IService {
 	return application_role.NewServiceImpl(roleRepo, userRepo, transactionRepo, eventProducer, esdb, l)
 }
 
@@ -149,11 +149,11 @@ func provideEventTypeMapper() *event.TypeMapper {
 	return event.NewEventTypeMapper()
 }
 
-func provideEventStoreDB(cfg *config.Config) (*pkg_eventstore.EventStoreDB, error) {
+func provideEventStoreDB(cfg *config.Config) (*pkg_eventstore.StoreDB, error) {
 	return pkg_eventstore.NewEventStoreDB(cfg.EventStoreDB.Host)
 }
 
-func provideEventStoreDBImpl(esdb *pkg_eventstore.EventStoreDB, mapper *event.EventTypeMapper) (*infra_eventstore.EventStoreDBImpl, error) {
+func provideEventStoreDBImpl(esdb *pkg_eventstore.StoreDB, mapper *event.TypeMapper) (*infra_eventstore.DBImpl, error) {
 	return infra_eventstore.NewEventStoreDBImpl(esdb, mapper)
 }
 
