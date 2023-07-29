@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/gofrs/uuid"
 )
 
 type Event interface {
@@ -35,7 +35,7 @@ type DomainEvent struct {
 func NewDomainEvent(aggregateID, aggregateType string, version int, data interface{}) *DomainEvent {
 	_, eventType := GetTypeName(data)
 
-	uid, err := uuid.NewUUID()
+	uid, err := uuid.NewV4()
 	if err != nil {
 		return nil
 	}

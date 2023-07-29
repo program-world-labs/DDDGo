@@ -12,6 +12,9 @@ kafka:
   brokers: "localhost:29092,localhost:29093,localhost:29094"
   group_id: "ai-dev"
 
+esdb:
+  host: "esdb://localhost:2113?tls=false"
+
 logger:
   project: ""
   log_level: "debug"

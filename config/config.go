@@ -14,15 +14,16 @@ import (
 type (
 	// Config -.
 	Config struct {
-		App       `mapstructure:"app"`
-		Swagger   `mapstructure:"swagger"`
-		SQL       `mapstructure:"sql"`
-		Redis     `mapstructure:"redis"`
-		Storage   `mapstructure:"storage"`
-		HTTP      `mapstructure:"http"`
-		Log       `mapstructure:"logger"`
-		Kafka     `mapstructure:"kafka"`
-		Telemetry `mapstructure:"telemetry"`
+		App          `mapstructure:"app"`
+		Swagger      `mapstructure:"swagger"`
+		SQL          `mapstructure:"sql"`
+		Redis        `mapstructure:"redis"`
+		Storage      `mapstructure:"storage"`
+		HTTP         `mapstructure:"http"`
+		Log          `mapstructure:"logger"`
+		Kafka        `mapstructure:"kafka"`
+		Telemetry    `mapstructure:"telemetry"`
+		EventStoreDB `mapstructure:"esdb"`
 		Env
 	}
 
@@ -89,6 +90,11 @@ type (
 	Kafka struct {
 		Brokers []string `mapstructure:"brokers"`
 		GroupID string   `mapstructure:"group_id"`
+	}
+
+	// EventStoreDB -.
+	EventStoreDB struct {
+		Host string `mapstructure:"host"`
 	}
 
 	Env struct {
