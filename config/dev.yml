@@ -22,9 +22,22 @@ sql:
   port: 5432
   user: "user"
   password: "pass"
-  pool_max: 2
-  db: "postgres"
+  db: "db"
   type: "postgresql"
+  pool_max: 1
+  connection_attempts: 3
+  connection_timeout: 1
+
+# sql:
+#   host: "localhost"
+#   port: 3306
+#   user: "user"
+#   password: "pass"
+#   db: "db"
+#   type: "mysql"
+#   pool_max: 1
+#   connection_attempts: 3
+#   connection_timeout: 1
 
 redis:
   host: "localhost"

@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -37,13 +38,15 @@ type (
 
 	// SQL -.
 	SQL struct {
-		PoolMax  int    `mapstructure:"pool_max"`
-		Host     string `mapstructure:"host"`
-		Port     int    `mapstructure:"port"`
-		User     string `mapstructure:"user"`
-		Password string `mapstructure:"password"`
-		DB       string `mapstructure:"db"`
-		Type     string `mapstructure:"type" validate:"oneof=postgres"`
+		PoolMax      int           `mapstructure:"pool_max"`
+		Host         string        `mapstructure:"host"`
+		Port         int           `mapstructure:"port"`
+		User         string        `mapstructure:"user"`
+		Password     string        `mapstructure:"password"`
+		DB           string        `mapstructure:"db"`
+		ConnAttempts int           `mapstructure:"connection_attempts"`
+		ConnTimeout  time.Duration `mapstructure:"connection_timeout"`
+		Type         string        `mapstructure:"type" validate:"oneof=postgres"`
 	}
 
 	// Redis -.

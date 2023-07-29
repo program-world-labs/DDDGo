@@ -5,6 +5,7 @@ package app
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/allegro/bigcache/v3"
@@ -40,11 +41,18 @@ import (
 	"github.com/program-world-labs/DDDGo/pkg/pwsql"
 )
 
-func providePostgres(cfg *config.Config) (pwsql.ISQLGorm, error) {
+func provideSQL(cfg *config.Config) (pwsql.ISQLGorm, error) {
 	// postgres://user:password@localhost:5432/postgres
 	port := fmt.Sprint(cfg.SQL.Port)
-	dsn := cfg.SQL.Type + "://" + cfg.SQL.User + ":" + cfg.SQL.Password + "@" + cfg.SQL.Host + ":" + port + "/" + cfg.SQL.DB
-	client, err := pwsql.New(dsn, pwsql.MaxPoolSize(cfg.SQL.PoolMax))
+	var dsn string
+	switch cfg.SQL.Type {
+	case "mysql":
+		dsn = cfg.SQL.User + ":" + cfg.SQL.Password + "@tcp(" + cfg.SQL.Host + ":" + port + ")/" + cfg.SQL.DB + "?charset=utf8mb4&parseTime=True&loc=Local&allowNativePasswords=true"
+	case "postgresql":
+		dsn = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=Asia/Shanghai", cfg.SQL.Host, port, cfg.SQL.User, cfg.SQL.Password, cfg.SQL.DB)
+	default:
+	}
+	client, err := pwsql.InitSQL(cfg.SQL.Type, dsn, cfg.SQL.PoolMax, cfg.SQL.ConnAttempts, cfg.SQL.ConnTimeout*time.Second)
 	client.GetDB().AutoMigrate(&dto.User{}, &dto.Role{}, &dto.Group{}, &dto.Wallet{}, &dto.Currency{})
 
 	return client, err
@@ -148,7 +156,7 @@ func provideEventTypeMapper() *event.TypeMapper {
 }
 
 var appSet = wire.NewSet(
-	providePostgres,
+	provideSQL,
 	provideRedisCache,
 	provideLocalCache,
 	provideRocksCache,

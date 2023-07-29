@@ -4,6 +4,7 @@ package v1
 import (
 	"net/http"
 
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/program-world-labs/pwlogger"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -36,6 +37,17 @@ import (
 // Swagger base path.
 func NewRouter(l pwlogger.Interface, s application.Services, cfg *config.Config) *gin.Engine {
 	handler := gin.New()
+	// Init
+	switch cfg.Env.EnvName {
+	case "dev":
+		gin.SetMode(gin.DebugMode)
+		// Register pprof handlers
+		pprof.Register(handler)
+	case "test":
+		gin.SetMode(gin.TestMode)
+	case "prod":
+		gin.SetMode(gin.ReleaseMode)
+	}
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
