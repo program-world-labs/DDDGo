@@ -7,6 +7,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/allegro/bigcache/v3"
@@ -39,14 +40,17 @@ import (
 	"github.com/program-world-labs/DDDGo/pkg/httpserver"
 	message2 "github.com/program-world-labs/DDDGo/pkg/message"
 	"github.com/program-world-labs/DDDGo/pkg/pwsql"
+	"github.com/program-world-labs/DDDGo/pkg/pwsql/nosql/firestoreDB"
+	"github.com/program-world-labs/DDDGo/pkg/pwsql/relation"
 	"github.com/program-world-labs/pwlogger"
 	"github.com/redis/go-redis/v9"
+	"time"
 )
 
 // Injectors from wire.go:
 
 func NewHTTPServer(cfg *config.Config, l pwlogger.Interface) (*httpserver.Server, error) {
-	isqlGorm, err := providePostgres(cfg)
+	isqlGorm, err := provideSQL(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +102,7 @@ func NewMessageRouter(cfg *config.Config, l pwlogger.Interface) (*message.Router
 		return nil, err
 	}
 	typeMapper := provideEventTypeMapper()
-	isqlGorm, err := providePostgres(cfg)
+	isqlGorm, err := provideSQL(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -143,11 +147,23 @@ func NewMessageRouter(cfg *config.Config, l pwlogger.Interface) (*message.Router
 
 // wire.go:
 
-func providePostgres(cfg *config.Config) (pwsql.ISQLGorm, error) {
+func provideFirestoreDB(cfg *config.Config) (*firestoredb.Firestore, error) {
+	ctx := context.Background()
+	return firestoredb.New(ctx, cfg.NoSQL.Host)
+}
+
+func provideSQL(cfg *config.Config) (pwsql.ISQLGorm, error) {
 
 	port := fmt.Sprint(cfg.SQL.Port)
-	dsn := cfg.SQL.Type + "://" + cfg.SQL.User + ":" + cfg.SQL.Password + "@" + cfg.SQL.Host + ":" + port + "/" + cfg.SQL.DB
-	client, err := pwsql.New(dsn, pwsql.MaxPoolSize(cfg.SQL.PoolMax))
+	var dsn string
+	switch cfg.SQL.Type {
+	case "mysql":
+		dsn = cfg.SQL.User + ":" + cfg.SQL.Password + "@tcp(" + cfg.SQL.Host + ":" + port + ")/" + cfg.SQL.DB + "?charset=utf8mb4&parseTime=True&loc=Local&allowNativePasswords=true"
+	case "postgresql":
+		dsn = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=Asia/Shanghai", cfg.SQL.Host, port, cfg.SQL.User, cfg.SQL.Password, cfg.SQL.DB)
+	default:
+	}
+	client, err := relation.InitSQL(cfg.SQL.Type, dsn, cfg.SQL.PoolMax, cfg.SQL.ConnAttempts, cfg.SQL.ConnTimeout*time.Second)
 	client.GetDB().AutoMigrate(&dto.User{}, &dto.Role{}, &dto.Group{}, &dto.Wallet{}, &dto.Currency{})
 
 	return client, err
@@ -259,7 +275,8 @@ func provideEventStoreDBImpl(esdb *eventstore2.StoreDB, mapper *event.TypeMapper
 }
 
 var appSet = wire.NewSet(
-	providePostgres,
+	provideFirestoreDB,
+	provideSQL,
 	provideRedisCache,
 	provideLocalCache,
 	provideRocksCache,

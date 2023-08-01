@@ -51,11 +51,17 @@ func (a *Currency) BackToDomain() (domain.IEntity, error) {
 	return i, nil
 }
 
-func (a *Currency) BeforeCreate(_ *gorm.DB) (err error) {
+func (a *Currency) BeforeCreate() (err error) {
 	a.ID, err = generateID()
 	a.UpdatedAt = time.Now()
 	a.CreatedAt = time.Now()
 	a.DeletedAt = nil
+
+	return
+}
+
+func (a *Currency) BeforeUpdate() (err error) {
+	a.UpdatedAt = time.Now()
 
 	return
 }

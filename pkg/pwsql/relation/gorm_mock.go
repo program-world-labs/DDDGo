@@ -1,4 +1,4 @@
-package pwsql
+package relation
 
 import (
 	"database/sql"
@@ -9,9 +9,11 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
+
+	"github.com/program-world-labs/DDDGo/pkg/pwsql"
 )
 
-var _ ISQLGorm = (*MockSQL)(nil)
+var _ pwsql.ISQLGorm = (*MockSQL)(nil)
 
 type MockSQL struct {
 	db *gorm.DB

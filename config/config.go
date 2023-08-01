@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -16,6 +17,7 @@ type (
 		App          `mapstructure:"app"`
 		Swagger      `mapstructure:"swagger"`
 		SQL          `mapstructure:"sql"`
+		NoSQL        `mapstructure:"nosql"`
 		Redis        `mapstructure:"redis"`
 		Storage      `mapstructure:"storage"`
 		HTTP         `mapstructure:"http"`
@@ -38,13 +40,24 @@ type (
 
 	// SQL -.
 	SQL struct {
-		PoolMax  int    `mapstructure:"pool_max"`
+		PoolMax      int           `mapstructure:"pool_max"`
+		Host         string        `mapstructure:"host"`
+		Port         int           `mapstructure:"port"`
+		User         string        `mapstructure:"user"`
+		Password     string        `mapstructure:"password"`
+		DB           string        `mapstructure:"db"`
+		ConnAttempts int           `mapstructure:"connection_attempts"`
+		ConnTimeout  time.Duration `mapstructure:"connection_timeout"`
+		Type         string        `mapstructure:"type" validate:"oneof=postgres"`
+	}
+
+	NoSQL struct {
 		Host     string `mapstructure:"host"`
 		Port     int    `mapstructure:"port"`
 		User     string `mapstructure:"user"`
 		Password string `mapstructure:"password"`
 		DB       string `mapstructure:"db"`
-		Type     string `mapstructure:"type" validate:"oneof=postgres"`
+		Type     string `mapstructure:"type" validate:"oneof=firestore"`
 	}
 
 	// Redis -.
@@ -139,8 +152,8 @@ func setConfigValues(cfg *Config) {
 		"prod": "prod",
 		"test": "test",
 	}
-	configName, ok := envConfig[viper.GetString("env")]
 
+	configName, ok := envConfig[viper.GetString("env")]
 	if !ok {
 		configName = "dev"
 	}
@@ -167,10 +180,15 @@ func readAndParseConfig(cfg *Config) error {
 }
 
 func applyEnvSetting(cfg *Config) error {
+	const postgresType = "postgres"
+
+	const mysqlType = "mysql"
+
 	sqlDSN := viper.GetString("sql_url")
 
 	if sqlDSN != "" {
 		// postgres://user:password@host:port/db 解析成 host:port:username:password:db
+		// mysql://user:password@host:port/db 解析成 host:port:username:password:db
 		u, err := url.Parse(sqlDSN)
 		if err != nil {
 			return err
@@ -181,6 +199,13 @@ func applyEnvSetting(cfg *Config) error {
 
 		if err != nil {
 			return err
+		}
+
+		switch strings.Split(sqlDSN, ":")[0] {
+		case postgresType:
+			cfg.SQL.Type = "postgresql"
+		case mysqlType:
+			cfg.SQL.Type = "mysql"
 		}
 
 		cfg.SQL.User = u.User.Username()

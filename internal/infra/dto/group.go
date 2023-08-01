@@ -53,11 +53,17 @@ func (a *Group) BackToDomain() (domain.IEntity, error) {
 	return i, nil
 }
 
-func (a *Group) BeforeCreate(_ *gorm.DB) (err error) {
+func (a *Group) BeforeCreate() (err error) {
 	a.ID, err = generateID()
 	a.UpdatedAt = time.Now()
 	a.CreatedAt = time.Now()
 	a.DeletedAt = nil
+
+	return
+}
+
+func (a *Group) BeforeUpdate() (err error) {
+	a.UpdatedAt = time.Now()
 
 	return
 }

@@ -8,10 +8,22 @@ services:
     environment:
       POSTGRES_USER: 'user'
       POSTGRES_PASSWORD: 'pass'
-      POSTGRES_DB: 'postgres'
+      POSTGRES_DB: 'db'
     ports:
       - 5432:5432
-
+  # mysql:
+  #   container_name: mysql
+  #   image: mysql
+  #   volumes:
+  #     - mysql-data:/var/lib/mysql
+  #     - ./pkg/pwsql/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: 'pass'
+  #     MYSQL_DATABASE: 'db'
+  #     MYSQL_USER: 'user'
+  #     MYSQL_PASSWORD: 'pass'
+  #   ports:
+  #     - 3306:3306
   redis:
     container_name: redis
     image: redis

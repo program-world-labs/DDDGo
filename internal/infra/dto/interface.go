@@ -13,6 +13,10 @@ type IRepoEntity interface {
 	GetListType() interface{}
 	GetPreloads() []string
 
+	// Hook
+	BeforeCreate() error
+	BeforeUpdate() error
+
 	GetID() string
 	SetID(string)
 }

@@ -1,4 +1,4 @@
-package pwsql
+package postgresql
 
 import (
 	"context"
@@ -10,8 +10,6 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/plugin/opentelemetry/tracing"
 )
-
-var _ ISQLGorm = (*Postgres)(nil)
 
 const (
 	_defaultMaxPoolSize  = 1

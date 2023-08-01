@@ -1,6 +1,8 @@
-package pwsql
+package postgresql
 
-import "time"
+import (
+	"time"
+)
 
 // Option -.
 type Option func(*Postgres)

@@ -58,12 +58,12 @@ func (a *User) BackToDomain() (domain.IEntity, error) {
 	return i, nil
 }
 
-func (a *User) BeforeUpdate(_ *gorm.DB) (err error) {
+func (a *User) BeforeUpdate() (err error) {
 	a.UpdatedAt = time.Now()
 
 	return
 }
-func (a *User) BeforeCreate(_ *gorm.DB) (err error) {
+func (a *User) BeforeCreate() (err error) {
 	a.ID, err = generateID()
 	a.UpdatedAt = time.Now()
 	a.CreatedAt = time.Now()
