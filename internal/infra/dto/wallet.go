@@ -63,11 +63,17 @@ func (a *Wallet) BackToDomain() (domain.IEntity, error) {
 	return i, nil
 }
 
-func (a *Wallet) BeforeCreate(_ *gorm.DB) (err error) {
+func (a *Wallet) BeforeCreate() (err error) {
 	a.ID, err = generateID()
 	a.UpdatedAt = time.Now()
 	a.CreatedAt = time.Now()
 	a.DeletedAt = nil
+
+	return
+}
+
+func (a *Wallet) BeforeUpdate() (err error) {
+	a.UpdatedAt = time.Now()
 
 	return
 }

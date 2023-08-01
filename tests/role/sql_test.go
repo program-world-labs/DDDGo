@@ -11,7 +11,7 @@ import (
 
 	datasourceSQL "github.com/program-world-labs/DDDGo/internal/infra/datasource/sql"
 	"github.com/program-world-labs/DDDGo/internal/infra/dto"
-	"github.com/program-world-labs/DDDGo/pkg/pwsql"
+	"github.com/program-world-labs/DDDGo/pkg/pwsql/relation"
 )
 
 type test struct {
@@ -29,7 +29,7 @@ func crudSQL(t *testing.T) (*datasourceSQL.CRUDDatasourceImpl, *sql.DB, sqlmock.
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
 
-	s := pwsql.NewMock(db)
+	s := relation.NewMock(db)
 	ds := datasourceSQL.NewCRUDDatasourceImpl(s)
 
 	return ds, db, mock

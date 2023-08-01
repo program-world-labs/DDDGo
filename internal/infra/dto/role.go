@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/jinzhu/copier"
-	"github.com/lib/pq"
 	"github.com/mitchellh/mapstructure"
 	"gorm.io/gorm"
 
@@ -18,14 +17,14 @@ import (
 var _ IRepoEntity = (*Role)(nil)
 
 type Role struct {
-	ID          string          `json:"id" gorm:"type:varchar(20);primary_key"`
-	Name        string          `json:"name"`
-	Description string          `json:"description"`
-	Permissions pq.StringArray  `json:"permissions" gorm:"type:varchar(100)[]"`
-	Users       []User          `json:"users" gorm:"many2many:user_roles;"`
-	CreatedAt   time.Time       `json:"created_at" mapstructure:"created_at" gorm:"column:created_at"`
-	UpdatedAt   time.Time       `json:"updated_at" mapstructure:"updated_at" gorm:"column:updated_at"`
-	DeletedAt   *gorm.DeletedAt `json:"deleted_at" mapstructure:"deleted_at" gorm:"index;column:deleted_at"`
+	ID          string          `json:"id" gorm:"type:varchar(20);primary_key" firestore:"id"`
+	Name        string          `json:"name" firestore:"name"`
+	Description string          `json:"description" firestore:"description"`
+	Permissions []string        `json:"permissions" gorm:"type:json" firestore:"permissions"`
+	Users       []User          `json:"users" gorm:"many2many:user_roles;" firestore:"users"`
+	CreatedAt   time.Time       `json:"created_at" mapstructure:"created_at" gorm:"column:created_at" firestore:"created_at"`
+	UpdatedAt   time.Time       `json:"updated_at" mapstructure:"updated_at" gorm:"column:updated_at" firestore:"updated_at"`
+	DeletedAt   *gorm.DeletedAt `json:"deleted_at" mapstructure:"deleted_at" gorm:"index;column:deleted_at" firestore:"deleted_at"`
 }
 
 func (a *Role) TableName() string {
@@ -53,13 +52,13 @@ func (a *Role) BackToDomain() (domain.IEntity, error) {
 	return i, nil
 }
 
-func (a *Role) BeforeUpdate(_ *gorm.DB) (err error) {
+func (a *Role) BeforeUpdate() (err error) {
 	a.UpdatedAt = time.Now()
 
 	return
 }
 
-func (a *Role) BeforeCreate(_ *gorm.DB) (err error) {
+func (a *Role) BeforeCreate() (err error) {
 	a.ID, err = generateID()
 	a.UpdatedAt = time.Now()
 	a.CreatedAt = time.Now()

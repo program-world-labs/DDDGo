@@ -45,6 +45,11 @@ func (r *CRUDDatasourceImpl) GetByID(ctx context.Context, model dto.IRepoEntity)
 
 // Create -.
 func (r *CRUDDatasourceImpl) Create(ctx context.Context, model dto.IRepoEntity) (dto.IRepoEntity, error) {
+	// exec hook BeforeCreate
+	if err := model.BeforeCreate(); err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeSQLCreate, err)
+	}
+
 	err := r.DB.WithContext(ctx).Create(model).Error
 	if err != nil {
 		return nil, domainerrors.Wrap(ErrorCodeSQLCreate, err)
@@ -55,6 +60,11 @@ func (r *CRUDDatasourceImpl) Create(ctx context.Context, model dto.IRepoEntity) 
 
 // Update -.
 func (r *CRUDDatasourceImpl) Update(ctx context.Context, model dto.IRepoEntity) (dto.IRepoEntity, error) {
+	// exec hook BeforeUpdate
+	if err := model.BeforeUpdate(); err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeSQLUpdate, err)
+	}
+
 	err := r.DB.WithContext(ctx).Omit("created_at").Omit("deleted_at").Updates(model).Error
 	if err != nil {
 		return nil, domainerrors.Wrap(ErrorCodeSQLUpdate, err)
@@ -65,6 +75,11 @@ func (r *CRUDDatasourceImpl) Update(ctx context.Context, model dto.IRepoEntity) 
 
 // UpdateWithFields -.
 func (r *CRUDDatasourceImpl) UpdateWithFields(ctx context.Context, model dto.IRepoEntity, fields []string) (dto.IRepoEntity, error) {
+	// exec hook BeforeUpdate
+	if err := model.BeforeUpdate(); err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeSQLUpdate, err)
+	}
+
 	err := r.DB.WithContext(ctx).Model(model).Select(fields).Updates(model).Error
 	if err != nil {
 		return nil, domainerrors.Wrap(ErrorCodeSQLUpdateWithFields, err)
@@ -136,6 +151,11 @@ func (r *CRUDDatasourceImpl) GetAll(ctx context.Context, sq *domain.SearchQuery,
 
 // Create -.
 func (r *CRUDDatasourceImpl) CreateTx(ctx context.Context, model dto.IRepoEntity, tx domain.ITransactionEvent) (dto.IRepoEntity, error) {
+	// exec hook BeforeCreate
+	if err := model.BeforeCreate(); err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeSQLCreate, err)
+	}
+
 	t, ok := tx.GetTx().(*gorm.DB)
 	if !ok {
 		return nil, domainerrors.Wrap(ErrorCodeSQLCast, ErrCastToEntityFailed)
@@ -151,6 +171,11 @@ func (r *CRUDDatasourceImpl) CreateTx(ctx context.Context, model dto.IRepoEntity
 
 // Update -.
 func (r *CRUDDatasourceImpl) UpdateTx(ctx context.Context, model dto.IRepoEntity, tx domain.ITransactionEvent) (dto.IRepoEntity, error) {
+	// exec hook BeforeUpdate
+	if err := model.BeforeUpdate(); err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeSQLUpdate, err)
+	}
+
 	t, ok := tx.GetTx().(*gorm.DB)
 	if !ok {
 		return nil, domainerrors.Wrap(ErrorCodeSQLCast, ErrCastToEntityFailed)
@@ -166,6 +191,11 @@ func (r *CRUDDatasourceImpl) UpdateTx(ctx context.Context, model dto.IRepoEntity
 
 // UpdateWithFields -.
 func (r *CRUDDatasourceImpl) UpdateWithFieldsTx(ctx context.Context, model dto.IRepoEntity, fields []string, tx domain.ITransactionEvent) (dto.IRepoEntity, error) {
+	// exec hook BeforeUpdate
+	if err := model.BeforeUpdate(); err != nil {
+		return nil, domainerrors.Wrap(ErrorCodeSQLUpdate, err)
+	}
+
 	t, ok := tx.GetTx().(*gorm.DB)
 	if !ok {
 		return nil, domainerrors.Wrap(ErrorCodeSQLCast, ErrCastToEntityFailed)
