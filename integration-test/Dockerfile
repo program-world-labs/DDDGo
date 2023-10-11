@@ -1,5 +1,5 @@
 # Step 1: Modules caching
-FROM golang:1.21rc3-alpine as modules
+FROM golang:1.21.2-alpine as modules
 COPY go.mod go.sum /modules/
 WORKDIR /modules
 RUN go mod download
@@ -13,7 +13,7 @@ RUN apk update && \
     rm dockerize-linux-amd64-v0.6.1.tar.gz
 
 # Step 3: Tests
-FROM golang:1.21rc3-alpine
+FROM golang:1.21.2-alpine
 COPY --from=modules /go/pkg /go/pkg
 COPY --from=intermediate /usr/local/bin/dockerize /dockerize
 COPY . /app
